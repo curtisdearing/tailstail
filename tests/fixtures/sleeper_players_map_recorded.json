@@ -1,0 +1,329 @@
+{
+ "_meta": {
+  "retrieved_at": "2026-07-01T20:30:16Z",
+  "source_url": "https://api.sleeper.app/v1/players/nfl",
+  "note": "REAL recorded payload, trimmed for fixture size. subset covering the projections fixture"
+ },
+ "payload": {
+  "7585": {
+   "gsis_id": null,
+   "full_name": "Davis Mills",
+   "first_name": "Davis",
+   "last_name": "Mills",
+   "team": "HOU",
+   "position": "QB"
+  },
+  "421": {
+   "gsis_id": "00-0026498",
+   "full_name": "Matthew Stafford",
+   "first_name": "Matthew",
+   "last_name": "Stafford",
+   "team": "LAR",
+   "position": "QB"
+  },
+  "11574": {
+   "gsis_id": null,
+   "full_name": "Dylan Laube",
+   "first_name": "Dylan",
+   "last_name": "Laube",
+   "team": "LV",
+   "position": "RB"
+  },
+  "1373": {
+   "gsis_id": "00-0030565",
+   "full_name": "Geno Smith",
+   "first_name": "Geno",
+   "last_name": "Smith",
+   "team": "NYJ",
+   "position": "QB"
+  },
+  "6130": {
+   "gsis_id": " 00-0035250",
+   "full_name": "Devin Singletary",
+   "first_name": "Devin",
+   "last_name": "Singletary",
+   "team": "NYG",
+   "position": "RB"
+  },
+  "6386": {
+   "gsis_id": " 00-0035602",
+   "full_name": "Alex Bachman",
+   "first_name": "Alex",
+   "last_name": "Bachman",
+   "team": null,
+   "position": "WR"
+  },
+  "12545": {
+   "gsis_id": null,
+   "full_name": "Tyler Shough",
+   "first_name": "Tyler",
+   "last_name": "Shough",
+   "team": "NO",
+   "position": "QB"
+  },
+  "3271": {
+   "gsis_id": "00-0033110",
+   "full_name": "Tyler Higbee",
+   "first_name": "Tyler",
+   "last_name": "Higbee",
+   "team": "LAR",
+   "position": "TE"
+  },
+  "8208": {
+   "gsis_id": null,
+   "full_name": "Tyler Badie",
+   "first_name": "Tyler",
+   "last_name": "Badie",
+   "team": "DEN",
+   "position": "RB"
+  },
+  "12489": {
+   "gsis_id": null,
+   "full_name": "RJ Harvey",
+   "first_name": "RJ",
+   "last_name": "Harvey",
+   "team": "DEN",
+   "position": "RB"
+  },
+  "11596": {
+   "gsis_id": null,
+   "full_name": "Ben Sinnott",
+   "first_name": "Ben",
+   "last_name": "Sinnott",
+   "team": "WAS",
+   "position": "TE"
+  },
+  "8076": {
+   "gsis_id": null,
+   "full_name": "Michael Bandy",
+   "first_name": "Michael",
+   "last_name": "Bandy",
+   "team": "DEN",
+   "position": "WR"
+  },
+  "10213": {
+   "gsis_id": null,
+   "full_name": "Tre Tucker",
+   "first_name": "Tre",
+   "last_name": "Tucker",
+   "team": "LV",
+   "position": "WR"
+  },
+  "4066": {
+   "gsis_id": "00-0033881",
+   "full_name": "Evan Engram",
+   "first_name": "Evan",
+   "last_name": "Engram",
+   "team": "DEN",
+   "position": "TE"
+  },
+  "12527": {
+   "gsis_id": null,
+   "full_name": "Ashton Jeanty",
+   "first_name": "Ashton",
+   "last_name": "Jeanty",
+   "team": "LV",
+   "position": "RB"
+  },
+  "12473": {
+   "gsis_id": null,
+   "full_name": "Mitchell Evans",
+   "first_name": "Mitchell",
+   "last_name": "Evans",
+   "team": "CAR",
+   "position": "TE"
+  },
+  "2374": {
+   "gsis_id": "00-0032211",
+   "full_name": "Tyler Lockett",
+   "first_name": "Tyler",
+   "last_name": "Lockett",
+   "team": null,
+   "position": "WR"
+  },
+  "11559": {
+   "gsis_id": null,
+   "full_name": "Michael Penix",
+   "first_name": "Michael",
+   "last_name": "Penix",
+   "team": "ATL",
+   "position": "QB"
+  },
+  "11627": {
+   "gsis_id": null,
+   "full_name": "Troy Franklin",
+   "first_name": "Troy",
+   "last_name": "Franklin",
+   "team": "DEN",
+   "position": "WR"
+  },
+  "6869": {
+   "gsis_id": null,
+   "full_name": "Adam Trautman",
+   "first_name": "Adam",
+   "last_name": "Trautman",
+   "team": "DEN",
+   "position": "TE"
+  },
+  "12476": {
+   "gsis_id": null,
+   "full_name": "Devin Neal",
+   "first_name": "Devin",
+   "last_name": "Neal",
+   "team": "NO",
+   "position": "RB"
+  },
+  "2749": {
+   "gsis_id": "00-0031687",
+   "full_name": "Raheem Mostert",
+   "first_name": "Raheem",
+   "last_name": "Mostert",
+   "team": null,
+   "position": "RB"
+  },
+  "3163": {
+   "gsis_id": "00-0033106",
+   "full_name": "Jared Goff",
+   "first_name": "Jared",
+   "last_name": "Goff",
+   "team": "DET",
+   "position": "QB"
+  },
+  "12483": {
+   "gsis_id": null,
+   "full_name": "Jack Bech",
+   "first_name": "Jack",
+   "last_name": "Bech",
+   "team": "LV",
+   "position": "WR"
+  },
+  "12541": {
+   "gsis_id": null,
+   "full_name": "Dont'e Thornton",
+   "first_name": "Dont'e",
+   "last_name": "Thornton",
+   "team": "LV",
+   "position": "WR"
+  },
+  "12492": {
+   "gsis_id": null,
+   "full_name": "Pat Bryant",
+   "first_name": "Pat",
+   "last_name": "Bryant",
+   "team": "DEN",
+   "position": "WR"
+  },
+  "11563": {
+   "gsis_id": null,
+   "full_name": "Bo Nix",
+   "first_name": "Bo",
+   "last_name": "Nix",
+   "team": "DEN",
+   "position": "QB"
+  },
+  "12534": {
+   "gsis_id": null,
+   "full_name": "Kyle Monangai",
+   "first_name": "Kyle",
+   "last_name": "Monangai",
+   "team": "CHI",
+   "position": "RB"
+  },
+  "4995": {
+   "gsis_id": "00-0034365",
+   "full_name": "Ian Thomas",
+   "first_name": "Ian",
+   "last_name": "Thomas",
+   "team": "LV",
+   "position": "TE"
+  },
+  "5154": {
+   "gsis_id": "00-0034487",
+   "full_name": "Trent Sherfield",
+   "first_name": "Trent",
+   "last_name": "Sherfield",
+   "team": "BUF",
+   "position": "WR"
+  },
+  "5045": {
+   "gsis_id": "00-0034348",
+   "full_name": "Courtland Sutton",
+   "first_name": "Courtland",
+   "last_name": "Sutton",
+   "team": "DEN",
+   "position": "WR"
+  },
+  "9482": {
+   "gsis_id": null,
+   "full_name": "Michael Mayer",
+   "first_name": "Michael",
+   "last_name": "Mayer",
+   "team": "LV",
+   "position": "TE"
+  },
+  "4035": {
+   "gsis_id": "00-0033906",
+   "full_name": "Alvin Kamara",
+   "first_name": "Alvin",
+   "last_name": "Kamara",
+   "team": "NO",
+   "position": "RB"
+  },
+  "3257": {
+   "gsis_id": "00-0033119",
+   "full_name": "Jacoby Brissett",
+   "first_name": "Jacoby",
+   "last_name": "Brissett",
+   "team": "ARI",
+   "position": "QB"
+  },
+  "10231": {
+   "gsis_id": null,
+   "full_name": "Elijah Higgins",
+   "first_name": "Elijah",
+   "last_name": "Higgins",
+   "team": "ARI",
+   "position": "TE"
+  },
+  "7527": {
+   "gsis_id": null,
+   "full_name": "Mac Jones",
+   "first_name": "Mac",
+   "last_name": "Jones",
+   "team": "SF",
+   "position": "QB"
+  },
+  "11604": {
+   "gsis_id": null,
+   "full_name": "Brock Bowers",
+   "first_name": "Brock",
+   "last_name": "Bowers",
+   "team": "LV",
+   "position": "TE"
+  },
+  "12658": {
+   "gsis_id": null,
+   "full_name": "Jackson Hawes",
+   "first_name": "Jackson",
+   "last_name": "Hawes",
+   "team": "BUF",
+   "position": "TE"
+  },
+  "6806": {
+   "gsis_id": null,
+   "full_name": "J.K. Dobbins",
+   "first_name": "J.K.",
+   "last_name": "Dobbins",
+   "team": "DEN",
+   "position": "RB"
+  },
+  "11564": {
+   "gsis_id": null,
+   "full_name": "Drake Maye",
+   "first_name": "Drake",
+   "last_name": "Maye",
+   "team": "NE",
+   "position": "QB"
+  }
+ }
+}

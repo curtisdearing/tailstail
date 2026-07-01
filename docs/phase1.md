@@ -1,10 +1,9 @@
 # Phase 1 — player-prop projection layer: how to run it
 
-Phase 1 Sub-phase A (deterministic core) + Phase 1B Part 1 (hardening) are
-complete. See `PHASE1_BUILD_PROMPT.md` / the Phase 1B build prompt for the
-full spec and `PHASE1_HANDSOFF_DESIGN.md` for the guardrails this honors.
-Phase 1B Part 2 (availability resolver, freshness gate, Sleeper divergence,
-LLM synthesis layer) has not been built yet — do not assume it exists.
+Phase 1 Sub-phase A (deterministic core) + Phase 1B Part 1 (hardening) +
+Phase 1B Part 2 (hands-off adapters) are complete. See `PHASE1_BUILD_PROMPT.md`
+/ the Phase 1B build prompt for the full spec and `PHASE1_HANDSOFF_DESIGN.md`
+for the guardrails this honors.
 
 ## Setup
 
@@ -29,7 +28,11 @@ once that cache exists.
 | `nflvalue/features.py` | Builds `player_week` (usage/efficiency, walk-forward), `opp_pos_def` (defense-vs-position factors, walk-forward, **WR and TE tracked separately** since 1B), `build_team_week` (team pass/rush pace, walk-forward). Position comes from `rosters.py`; the old play-by-play participation heuristic is kept only as a fallback for the rare row missing a roster match (~0.6% of rows), tagged `position_source="inferred_fallback"`. |
 | `nflvalue/projection.py` | Pure math: `project(player_row, market, ...)` returns `{player_id, name, pos, market, mean, sd, dist, line, p_over, p_under, components, low_confidence, eligible_for_shortlist, roll_games}`. Deterministic, no I/O. **Phase 1B:** adds the `MIN_GAMES_ELIGIBLE` cold-start gate (see below). |
 | `prop_backtest.py` | Walk-forward accuracy backtest, 2019–2023. Writes `data/prop_backtest.json` + upserts `nflvalue/db.py`'s `prop_backtest` table. Reports overall / eligible-only / by-sample-size / by-position accuracy and a calibration table. |
-| `tests/` | `test_leakage.py`, `test_reproducibility.py`, `test_projection.py`, `test_positions.py`, `test_backtest_smoke.py` — 23 tests total. |
+| `nflvalue/freshness.py` | **Phase 1B Part 2.** Feed timestamps + schema flags → one explicit gate: stale/missing/empty/future-dated load-bearing feed ⇒ `publish=False`; degraded context ⇒ confidence capped `low`. The automated substitute for the missing human (premortem H10). |
+| `nflvalue/sources/availability.py` | **Phase 1B Part 2.** Two-clock availability: ESPN league injuries (Wed provisional) + per-event roster `active` flag (T-90 final) → `OK\|RISK\|OUT` with `{source, timestamp, matched_by}` provenance; unmatched ESPN rows returned visibly, never guessed. Usage reallocation from historical with/without splits; degrades to an explicitly-flagged proportional guess (`low_confidence=True`) when no absent-game sample exists (H8). |
+| `nflvalue/sources/sleeper.py` | **Phase 1B Part 2.** Sleeper projections as a divergence FLAG only (H5) — parses `projections/nfl/{season}/{week}`, joins to nflverse gsis ids via the cached player dump (`historical/sleeper_players.parquet`), and reports `{divergence_flag, diffs, threshold}`. No code path returns an altered projection. |
+| `nflvalue/synthesis.py` | **Phase 1B Part 2.** The §3 verification/synthesis layer. LLM behind an `LLMClient` interface; default client is `RuleBasedMockLLM`, a deterministic pure-python implementation of TASK A–G. The `synthesize()` wrapper re-enforces the hard rules on whatever the client returns: byte-identical `model_projection` (else `SynthesisContractViolation`), future-dated news stripped + `leakage_suspected`, stale injuries/lines ⇒ `publish=false`, schema-validated output, RISK/stale confidence caps. Never imported by `prop_backtest.py` (H6) — a test asserts this. Demo I/O: `data/sample_synthesis.json`. |
+| `tests/` | `test_leakage.py`, `test_reproducibility.py`, `test_projection.py`, `test_positions.py`, `test_backtest_smoke.py` (Phase 1A/1B-1) + `test_freshness.py`, `test_availability.py`, `test_sleeper.py`, `test_synthesis.py` (1B-2) — **64 tests total**. 1B-2 tests run offline against recorded fixtures in `tests/fixtures/` (real payloads, trimmed, with `_meta` provenance; the T-90 actives fixture is synthetic and labeled as such — ESPN zeroes `active` post-game, so a real pre-kick payload can't be recorded in the offseason). |
 
 ## Run the backtest
 
@@ -55,7 +58,7 @@ can only be tested forward, live, once real prop lines are pulled (Phase 3).
 python3 -m pytest tests/ -q
 ```
 
-23 tests, ~55–60s total (the leakage/reproducibility tests rebuild
+64 tests, ~60s total (the leakage/reproducibility tests rebuild
 `player_week` a handful of times, which is the slow step). Split across a
 couple of invocations if your shell has a tight timeout:
 
