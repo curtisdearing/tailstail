@@ -58,7 +58,14 @@ def rank_game(cands: List[Dict], weights: Optional[Dict] = None,
         scored.append(row)
     n_screened = len(scored)
 
-    scored.sort(key=lambda r: (-r["composite"], str(r["player_id"]), r["market"]))
+    # ML ranking mode (flag-gated upstream): candidates arrive stamped with
+    # ``ml_score`` (100 x the classifier's side probability). Ordering uses it;
+    # the deterministic composite is still computed and displayed so every
+    # lean stays explainable. Absent the stamp, ranking is pure composite.
+    use_ml = all(r.get("ml_score") is not None for r in scored) and bool(scored)
+    rank_key = (lambda r: (-r["ml_score"], str(r["player_id"]), r["market"])) if use_ml \
+        else (lambda r: (-r["composite"], str(r["player_id"]), r["market"]))
+    scored.sort(key=rank_key)
 
     leans, per_player = [], {}
     for r in scored:

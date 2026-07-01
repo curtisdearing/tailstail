@@ -1,0 +1,198 @@
+{
+  "seasons": {
+    "2021": {
+      "eval_season": 2021,
+      "n_train": 18065,
+      "n_test": 11510,
+      "baseline_tuned_composite": {
+        "n": 1360,
+        "hit_rate": 0.5882,
+        "units_at_-110": 167.27
+      },
+      "models": {
+        "gbdt": {
+          "log_loss": 0.63928,
+          "auc": 0.6253,
+          "leans": {
+            "n": 1360,
+            "hit_rate": 0.6485,
+            "units_at_-110": 323.82,
+            "top1_hit_rate": 0.6765
+          }
+        },
+        "rf": {
+          "log_loss": 0.62688,
+          "auc": 0.6365,
+          "leans": {
+            "n": 1360,
+            "hit_rate": 0.6904,
+            "units_at_-110": 432.64,
+            "top1_hit_rate": 0.761
+          }
+        }
+      }
+    },
+    "2022": {
+      "eval_season": 2022,
+      "n_train": 29575,
+      "n_test": 11198,
+      "baseline_tuned_composite": {
+        "n": 1355,
+        "hit_rate": 0.5941,
+        "units_at_-110": 181.82
+      },
+      "models": {
+        "gbdt": {
+          "log_loss": 0.63458,
+          "auc": 0.6221,
+          "leans": {
+            "n": 1355,
+            "hit_rate": 0.6347,
+            "units_at_-110": 286.82,
+            "top1_hit_rate": 0.69
+          }
+        },
+        "rf": {
+          "log_loss": 0.62243,
+          "auc": 0.6327,
+          "leans": {
+            "n": 1355,
+            "hit_rate": 0.6546,
+            "units_at_-110": 338.36,
+            "top1_hit_rate": 0.6863
+          }
+        }
+      }
+    },
+    "2023": {
+      "eval_season": 2023,
+      "n_train": 40773,
+      "n_test": 11045,
+      "baseline_tuned_composite": {
+        "n": 1360,
+        "hit_rate": 0.5949,
+        "units_at_-110": 184.45
+      },
+      "models": {
+        "gbdt": {
+          "log_loss": 0.62563,
+          "auc": 0.6353,
+          "leans": {
+            "n": 1360,
+            "hit_rate": 0.65,
+            "units_at_-110": 327.64,
+            "top1_hit_rate": 0.6691
+          }
+        },
+        "rf": {
+          "log_loss": 0.61694,
+          "auc": 0.6485,
+          "leans": {
+            "n": 1360,
+            "hit_rate": 0.661,
+            "units_at_-110": 356.27,
+            "top1_hit_rate": 0.6507
+          }
+        }
+      }
+    },
+    "2024": {
+      "eval_season": 2024,
+      "n_train": 51818,
+      "n_test": 11162,
+      "baseline_tuned_composite": {
+        "n": 1360,
+        "hit_rate": 0.5926,
+        "units_at_-110": 178.73
+      },
+      "models": {
+        "gbdt": {
+          "log_loss": 0.63712,
+          "auc": 0.6335,
+          "leans": {
+            "n": 1360,
+            "hit_rate": 0.6316,
+            "units_at_-110": 279.91,
+            "top1_hit_rate": 0.6691
+          }
+        },
+        "rf": {
+          "log_loss": 0.632,
+          "auc": 0.6406,
+          "leans": {
+            "n": 1360,
+            "hit_rate": 0.6382,
+            "units_at_-110": 297.09,
+            "top1_hit_rate": 0.6985
+          }
+        }
+      }
+    },
+    "2025": {
+      "eval_season": 2025,
+      "n_train": 62980,
+      "n_test": 10945,
+      "baseline_tuned_composite": {
+        "n": 1360,
+        "hit_rate": 0.5706,
+        "units_at_-110": 121.45
+      },
+      "models": {
+        "gbdt": {
+          "log_loss": 0.62942,
+          "auc": 0.6291,
+          "leans": {
+            "n": 1360,
+            "hit_rate": 0.6713,
+            "units_at_-110": 383.0,
+            "top1_hit_rate": 0.7096
+          }
+        },
+        "rf": {
+          "log_loss": 0.62417,
+          "auc": 0.6374,
+          "leans": {
+            "n": 1360,
+            "hit_rate": 0.6824,
+            "units_at_-110": 411.64,
+            "top1_hit_rate": 0.739
+          }
+        }
+      }
+    }
+  },
+  "weekly": {
+    "2025": {
+      "eval_season": 2025,
+      "model": "gbdt",
+      "mode": "weekly_retrain",
+      "avg_log_loss": 0.62643,
+      "leans": {
+        "n": 1360,
+        "hit_rate": 0.6647,
+        "units_at_-110": 365.82,
+        "top1_hit_rate": 0.6949
+      },
+      "by_week": {
+        "1": 0.8625,
+        "2": 0.7,
+        "3": 0.825,
+        "4": 0.7375,
+        "5": 0.6429,
+        "6": 0.6,
+        "7": 0.6267,
+        "8": 0.6462,
+        "9": 0.5714,
+        "10": 0.6571,
+        "11": 0.6267,
+        "12": 0.6,
+        "13": 0.6375,
+        "14": 0.7714,
+        "15": 0.575,
+        "16": 0.5875,
+        "17": 0.6125,
+        "18": 0.6625
+      }
+    }
+  }
+}

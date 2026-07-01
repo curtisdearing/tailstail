@@ -183,3 +183,20 @@ edits a projection raises `SynthesisContractViolation`, SQL injection/DDL/
 non-whitelisted tables rejected, no secrets in tracked files, and the
 existing game-line app (`build_ratings.py`, `backtest.py`, `run.py`,
 `weekly.py`) still compiles and the dashboard still renders legacy payloads.
+
+## ML ranking layer (flag-gated, on by default)
+
+`nflvalue/ml_ranker.py` ranks candidates by a gradient-boosted (or RF)
+classifier's P(over) stacked on the deterministic projections — numbers stay
+the model's, ordering is learned. Weekly retrain cadence (after `--grade`):
+
+```bash
+python3 ml_test.py --stage frame --seasons 2026 --append   # fold in the new week
+python3 ml_test.py --stage fit                             # refit + save artifact
+python3 ml_test.py --stage fit --models rf                 # (better, slower: RF)
+```
+
+Evidence: `reports/ml_improvement_test.md` (walk-forward OOS 2021–2025:
+GBDT 63.2–67.1%, RF 63.8–69.0% vs tuned composite 57.1–59.5% at synthetic
+lines — the caveat section there matters). Disable via config
+`ml_ranker.enabled=false` to fall back to the tuned composite instantly.

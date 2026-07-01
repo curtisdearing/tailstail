@@ -163,3 +163,30 @@ reversible; config keys are noted where one exists.
 - Combined validation, 2025 replay at identical volume (synthetic-line
   caveats apply): static default 56.5% → learning 58.5% → tuned+learning
   59.9% overall; top-1 per game 58.8% → 64.0% → 64.7%.
+
+## ML ranking layer (2026-07-01, user-requested)
+
+- Request: "random forest + ML improvement test, best gradient descent score
+  on bet payouts." Framing correction applied: RF has no gradient descent;
+  gradient boosting minimizes log-loss (the reported "gradient descent
+  score"). Both were tested.
+- Architecture: stacked CLASSIFIER P(actual > line) over the deterministic
+  model's own beliefs + walk-forward usage/context features. Projection
+  NUMBERS stay deterministic-model-owned; ML supplies ranking probability +
+  side. Structural anti-leakage: predict refuses any week ≤ train cutoff
+  (WalkForwardViolation); pipeline falls back to composite for past-week
+  replays only.
+- Walk-forward OOS (identical pools/protocol, synthetic-line grading):
+  tuned composite 57.1–59.5%/season; GBDT 63.2–67.1% (log-loss .626–.639,
+  AUC .62–.64); RF 63.8–69.0%. Weekly-retrain GBDT 2025: 66.5%, top-1 69.5%.
+- MATERIAL CAVEAT recorded: part of the ML gap is learned exploitation of the
+  synthetic-line construction (mean-anchored lines ⇒ under-skew); transfer to
+  real bookmaker lines is unproven until live CLV accrues. Kill-check remains
+  the referendum; once real lines exist, y should be re-labeled against them.
+- Shipped: config `ml_ranker.enabled=true`, GBDT artifact (fits on this
+  2-core sandbox; RF upgrade = `python3 ml_test.py --stage fit --models rf`
+  offline). Artifact is gitignored (regenerable, data-derived). When ML is
+  on, the learning loop's bias-mean correction is skipped (classifier trained
+  on raw beliefs; reliability/context multipliers remain display-consistent).
+- RF n_jobs=-1 is reproducible to one float ULP (parallel vote averaging);
+  GBDT byte-reproducible. Seed 20260701.

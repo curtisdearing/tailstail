@@ -92,6 +92,44 @@ def _players_frame(cands: pd.DataFrame) -> pd.DataFrame:
             .rename(columns={"name": "player_name"}))
 
 
+def _maybe_stamp_ml(cfg: Dict, cands: pd.DataFrame,
+                    inputs: candmod.WeekInputs) -> pd.DataFrame:
+    """Flag-gated ML ranking (config "ml_ranker"): the trained classifier's
+    P(over) replaces the ranking probability (side + ordering), while every
+    published NUMBER (mean/sd/line) stays the deterministic model's. Fails
+    LOUD on a walk-forward violation (model trained on/after these weeks) and
+    falls back to pure composite if no model artifact exists yet."""
+    ml_cfg = cfg.get("ml_ranker") or {}
+    if not ml_cfg.get("enabled") or cands.empty:
+        return cands
+    from nflvalue import ml_ranker as mlrmod
+    path = ml_cfg.get("path", mlrmod.MODEL_PATH_DEFAULT)
+    try:
+        model = mlrmod.MLRanker.load(path)
+    except FileNotFoundError:
+        print(f"[pipeline] ml_ranker enabled but no model at {path} — "
+              "run `python3 ml_test.py --stage fit` after grading; using composite ranking")
+        return cands
+    feats = mlrmod.build_features(cands, inputs.pw)
+    try:
+        p = model.predict_p_over(feats)
+    except mlrmod.WalkForwardViolation as exc:
+        # replaying a week the model already trained on: composite ranks it.
+        # (Live future weeks always pass; a future-contaminated model would
+        # still fail loudly there -- this fallback is only for the past.)
+        print(f"[pipeline] ml_ranker skipped (walk-forward guard): {exc}")
+        return cands
+    cands = cands.copy()
+    cands["p_over"] = [round(float(x), 4) for x in p]
+    cands["p_under"] = [round(1 - float(x), 4) for x in p]
+    yes_only = cands["market"].isin({"anytime_td"})
+    p_side = [max(x, 1 - x) for x in p]
+    cands["ml_score"] = [round(100 * (x if yo else ps), 2)
+                         for x, ps, yo in zip(p, p_side, yes_only)]
+    cands["prob_source"] = f"ml_{model.model_name}"
+    return cands
+
+
 def _synthesis_for_games(games: List[Dict], statuses: Dict[str, Dict],
                          sleeper_df: Optional[pd.DataFrame], as_of: str,
                          week: int, freshness_ts: Dict[str, str],
@@ -287,14 +325,21 @@ def run_week(season: int, week: int, mode: str = "historical", clock: str = "wed
 
     # 2b. learning loop: walk-forward per-market corrections + (evidence-gated,
     # human-promoted) context multipliers. All no-ops until weeks are graded.
+    # When the ML ranker is on, the bias-mean correction is SKIPPED -- the
+    # classifier was trained on raw deterministic beliefs and subsumes
+    # calibration; double-correcting would shift its features off-distribution.
+    ml_on = bool((cfg.get("ml_ranker") or {}).get("enabled"))
     learn_cfg = {**{"enabled": True}, **(cfg.get("learning") or {})}
-    if learn_cfg.get("enabled"):
+    if learn_cfg.get("enabled") and not ml_on:
         from nflvalue import context_study, prop_learning
         adjustments = prop_learning.load_adjustments(conn, season, week)
         cands = prop_learning.apply_to_candidates(cands, adjustments, enabled=True)
         ctx_mults = context_study.enabled_multipliers(cfg, conn)
         if ctx_mults:
             cands = context_study.apply_context_multipliers(cands, conn, season, week, ctx_mults)
+
+    # 2c. flag-gated ML ranking layer (see reports/ml_improvement_test.md)
+    cands = _maybe_stamp_ml(cfg, cands, inputs)
 
     # 3. real prop lines (budgeted, rotating) -- optional
     prop_lines, line_note = None, None
@@ -392,6 +437,7 @@ def run_t90(season: int, week: int, game_id: str, mode: str = "live",
         conn.close()
         raise ValueError(f"no candidates for game {game_id} — check season/week/game_id")
 
+    cands = _maybe_stamp_ml(cfg, cands, inputs)
     live = gather_live_feeds(cfg, season, week, _players_frame(cands), clock="t90",
                              inject=inject_feeds)
     statuses = live["statuses"]
