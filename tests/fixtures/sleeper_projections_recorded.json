@@ -1,0 +1,926 @@
+{
+ "_meta": {
+  "retrieved_at": "2026-07-01T20:30:16Z",
+  "source_url": "https://api.sleeper.com/projections/nfl/2025/10?season_type=regular",
+  "note": "REAL recorded payload, trimmed for fixture size. "
+ },
+ "payload": [
+  {
+   "player_id": "1373",
+   "team": "LV",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "pass_att": 32.78,
+    "pass_td": 1.34,
+    "pass_yd": 230.98,
+    "rush_att": 3.95,
+    "rush_td": 0.14,
+    "rush_yd": 19.02
+   },
+   "player": {
+    "first_name": "Geno",
+    "last_name": "Smith",
+    "position": "QB",
+    "team": "NYJ"
+   }
+  },
+  {
+   "player_id": "11563",
+   "team": "DEN",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "pass_att": 32.16,
+    "pass_td": 1.78,
+    "pass_yd": 223.94,
+    "rush_att": 5.11,
+    "rush_td": 0.24,
+    "rush_yd": 25.47
+   },
+   "player": {
+    "first_name": "Bo",
+    "last_name": "Nix",
+    "position": "QB",
+    "team": "DEN"
+   }
+  },
+  {
+   "player_id": "12545",
+   "team": "NO",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "pass_att": 32.37,
+    "pass_td": 1.37,
+    "pass_yd": 199.15,
+    "rush_att": 2.68,
+    "rush_td": 0.09,
+    "rush_yd": 12.32
+   },
+   "player": {
+    "first_name": "Tyler",
+    "last_name": "Shough",
+    "position": "QB",
+    "team": "NO"
+   }
+  },
+  {
+   "player_id": "3163",
+   "team": "DET",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "pass_att": 31.07,
+    "pass_td": 2.18,
+    "pass_yd": 265.66,
+    "rush_att": 1.81,
+    "rush_td": 0.05,
+    "rush_yd": 7.29
+   },
+   "player": {
+    "first_name": "Jared",
+    "last_name": "Goff",
+    "position": "QB",
+    "team": "DET"
+   }
+  },
+  {
+   "player_id": "421",
+   "team": "LAR",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "pass_att": 32.48,
+    "pass_td": 1.92,
+    "pass_yd": 238.14,
+    "rush_att": 1.76,
+    "rush_td": 0.06,
+    "rush_yd": 7.04
+   },
+   "player": {
+    "first_name": "Matthew",
+    "last_name": "Stafford",
+    "position": "QB",
+    "team": "LAR"
+   }
+  },
+  {
+   "player_id": "7527",
+   "team": "SF",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "pass_att": 32.13,
+    "pass_td": 1.21,
+    "pass_yd": 211.02,
+    "rush_att": 3.22,
+    "rush_td": 0.1,
+    "rush_yd": 12.52
+   },
+   "player": {
+    "first_name": "Mac",
+    "last_name": "Jones",
+    "position": "QB",
+    "team": "SF"
+   }
+  },
+  {
+   "player_id": "7585",
+   "team": "HOU",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "pass_att": 31.47,
+    "pass_td": 1.16,
+    "pass_yd": 192.48,
+    "rush_att": 2.35,
+    "rush_td": 0.1,
+    "rush_yd": 9.9
+   },
+   "player": {
+    "first_name": "Davis",
+    "last_name": "Mills",
+    "position": "QB",
+    "team": "HOU"
+   }
+  },
+  {
+   "player_id": "11559",
+   "team": "ATL",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "pass_att": 31.34,
+    "pass_td": 1.25,
+    "pass_yd": 218.62,
+    "rush_att": 2.81,
+    "rush_td": 0.12,
+    "rush_yd": 10.56
+   },
+   "player": {
+    "first_name": "Michael",
+    "last_name": "Penix",
+    "position": "QB",
+    "team": "ATL"
+   }
+  },
+  {
+   "player_id": "11564",
+   "team": "NE",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "pass_att": 31.28,
+    "pass_td": 1.61,
+    "pass_yd": 249.98,
+    "rush_att": 6.66,
+    "rush_td": 0.29,
+    "rush_yd": 36.47
+   },
+   "player": {
+    "first_name": "Drake",
+    "last_name": "Maye",
+    "position": "QB",
+    "team": "NE"
+   }
+  },
+  {
+   "player_id": "3257",
+   "team": "ARI",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "pass_att": 32.83,
+    "pass_td": 1.12,
+    "pass_yd": 205.79,
+    "rush_att": 3.4,
+    "rush_td": 0.14,
+    "rush_yd": 13.24
+   },
+   "player": {
+    "first_name": "Jacoby",
+    "last_name": "Brissett",
+    "position": "QB",
+    "team": "ARI"
+   }
+  },
+  {
+   "player_id": "11574",
+   "team": "LV",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 0.02,
+    "rec_td": 0.0,
+    "rec_tgt": 0.03,
+    "rec_yd": 0.2,
+    "rush_att": 0.07,
+    "rush_td": 0.0,
+    "rush_yd": 0.24
+   },
+   "player": {
+    "first_name": "Dylan",
+    "last_name": "Laube",
+    "position": "RB",
+    "team": "LV"
+   }
+  },
+  {
+   "player_id": "2749",
+   "team": "LV",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 0.62,
+    "rec_td": 0.04,
+    "rec_tgt": 0.75,
+    "rec_yd": 4.37,
+    "rush_att": 2.88,
+    "rush_td": 0.11,
+    "rush_yd": 10.48
+   },
+   "player": {
+    "first_name": "Raheem",
+    "last_name": "Mostert",
+    "position": "RB",
+    "team": null
+   }
+  },
+  {
+   "player_id": "6806",
+   "team": "DEN",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 1.08,
+    "rec_td": 0.06,
+    "rec_tgt": 1.29,
+    "rec_yd": 6.09,
+    "rush_att": 13.82,
+    "rush_td": 0.49,
+    "rush_yd": 65.39
+   },
+   "player": {
+    "first_name": "J.K.",
+    "last_name": "Dobbins",
+    "position": "RB",
+    "team": "DEN"
+   }
+  },
+  {
+   "player_id": "8208",
+   "team": "DEN",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 1.34,
+    "rec_td": 0.1,
+    "rec_tgt": 1.87,
+    "rec_yd": 11.38,
+    "rush_att": 1.6,
+    "rush_td": 0.05,
+    "rush_yd": 7.84
+   },
+   "player": {
+    "first_name": "Tyler",
+    "last_name": "Badie",
+    "position": "RB",
+    "team": "DEN"
+   }
+  },
+  {
+   "player_id": "12527",
+   "team": "LV",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 2.85,
+    "rec_td": 0.22,
+    "rec_tgt": 3.7,
+    "rec_yd": 20.16,
+    "rush_att": 16.38,
+    "rush_td": 0.47,
+    "rush_yd": 56.21
+   },
+   "player": {
+    "first_name": "Ashton",
+    "last_name": "Jeanty",
+    "position": "RB",
+    "team": "LV"
+   }
+  },
+  {
+   "player_id": "12489",
+   "team": "DEN",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 2.79,
+    "rec_td": 0.25,
+    "rec_tgt": 3.22,
+    "rec_yd": 20.79,
+    "rush_att": 5.54,
+    "rush_td": 0.12,
+    "rush_yd": 23.16
+   },
+   "player": {
+    "first_name": "RJ",
+    "last_name": "Harvey",
+    "position": "RB",
+    "team": "DEN"
+   }
+  },
+  {
+   "player_id": "12476",
+   "team": "NO",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "rec": 0.85,
+    "rec_td": 0.06,
+    "rec_tgt": 1.13,
+    "rec_yd": 6.72,
+    "rush_att": 5.77,
+    "rush_td": 0.2,
+    "rush_yd": 29.25
+   },
+   "player": {
+    "first_name": "Devin",
+    "last_name": "Neal",
+    "position": "RB",
+    "team": "NO"
+   }
+  },
+  {
+   "player_id": "12534",
+   "team": "CHI",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "rec": 1.37,
+    "rec_td": 0.08,
+    "rec_tgt": 1.91,
+    "rec_yd": 11.37,
+    "rush_att": 7.97,
+    "rush_td": 0.33,
+    "rush_yd": 42.96
+   },
+   "player": {
+    "first_name": "Kyle",
+    "last_name": "Monangai",
+    "position": "RB",
+    "team": "CHI"
+   }
+  },
+  {
+   "player_id": "4035",
+   "team": "NO",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "rec": 2.66,
+    "rec_td": 0.12,
+    "rec_tgt": 3.33,
+    "rec_yd": 17.49,
+    "rush_att": 11.03,
+    "rush_td": 0.18,
+    "rush_yd": 50.01
+   },
+   "player": {
+    "first_name": "Alvin",
+    "last_name": "Kamara",
+    "position": "RB",
+    "team": "NO"
+   }
+  },
+  {
+   "player_id": "6130",
+   "team": "NYG",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "rec": 1.56,
+    "rec_td": 0.1,
+    "rec_tgt": 1.87,
+    "rec_yd": 11.09,
+    "rush_att": 10.19,
+    "rush_td": 0.31,
+    "rush_yd": 43.45
+   },
+   "player": {
+    "first_name": "Devin",
+    "last_name": "Singletary",
+    "position": "RB",
+    "team": "NYG"
+   }
+  },
+  {
+   "player_id": "11627",
+   "team": "DEN",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 3.61,
+    "rec_td": 0.4,
+    "rec_tgt": 6.4,
+    "rec_yd": 43.2,
+    "rush_att": 0.16,
+    "rush_td": 0.01,
+    "rush_yd": 0.64
+   },
+   "player": {
+    "first_name": "Troy",
+    "last_name": "Franklin",
+    "position": "WR",
+    "team": "DEN"
+   }
+  },
+  {
+   "player_id": "8076",
+   "team": "DEN",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 0.83,
+    "rec_td": 0.08,
+    "rec_tgt": 1.35,
+    "rec_yd": 10.11
+   },
+   "player": {
+    "first_name": "Michael",
+    "last_name": "Bandy",
+    "position": "WR",
+    "team": "DEN"
+   }
+  },
+  {
+   "player_id": "5154",
+   "team": "DEN",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 0.38,
+    "rec_td": 0.04,
+    "rec_tgt": 0.61,
+    "rec_yd": 4.53
+   },
+   "player": {
+    "first_name": "Trent",
+    "last_name": "Sherfield",
+    "position": "WR",
+    "team": "BUF"
+   }
+  },
+  {
+   "player_id": "10213",
+   "team": "LV",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 3.63,
+    "rec_td": 0.33,
+    "rec_tgt": 5.93,
+    "rec_yd": 49.43,
+    "rush_att": 0.61,
+    "rush_td": 0.02,
+    "rush_yd": 2.72
+   },
+   "player": {
+    "first_name": "Tre",
+    "last_name": "Tucker",
+    "position": "WR",
+    "team": "LV"
+   }
+  },
+  {
+   "player_id": "12541",
+   "team": "LV",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 0.55,
+    "rec_td": 0.05,
+    "rec_tgt": 1.31,
+    "rec_yd": 8.39,
+    "rush_att": 0.02,
+    "rush_td": 0.0,
+    "rush_yd": 0.1
+   },
+   "player": {
+    "first_name": "Dont'e",
+    "last_name": "Thornton",
+    "position": "WR",
+    "team": "LV"
+   }
+  },
+  {
+   "player_id": "5045",
+   "team": "DEN",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 4.06,
+    "rec_td": 0.49,
+    "rec_tgt": 6.59,
+    "rec_yd": 60.79
+   },
+   "player": {
+    "first_name": "Courtland",
+    "last_name": "Sutton",
+    "position": "WR",
+    "team": "DEN"
+   }
+  },
+  {
+   "player_id": "2374",
+   "team": "LV",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 1.5,
+    "rec_td": 0.12,
+    "rec_tgt": 2.46,
+    "rec_yd": 18.85
+   },
+   "player": {
+    "first_name": "Tyler",
+    "last_name": "Lockett",
+    "position": "WR",
+    "team": null
+   }
+  },
+  {
+   "player_id": "6386",
+   "team": "LV",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 0.5,
+    "rec_td": 0.04,
+    "rec_tgt": 0.75,
+    "rec_yd": 5.45,
+    "rush_att": 0.02,
+    "rush_td": 0.0,
+    "rush_yd": 0.09
+   },
+   "player": {
+    "first_name": "Alex",
+    "last_name": "Bachman",
+    "position": "WR",
+    "team": null
+   }
+  },
+  {
+   "player_id": "12483",
+   "team": "LV",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 2.74,
+    "rec_td": 0.19,
+    "rec_tgt": 4.26,
+    "rec_yd": 30.68,
+    "rush_att": 0.05,
+    "rush_td": 0.0,
+    "rush_yd": 0.2
+   },
+   "player": {
+    "first_name": "Jack",
+    "last_name": "Bech",
+    "position": "WR",
+    "team": "LV"
+   }
+  },
+  {
+   "player_id": "12492",
+   "team": "DEN",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 1.41,
+    "rec_td": 0.15,
+    "rec_tgt": 2.38,
+    "rec_yd": 17.81,
+    "rush_att": 0.01,
+    "rush_td": 0.0,
+    "rush_yd": 0.04
+   },
+   "player": {
+    "first_name": "Pat",
+    "last_name": "Bryant",
+    "position": "WR",
+    "team": "DEN"
+   }
+  },
+  {
+   "player_id": "4066",
+   "team": "DEN",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 3.58,
+    "rec_td": 0.24,
+    "rec_tgt": 4.76,
+    "rec_yd": 32.35,
+    "rush_att": 0.01,
+    "rush_td": 0.0,
+    "rush_yd": 0.06
+   },
+   "player": {
+    "first_name": "Evan",
+    "last_name": "Engram",
+    "position": "TE",
+    "team": "DEN"
+   }
+  },
+  {
+   "player_id": "4995",
+   "team": "LV",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 0.34,
+    "rec_td": 0.02,
+    "rec_tgt": 0.49,
+    "rec_yd": 3.05
+   },
+   "player": {
+    "first_name": "Ian",
+    "last_name": "Thomas",
+    "position": "TE",
+    "team": "LV"
+   }
+  },
+  {
+   "player_id": "6869",
+   "team": "DEN",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 0.97,
+    "rec_td": 0.09,
+    "rec_tgt": 1.32,
+    "rec_yd": 10.47
+   },
+   "player": {
+    "first_name": "Adam",
+    "last_name": "Trautman",
+    "position": "TE",
+    "team": "DEN"
+   }
+  },
+  {
+   "player_id": "9482",
+   "team": "LV",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 2.04,
+    "rec_td": 0.13,
+    "rec_tgt": 3.02,
+    "rec_yd": 19.01
+   },
+   "player": {
+    "first_name": "Michael",
+    "last_name": "Mayer",
+    "position": "TE",
+    "team": "LV"
+   }
+  },
+  {
+   "player_id": "11604",
+   "team": "LV",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-06",
+   "stats": {
+    "rec": 6.29,
+    "rec_td": 0.48,
+    "rec_tgt": 8.49,
+    "rec_yd": 67.27,
+    "rush_att": 0.24,
+    "rush_td": 0.01,
+    "rush_yd": 0.86
+   },
+   "player": {
+    "first_name": "Brock",
+    "last_name": "Bowers",
+    "position": "TE",
+    "team": "LV"
+   }
+  },
+  {
+   "player_id": "10231",
+   "team": "ARI",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "rec": 1.31,
+    "rec_td": 0.08,
+    "rec_tgt": 1.71,
+    "rec_yd": 12.63
+   },
+   "player": {
+    "first_name": "Elijah",
+    "last_name": "Higgins",
+    "position": "TE",
+    "team": "ARI"
+   }
+  },
+  {
+   "player_id": "11596",
+   "team": "WAS",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "rec": 0.62,
+    "rec_td": 0.05,
+    "rec_tgt": 0.86,
+    "rec_yd": 6.58
+   },
+   "player": {
+    "first_name": "Ben",
+    "last_name": "Sinnott",
+    "position": "TE",
+    "team": "WAS"
+   }
+  },
+  {
+   "player_id": "12473",
+   "team": "CAR",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "rec": 0.66,
+    "rec_td": 0.06,
+    "rec_tgt": 0.92,
+    "rec_yd": 6.58,
+    "rush_att": 0.0,
+    "rush_td": 0.0,
+    "rush_yd": 0.01
+   },
+   "player": {
+    "first_name": "Mitchell",
+    "last_name": "Evans",
+    "position": "TE",
+    "team": "CAR"
+   }
+  },
+  {
+   "player_id": "12658",
+   "team": "BUF",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "rec": 0.73,
+    "rec_td": 0.07,
+    "rec_tgt": 0.97,
+    "rec_yd": 8.03
+   },
+   "player": {
+    "first_name": "Jackson",
+    "last_name": "Hawes",
+    "position": "TE",
+    "team": "BUF"
+   }
+  },
+  {
+   "player_id": "3271",
+   "team": "LAR",
+   "week": 10,
+   "season": "2025",
+   "season_type": "regular",
+   "category": "proj",
+   "date": "2025-11-09",
+   "stats": {
+    "rec": 1.96,
+    "rec_td": 0.21,
+    "rec_tgt": 2.76,
+    "rec_yd": 18.03
+   },
+   "player": {
+    "first_name": "Tyler",
+    "last_name": "Higbee",
+    "position": "TE",
+    "team": "LAR"
+   }
+  }
+ ]
+}
