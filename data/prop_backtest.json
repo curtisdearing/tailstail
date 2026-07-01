@@ -1,0 +1,748 @@
+{
+  "generated": "2026-07-01 19:53 UTC",
+  "n_plays": 232952,
+  "seasons": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023
+  ],
+  "note": "Projection accuracy only -- NOT a price-beating / CLV test. See PROP_SHORTLISTER_SPEC.md \u00a75.",
+  "markets": {
+    "receiving_yards": {
+      "role": [
+        "WR",
+        "TE"
+      ],
+      "dist": "gamma",
+      "low_confidence": false,
+      "overall": {
+        "n": 15918,
+        "mae": 22.523,
+        "rmse": 30.494,
+        "corr": 0.4934
+      },
+      "eligible_only": {
+        "n": 14028,
+        "mae": 22.443,
+        "rmse": 30.261,
+        "corr": 0.5128
+      },
+      "n_ineligible_cold_start": 1890,
+      "by_sample_size": {
+        "0 games (cold start)": {
+          "n": 712,
+          "mae": 29.697,
+          "rmse": 38.639,
+          "corr": -0.3154
+        },
+        "1-3 games": {
+          "n": 1718,
+          "mae": 19.489,
+          "rmse": 28.123,
+          "corr": 0.4644
+        },
+        "4-7 games": {
+          "n": 1955,
+          "mae": 20.176,
+          "rmse": 28.61,
+          "corr": 0.4881
+        },
+        "8+ games": {
+          "n": 11533,
+          "mae": 22.93,
+          "rmse": 30.573,
+          "corr": 0.5119
+        }
+      },
+      "by_role": {
+        "TE": {
+          "n": 5228,
+          "mae": 17.145,
+          "rmse": 23.459,
+          "corr": 0.4694
+        },
+        "WR": {
+          "n": 10690,
+          "mae": 25.154,
+          "rmse": 33.399,
+          "corr": 0.4676
+        }
+      },
+      "calibration": [
+        {
+          "bucket": "0-10%",
+          "n": 235,
+          "predicted_p_over": 0.0788,
+          "actual_over_rate": 0.5191
+        },
+        {
+          "bucket": "10-20%",
+          "n": 1697,
+          "predicted_p_over": 0.1612,
+          "actual_over_rate": 0.4148
+        },
+        {
+          "bucket": "20-30%",
+          "n": 3928,
+          "predicted_p_over": 0.2536,
+          "actual_over_rate": 0.403
+        },
+        {
+          "bucket": "30-40%",
+          "n": 3994,
+          "predicted_p_over": 0.3479,
+          "actual_over_rate": 0.4116
+        },
+        {
+          "bucket": "40-50%",
+          "n": 2466,
+          "predicted_p_over": 0.444,
+          "actual_over_rate": 0.4347
+        },
+        {
+          "bucket": "50-60%",
+          "n": 1087,
+          "predicted_p_over": 0.5417,
+          "actual_over_rate": 0.4278
+        },
+        {
+          "bucket": "60-70%",
+          "n": 407,
+          "predicted_p_over": 0.6393,
+          "actual_over_rate": 0.4152
+        },
+        {
+          "bucket": "70-80%",
+          "n": 138,
+          "predicted_p_over": 0.7386,
+          "actual_over_rate": 0.3768
+        },
+        {
+          "bucket": "80-90%",
+          "n": 40,
+          "predicted_p_over": 0.8326,
+          "actual_over_rate": 0.575
+        },
+        {
+          "bucket": "90-100%",
+          "n": 20,
+          "predicted_p_over": 0.9848,
+          "actual_over_rate": 0.6
+        }
+      ]
+    },
+    "receptions": {
+      "role": [
+        "WR",
+        "TE"
+      ],
+      "dist": "negbinom",
+      "low_confidence": false,
+      "overall": {
+        "n": 15918,
+        "mae": 1.519,
+        "rmse": 2.02,
+        "corr": 0.5608
+      },
+      "eligible_only": {
+        "n": 14028,
+        "mae": 1.5,
+        "rmse": 1.989,
+        "corr": 0.5824
+      },
+      "n_ineligible_cold_start": 1890,
+      "by_sample_size": {
+        "0 games (cold start)": {
+          "n": 712,
+          "mae": 2.221,
+          "rmse": 2.762,
+          "corr": -0.3859
+        },
+        "1-3 games": {
+          "n": 1718,
+          "mae": 1.314,
+          "rmse": 1.84,
+          "corr": 0.5557
+        },
+        "4-7 games": {
+          "n": 1955,
+          "mae": 1.301,
+          "rmse": 1.795,
+          "corr": 0.5642
+        },
+        "8+ games": {
+          "n": 11533,
+          "mae": 1.543,
+          "rmse": 2.027,
+          "corr": 0.577
+        }
+      },
+      "by_role": {
+        "TE": {
+          "n": 5228,
+          "mae": 1.299,
+          "rmse": 1.748,
+          "corr": 0.5443
+        },
+        "WR": {
+          "n": 10690,
+          "mae": 1.626,
+          "rmse": 2.14,
+          "corr": 0.553
+        }
+      },
+      "calibration": [
+        {
+          "bucket": "0-10%",
+          "n": 22,
+          "predicted_p_over": 0.0582,
+          "actual_over_rate": 0.6818
+        },
+        {
+          "bucket": "10-20%",
+          "n": 437,
+          "predicted_p_over": 0.1688,
+          "actual_over_rate": 0.4279
+        },
+        {
+          "bucket": "20-30%",
+          "n": 2293,
+          "predicted_p_over": 0.2592,
+          "actual_over_rate": 0.4008
+        },
+        {
+          "bucket": "30-40%",
+          "n": 4880,
+          "predicted_p_over": 0.3542,
+          "actual_over_rate": 0.4041
+        },
+        {
+          "bucket": "40-50%",
+          "n": 4484,
+          "predicted_p_over": 0.4452,
+          "actual_over_rate": 0.4431
+        },
+        {
+          "bucket": "50-60%",
+          "n": 1668,
+          "predicted_p_over": 0.5372,
+          "actual_over_rate": 0.5
+        },
+        {
+          "bucket": "60-70%",
+          "n": 211,
+          "predicted_p_over": 0.6314,
+          "actual_over_rate": 0.4976
+        },
+        {
+          "bucket": "70-80%",
+          "n": 17,
+          "predicted_p_over": 0.7324,
+          "actual_over_rate": 0.4118
+        }
+      ]
+    },
+    "rushing_yards": {
+      "role": [
+        "RB"
+      ],
+      "dist": "gamma",
+      "low_confidence": false,
+      "overall": {
+        "n": 7312,
+        "mae": 21.106,
+        "rmse": 29.737,
+        "corr": 0.5754
+      },
+      "eligible_only": {
+        "n": 6369,
+        "mae": 21.015,
+        "rmse": 29.603,
+        "corr": 0.5938
+      },
+      "n_ineligible_cold_start": 943,
+      "by_sample_size": {
+        "0 games (cold start)": {
+          "n": 359,
+          "mae": 28.328,
+          "rmse": 35.454,
+          "corr": -0.3473
+        },
+        "1-3 games": {
+          "n": 841,
+          "mae": 17.412,
+          "rmse": 27.017,
+          "corr": 0.5594
+        },
+        "4-7 games": {
+          "n": 913,
+          "mae": 18.877,
+          "rmse": 27.622,
+          "corr": 0.622
+        },
+        "8+ games": {
+          "n": 5199,
+          "mae": 21.596,
+          "rmse": 30.081,
+          "corr": 0.583
+        }
+      },
+      "by_role": {},
+      "calibration": [
+        {
+          "bucket": "0-10%",
+          "n": 594,
+          "predicted_p_over": 0.0353,
+          "actual_over_rate": 0.3333
+        },
+        {
+          "bucket": "10-20%",
+          "n": 735,
+          "predicted_p_over": 0.1585,
+          "actual_over_rate": 0.4027
+        },
+        {
+          "bucket": "20-30%",
+          "n": 1505,
+          "predicted_p_over": 0.2537,
+          "actual_over_rate": 0.3953
+        },
+        {
+          "bucket": "30-40%",
+          "n": 1704,
+          "predicted_p_over": 0.3482,
+          "actual_over_rate": 0.3908
+        },
+        {
+          "bucket": "40-50%",
+          "n": 1069,
+          "predicted_p_over": 0.4445,
+          "actual_over_rate": 0.4172
+        },
+        {
+          "bucket": "50-60%",
+          "n": 457,
+          "predicted_p_over": 0.541,
+          "actual_over_rate": 0.4573
+        },
+        {
+          "bucket": "60-70%",
+          "n": 159,
+          "predicted_p_over": 0.6392,
+          "actual_over_rate": 0.5157
+        },
+        {
+          "bucket": "70-80%",
+          "n": 30,
+          "predicted_p_over": 0.7399,
+          "actual_over_rate": 0.5333
+        },
+        {
+          "bucket": "80-90%",
+          "n": 9,
+          "predicted_p_over": 0.816,
+          "actual_over_rate": 0.5556
+        },
+        {
+          "bucket": "90-100%",
+          "n": 94,
+          "predicted_p_over": 0.9973,
+          "actual_over_rate": 0.3085
+        }
+      ]
+    },
+    "passing_yards": {
+      "role": [
+        "QB"
+      ],
+      "dist": "normal",
+      "low_confidence": false,
+      "overall": {
+        "n": 3231,
+        "mae": 75.776,
+        "rmse": 99.093,
+        "corr": 0.4909
+      },
+      "eligible_only": {
+        "n": 2843,
+        "mae": 70.306,
+        "rmse": 90.092,
+        "corr": 0.5407
+      },
+      "n_ineligible_cold_start": 388,
+      "by_sample_size": {
+        "0 games (cold start)": {
+          "n": 139,
+          "mae": 164.321,
+          "rmse": 192.283,
+          "corr": -0.4859
+        },
+        "1-3 games": {
+          "n": 362,
+          "mae": 85.922,
+          "rmse": 114.881,
+          "corr": 0.4972
+        },
+        "4-7 games": {
+          "n": 403,
+          "mae": 73.023,
+          "rmse": 92.981,
+          "corr": 0.6099
+        },
+        "8+ games": {
+          "n": 2327,
+          "mae": 69.386,
+          "rmse": 88.743,
+          "corr": 0.5072
+        }
+      },
+      "by_role": {},
+      "calibration": [
+        {
+          "bucket": "10-20%",
+          "n": 5,
+          "predicted_p_over": 0.1834,
+          "actual_over_rate": 0.0
+        },
+        {
+          "bucket": "20-30%",
+          "n": 84,
+          "predicted_p_over": 0.2687,
+          "actual_over_rate": 0.3929
+        },
+        {
+          "bucket": "30-40%",
+          "n": 382,
+          "predicted_p_over": 0.3595,
+          "actual_over_rate": 0.4293
+        },
+        {
+          "bucket": "40-50%",
+          "n": 1045,
+          "predicted_p_over": 0.4539,
+          "actual_over_rate": 0.4555
+        },
+        {
+          "bucket": "50-60%",
+          "n": 953,
+          "predicted_p_over": 0.5409,
+          "actual_over_rate": 0.5142
+        },
+        {
+          "bucket": "60-70%",
+          "n": 317,
+          "predicted_p_over": 0.6403,
+          "actual_over_rate": 0.5331
+        },
+        {
+          "bucket": "70-80%",
+          "n": 47,
+          "predicted_p_over": 0.7368,
+          "actual_over_rate": 0.4468
+        },
+        {
+          "bucket": "80-90%",
+          "n": 10,
+          "predicted_p_over": 0.8336,
+          "actual_over_rate": 0.6
+        }
+      ]
+    },
+    "pass_attempts": {
+      "role": [
+        "QB"
+      ],
+      "dist": "negbinom",
+      "low_confidence": false,
+      "overall": {
+        "n": 3231,
+        "mae": 9.773,
+        "rmse": 13.213,
+        "corr": 0.509
+      },
+      "eligible_only": {
+        "n": 2843,
+        "mae": 8.876,
+        "rmse": 11.764,
+        "corr": 0.5648
+      },
+      "n_ineligible_cold_start": 388,
+      "by_sample_size": {
+        "0 games (cold start)": {
+          "n": 139,
+          "mae": 23.054,
+          "rmse": 26.743,
+          "corr": -0.3993
+        },
+        "1-3 games": {
+          "n": 362,
+          "mae": 12.005,
+          "rmse": 16.074,
+          "corr": 0.5198
+        },
+        "4-7 games": {
+          "n": 403,
+          "mae": 9.982,
+          "rmse": 12.832,
+          "corr": 0.61
+        },
+        "8+ games": {
+          "n": 2327,
+          "mae": 8.597,
+          "rmse": 11.444,
+          "corr": 0.5368
+        }
+      },
+      "by_role": {},
+      "calibration": [
+        {
+          "bucket": "0-10%",
+          "n": 83,
+          "predicted_p_over": 0.0148,
+          "actual_over_rate": 0.4819
+        },
+        {
+          "bucket": "10-20%",
+          "n": 34,
+          "predicted_p_over": 0.1435,
+          "actual_over_rate": 0.6765
+        },
+        {
+          "bucket": "20-30%",
+          "n": 41,
+          "predicted_p_over": 0.2511,
+          "actual_over_rate": 0.561
+        },
+        {
+          "bucket": "30-40%",
+          "n": 194,
+          "predicted_p_over": 0.368,
+          "actual_over_rate": 0.5258
+        },
+        {
+          "bucket": "40-50%",
+          "n": 2491,
+          "predicted_p_over": 0.4457,
+          "actual_over_rate": 0.4809
+        }
+      ]
+    },
+    "rush_attempts": {
+      "role": [
+        "RB"
+      ],
+      "dist": "negbinom",
+      "low_confidence": false,
+      "overall": {
+        "n": 7312,
+        "mae": 3.869,
+        "rmse": 5.228,
+        "corr": 0.6716
+      },
+      "eligible_only": {
+        "n": 6369,
+        "mae": 3.802,
+        "rmse": 5.136,
+        "corr": 0.6906
+      },
+      "n_ineligible_cold_start": 943,
+      "by_sample_size": {
+        "0 games (cold start)": {
+          "n": 359,
+          "mae": 6.277,
+          "rmse": 7.376,
+          "corr": -0.3767
+        },
+        "1-3 games": {
+          "n": 841,
+          "mae": 3.075,
+          "rmse": 4.486,
+          "corr": 0.6954
+        },
+        "4-7 games": {
+          "n": 913,
+          "mae": 3.303,
+          "rmse": 4.774,
+          "corr": 0.7189
+        },
+        "8+ games": {
+          "n": 5199,
+          "mae": 3.93,
+          "rmse": 5.237,
+          "corr": 0.6785
+        }
+      },
+      "by_role": {},
+      "calibration": [
+        {
+          "bucket": "0-10%",
+          "n": 554,
+          "predicted_p_over": 0.0407,
+          "actual_over_rate": 0.3899
+        },
+        {
+          "bucket": "10-20%",
+          "n": 269,
+          "predicted_p_over": 0.1585,
+          "actual_over_rate": 0.4275
+        },
+        {
+          "bucket": "20-30%",
+          "n": 779,
+          "predicted_p_over": 0.2581,
+          "actual_over_rate": 0.4172
+        },
+        {
+          "bucket": "30-40%",
+          "n": 1743,
+          "predicted_p_over": 0.3555,
+          "actual_over_rate": 0.42
+        },
+        {
+          "bucket": "40-50%",
+          "n": 2317,
+          "predicted_p_over": 0.4472,
+          "actual_over_rate": 0.435
+        },
+        {
+          "bucket": "50-60%",
+          "n": 574,
+          "predicted_p_over": 0.5311,
+          "actual_over_rate": 0.4408
+        },
+        {
+          "bucket": "60-70%",
+          "n": 96,
+          "predicted_p_over": 0.6301,
+          "actual_over_rate": 0.4271
+        },
+        {
+          "bucket": "70-80%",
+          "n": 18,
+          "predicted_p_over": 0.7399,
+          "actual_over_rate": 0.3889
+        },
+        {
+          "bucket": "80-90%",
+          "n": 6,
+          "predicted_p_over": 0.838,
+          "actual_over_rate": 0.1667
+        }
+      ]
+    },
+    "anytime_td": {
+      "role": [
+        "RB",
+        "WR",
+        "TE"
+      ],
+      "dist": "poisson",
+      "low_confidence": true,
+      "overall": {
+        "n": 23230,
+        "mae": 0.369,
+        "rmse": 0.521,
+        "corr": 0.2469
+      },
+      "eligible_only": {
+        "n": 20397,
+        "mae": 0.378,
+        "rmse": 0.528,
+        "corr": 0.257
+      },
+      "n_ineligible_cold_start": 2833,
+      "by_sample_size": {
+        "0 games (cold start)": {
+          "n": 1071,
+          "mae": 0.322,
+          "rmse": 0.473,
+          "corr": -0.1495
+        },
+        "1-3 games": {
+          "n": 2559,
+          "mae": 0.291,
+          "rmse": 0.46,
+          "corr": 0.1827
+        },
+        "4-7 games": {
+          "n": 2868,
+          "mae": 0.316,
+          "rmse": 0.484,
+          "corr": 0.2436
+        },
+        "8+ games": {
+          "n": 16732,
+          "mae": 0.393,
+          "rmse": 0.538,
+          "corr": 0.2562
+        }
+      },
+      "by_role": {
+        "RB": {
+          "n": 7312,
+          "mae": 0.414,
+          "rmse": 0.586,
+          "corr": 0.2952
+        },
+        "TE": {
+          "n": 5228,
+          "mae": 0.313,
+          "rmse": 0.455,
+          "corr": 0.1468
+        },
+        "WR": {
+          "n": 10690,
+          "mae": 0.365,
+          "rmse": 0.503,
+          "corr": 0.2021
+        }
+      },
+      "calibration": [
+        {
+          "bucket": "0-10%",
+          "n": 4511,
+          "predicted_p_over": 0.061,
+          "actual_over_rate": 0.1124
+        },
+        {
+          "bucket": "10-20%",
+          "n": 5770,
+          "predicted_p_over": 0.1492,
+          "actual_over_rate": 0.1707
+        },
+        {
+          "bucket": "20-30%",
+          "n": 4821,
+          "predicted_p_over": 0.2471,
+          "actual_over_rate": 0.2228
+        },
+        {
+          "bucket": "30-40%",
+          "n": 3125,
+          "predicted_p_over": 0.3469,
+          "actual_over_rate": 0.2947
+        },
+        {
+          "bucket": "40-50%",
+          "n": 1744,
+          "predicted_p_over": 0.441,
+          "actual_over_rate": 0.3802
+        },
+        {
+          "bucket": "50-60%",
+          "n": 400,
+          "predicted_p_over": 0.5308,
+          "actual_over_rate": 0.435
+        },
+        {
+          "bucket": "60-70%",
+          "n": 21,
+          "predicted_p_over": 0.6267,
+          "actual_over_rate": 0.5714
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "odds_api_key": "",
+
+  "regions": "us",
+  "game_markets": ["h2h", "spreads", "totals"],
+  "prop_markets": ["player_pass_yds", "player_rush_yds", "player_reception_yds", "player_anytime_td"],
+  "fetch_props": true,
+  "max_prop_games_per_run": 4,
+
+  "sharp_books": ["pinnacle"],
+  "sharp_weight": 2.0,
+
+  "ev_threshold": 0.03,
+  "edge_shrinkage": 0.5,
+  "min_odds": 1.40,
+  "max_odds": 6.00,
+
+  "kelly_multiplier": 0.15,
+  "max_stake_pct": 0.03,
+  "bankroll_units": 100.0,
+
+  "learning_rate": 0.06,
+  "l2": 0.01,
+
+  "refresh_seconds": 90
+}

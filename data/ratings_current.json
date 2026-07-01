@@ -1,0 +1,226 @@
+{
+  "Arizona Cardinals": {
+    "abbr": "ARI",
+    "off": -1.774,
+    "def": -3.274,
+    "net": -5.048,
+    "season": 2023
+  },
+  "Atlanta Falcons": {
+    "abbr": "ATL",
+    "off": -2.808,
+    "def": -2.192,
+    "net": -5.001,
+    "season": 2023
+  },
+  "Baltimore Ravens": {
+    "abbr": "BAL",
+    "off": 4.864,
+    "def": 5.918,
+    "net": 10.782,
+    "season": 2023
+  },
+  "Buffalo Bills": {
+    "abbr": "BUF",
+    "off": 4.43,
+    "def": 2.943,
+    "net": 7.373,
+    "season": 2023
+  },
+  "Carolina Panthers": {
+    "abbr": "CAR",
+    "off": -8.467,
+    "def": -0.405,
+    "net": -8.873,
+    "season": 2023
+  },
+  "Chicago Bears": {
+    "abbr": "CHI",
+    "off": -2.131,
+    "def": 1.121,
+    "net": -1.011,
+    "season": 2023
+  },
+  "Cincinnati Bengals": {
+    "abbr": "CIN",
+    "off": 1.248,
+    "def": 0.436,
+    "net": 1.684,
+    "season": 2023
+  },
+  "Cleveland Browns": {
+    "abbr": "CLE",
+    "off": 0.392,
+    "def": -2.485,
+    "net": -2.093,
+    "season": 2023
+  },
+  "Dallas Cowboys": {
+    "abbr": "DAL",
+    "off": 5.67,
+    "def": 1.743,
+    "net": 7.413,
+    "season": 2023
+  },
+  "Denver Broncos": {
+    "abbr": "DEN",
+    "off": -2.228,
+    "def": -0.1,
+    "net": -2.328,
+    "season": 2023
+  },
+  "Detroit Lions": {
+    "abbr": "DET",
+    "off": 5.489,
+    "def": -1.476,
+    "net": 4.013,
+    "season": 2023
+  },
+  "Green Bay Packers": {
+    "abbr": "GB",
+    "off": 2.855,
+    "def": 1.006,
+    "net": 3.861,
+    "season": 2023
+  },
+  "Houston Texans": {
+    "abbr": "HOU",
+    "off": -0.462,
+    "def": 0.315,
+    "net": -0.147,
+    "season": 2023
+  },
+  "Indianapolis Colts": {
+    "abbr": "IND",
+    "off": -0.752,
+    "def": -2.628,
+    "net": -3.38,
+    "season": 2023
+  },
+  "Jacksonville Jaguars": {
+    "abbr": "JAX",
+    "off": 0.021,
+    "def": -0.337,
+    "net": -0.316,
+    "season": 2023
+  },
+  "Kansas City Chiefs": {
+    "abbr": "KC",
+    "off": 1.049,
+    "def": 5.909,
+    "net": 6.958,
+    "season": 2023
+  },
+  "Los Angeles Rams": {
+    "abbr": "LA",
+    "off": 1.163,
+    "def": 0.613,
+    "net": 1.776,
+    "season": 2023
+  },
+  "Los Angeles Chargers": {
+    "abbr": "LAC",
+    "off": -2.478,
+    "def": -0.507,
+    "net": -2.985,
+    "season": 2023
+  },
+  "Las Vegas Raiders": {
+    "abbr": "OAK",
+    "off": -0.035,
+    "def": -0.031,
+    "net": -0.067,
+    "season": 2023
+  },
+  "Miami Dolphins": {
+    "abbr": "MIA",
+    "off": 3.123,
+    "def": -0.494,
+    "net": 2.629,
+    "season": 2023
+  },
+  "Minnesota Vikings": {
+    "abbr": "MIN",
+    "off": -2.729,
+    "def": 0.719,
+    "net": -2.009,
+    "season": 2023
+  },
+  "New England Patriots": {
+    "abbr": "NE",
+    "off": -6.538,
+    "def": 1.742,
+    "net": -4.796,
+    "season": 2023
+  },
+  "New Orleans Saints": {
+    "abbr": "NO",
+    "off": 1.1,
+    "def": 2.303,
+    "net": 3.403,
+    "season": 2023
+  },
+  "New York Giants": {
+    "abbr": "NYG",
+    "off": -3.858,
+    "def": 0.01,
+    "net": -3.848,
+    "season": 2023
+  },
+  "New York Jets": {
+    "abbr": "NYJ",
+    "off": -6.19,
+    "def": 2.043,
+    "net": -4.146,
+    "season": 2023
+  },
+  "Philadelphia Eagles": {
+    "abbr": "PHI",
+    "off": 1.443,
+    "def": -2.974,
+    "net": -1.531,
+    "season": 2023
+  },
+  "Pittsburgh Steelers": {
+    "abbr": "PIT",
+    "off": -2.482,
+    "def": 2.843,
+    "net": 0.36,
+    "season": 2023
+  },
+  "Seattle Seahawks": {
+    "abbr": "SEA",
+    "off": -0.447,
+    "def": -0.786,
+    "net": -1.233,
+    "season": 2023
+  },
+  "San Francisco 49ers": {
+    "abbr": "SF",
+    "off": 5.014,
+    "def": 3.325,
+    "net": 8.339,
+    "season": 2023
+  },
+  "Tampa Bay Buccaneers": {
+    "abbr": "TB",
+    "off": -1.148,
+    "def": 2.965,
+    "net": 1.817,
+    "season": 2023
+  },
+  "Tennessee Titans": {
+    "abbr": "TEN",
+    "off": -4.492,
+    "def": 0.11,
+    "net": -4.382,
+    "season": 2023
+  },
+  "Washington Commanders": {
+    "abbr": "WAS",
+    "off": -3.141,
+    "def": -5.685,
+    "net": -8.826,
+    "season": 2023
+  }
+}

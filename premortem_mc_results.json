@@ -1,0 +1,266 @@
+{
+  "constants": {
+    "decimal_odds": 1.9091,
+    "break_even": 0.52381,
+    "trials": 20000
+  },
+  "A_flat": [
+    {
+      "p": 0.5,
+      "nbets": 500,
+      "unit_frac": 0.01,
+      "ev_per_bet_pct": -4.545,
+      "median": 77.3,
+      "mean": 77.3,
+      "p5": 42.9,
+      "p95": 111.6,
+      "prob_profit": 0.1536,
+      "prob_ruin": 0.0003,
+      "prob_down_50pct": 0.0988
+    },
+    {
+      "p": 0.5,
+      "nbets": 2000,
+      "unit_frac": 0.01,
+      "ev_per_bet_pct": -4.545,
+      "median": 9.1,
+      "mean": 9.1,
+      "p5": -61.5,
+      "p95": 79.7,
+      "prob_profit": 0.0171,
+      "prob_ruin": 0.4956,
+      "prob_down_50pct": 0.8324
+    },
+    {
+      "p": 0.5238095238095238,
+      "nbets": 500,
+      "unit_frac": 0.01,
+      "ev_per_bet_pct": 0.0,
+      "median": 100.2,
+      "mean": 100.0,
+      "p5": 65.8,
+      "p95": 136.5,
+      "prob_profit": 0.513,
+      "prob_ruin": 0.0,
+      "prob_down_50pct": 0.0074
+    },
+    {
+      "p": 0.5238095238095238,
+      "nbets": 2000,
+      "unit_frac": 0.01,
+      "ev_per_bet_pct": 0.0,
+      "median": 98.8,
+      "mean": 99.7,
+      "p5": 30.1,
+      "p95": 169.5,
+      "prob_profit": 0.499,
+      "prob_ruin": 0.0203,
+      "prob_down_50pct": 0.1222
+    },
+    {
+      "p": 0.53,
+      "nbets": 500,
+      "unit_frac": 0.01,
+      "ev_per_bet_pct": 1.182,
+      "median": 105.9,
+      "mean": 106.1,
+      "p5": 71.5,
+      "p95": 142.2,
+      "prob_profit": 0.6293,
+      "prob_ruin": 0.0,
+      "prob_down_50pct": 0.0048
+    },
+    {
+      "p": 0.53,
+      "nbets": 2000,
+      "unit_frac": 0.01,
+      "ev_per_bet_pct": 1.182,
+      "median": 123.6,
+      "mean": 123.3,
+      "p5": 53.0,
+      "p95": 194.3,
+      "prob_profit": 0.7103,
+      "prob_ruin": 0.0049,
+      "prob_down_50pct": 0.0416
+    },
+    {
+      "p": 0.54,
+      "nbets": 500,
+      "unit_frac": 0.01,
+      "ev_per_bet_pct": 3.091,
+      "median": 115.5,
+      "mean": 115.3,
+      "p5": 79.2,
+      "p95": 149.8,
+      "prob_profit": 0.7755,
+      "prob_ruin": 0.0,
+      "prob_down_50pct": 0.0013
+    },
+    {
+      "p": 0.54,
+      "nbets": 2000,
+      "unit_frac": 0.01,
+      "ev_per_bet_pct": 3.091,
+      "median": 161.8,
+      "mean": 161.8,
+      "p5": 91.2,
+      "p95": 232.5,
+      "prob_profit": 0.9281,
+      "prob_ruin": 0.0004,
+      "prob_down_50pct": 0.0048
+    },
+    {
+      "p": 0.55,
+      "nbets": 500,
+      "unit_frac": 0.01,
+      "ev_per_bet_pct": 5.001,
+      "median": 125.0,
+      "mean": 125.1,
+      "p5": 90.6,
+      "p95": 159.4,
+      "prob_profit": 0.8875,
+      "prob_ruin": 0.0,
+      "prob_down_50pct": 0.0001
+    },
+    {
+      "p": 0.55,
+      "nbets": 2000,
+      "unit_frac": 0.01,
+      "ev_per_bet_pct": 5.001,
+      "median": 200.0,
+      "mean": 200.7,
+      "p5": 131.3,
+      "p95": 270.6,
+      "prob_profit": 0.992,
+      "prob_ruin": 0.0,
+      "prob_down_50pct": 0.0003
+    }
+  ],
+  "B_kelly": [
+    {
+      "p_true": 0.54,
+      "p_est": 0.54,
+      "kmult": 0.5,
+      "kelly_f_pct": 1.7,
+      "nbets": 1000,
+      "median": 148.4,
+      "mean": 168.7,
+      "p5": 63.8,
+      "p95": 345.3,
+      "prob_profit": 0.7869,
+      "prob_below_5pct": 0.0,
+      "prob_below_50pct": 0.0517
+    },
+    {
+      "p_true": 0.54,
+      "p_est": 0.54,
+      "kmult": 1.0,
+      "kelly_f_pct": 3.4,
+      "nbets": 1000,
+      "median": 169.3,
+      "mean": 287.3,
+      "p5": 31.2,
+      "p95": 918.3,
+      "prob_profit": 0.7086,
+      "prob_below_5pct": 0.0008,
+      "prob_below_50pct": 0.3202
+    },
+    {
+      "p_true": 0.515,
+      "p_est": 0.56,
+      "kmult": 1.0,
+      "kelly_f_pct": 7.6,
+      "nbets": 1000,
+      "median": 2.0,
+      "mean": 26.1,
+      "p5": 0.0,
+      "p95": 87.2,
+      "prob_profit": 0.0458,
+      "prob_below_5pct": 0.7661,
+      "prob_below_50pct": 0.9822
+    },
+    {
+      "p_true": 0.515,
+      "p_est": 0.56,
+      "kmult": 0.5,
+      "kelly_f_pct": 3.8,
+      "nbets": 1000,
+      "median": 27.3,
+      "mean": 53.6,
+      "p5": 4.1,
+      "p95": 180.7,
+      "prob_profit": 0.1372,
+      "prob_below_5pct": 0.1011,
+      "prob_below_50pct": 0.8567
+    },
+    {
+      "p_true": 0.52,
+      "p_est": 0.55,
+      "kmult": 0.5,
+      "kelly_f_pct": 2.75,
+      "nbets": 1000,
+      "median": 58.0,
+      "mean": 82.4,
+      "p5": 14.8,
+      "p95": 227.6,
+      "prob_profit": 0.2555,
+      "prob_below_5pct": 0.0027,
+      "prob_below_50pct": 0.6236
+    }
+  ],
+  "C_detect": [
+    {
+      "true_p": 0.53,
+      "edge_over_BE_pts": 0.62,
+      "n_bets_needed": 40225,
+      "empirical_power_at_n": 0.796
+    },
+    {
+      "true_p": 0.54,
+      "edge_over_BE_pts": 1.62,
+      "n_bets_needed": 5875,
+      "empirical_power_at_n": 0.803
+    },
+    {
+      "true_p": 0.55,
+      "edge_over_BE_pts": 2.62,
+      "n_bets_needed": 2243,
+      "empirical_power_at_n": 0.804
+    },
+    {
+      "true_p": 0.56,
+      "edge_over_BE_pts": 3.62,
+      "n_bets_needed": 1173,
+      "empirical_power_at_n": 0.795
+    },
+    {
+      "true_p": 0.57,
+      "edge_over_BE_pts": 4.62,
+      "n_bets_needed": 719,
+      "empirical_power_at_n": 0.808
+    }
+  ],
+  "D_seasons": [
+    {
+      "cadence": "aggressive ~150/yr",
+      "bets_per_season": 150,
+      "seasons_for_54pct": 39.2,
+      "seasons_for_55pct": 15.0,
+      "seasons_for_56pct": 7.8
+    },
+    {
+      "cadence": "moderate ~80/yr",
+      "bets_per_season": 80,
+      "seasons_for_54pct": 73.4,
+      "seasons_for_55pct": 28.0,
+      "seasons_for_56pct": 14.7
+    },
+    {
+      "cadence": "selective ~40/yr",
+      "bets_per_season": 40,
+      "seasons_for_54pct": 146.9,
+      "seasons_for_55pct": 56.1,
+      "seasons_for_56pct": 29.3
+    }
+  ]
+}

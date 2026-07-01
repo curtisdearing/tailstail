@@ -1,0 +1,14 @@
+{
+  "g_injury_diff": -0.03043,
+  "g_revenge": 0.00818,
+  "g_rest_diff": -0.09385,
+  "g_matchup": 0.33288,
+  "g_home_field": 0.20049,
+  "t_weather": 0.21029,
+  "t_injuries": 0.00719,
+  "t_pace": 0.30728,
+  "p_usage_trend": 0.35146,
+  "p_opp_defense": 0.42782,
+  "p_weather_pass": -0.01304,
+  "p_weather_rush": 0.11371
+}
