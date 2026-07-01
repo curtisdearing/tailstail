@@ -1,0 +1,204 @@
+{
+  "walk_forward": [
+    {
+      "eval_season": 2020,
+      "chosen_on_train": {
+        "conf_share": 0.8,
+        "z_cap": 1.5,
+        "low_conf_mult": 0.6,
+        "markets": "core4"
+      },
+      "train_hit_rate": 0.5952,
+      "oos": {
+        "n": 1280,
+        "hit_rate": 0.575
+      },
+      "default_config_oos": {
+        "n": 1280,
+        "hit_rate": 0.5836
+      }
+    },
+    {
+      "eval_season": 2021,
+      "chosen_on_train": {
+        "conf_share": 0.8,
+        "z_cap": 2.0,
+        "low_conf_mult": 0.8,
+        "markets": "all"
+      },
+      "train_hit_rate": 0.5858,
+      "oos": {
+        "n": 1360,
+        "hit_rate": 0.589
+      },
+      "default_config_oos": {
+        "n": 1360,
+        "hit_rate": 0.589
+      }
+    },
+    {
+      "eval_season": 2022,
+      "chosen_on_train": {
+        "conf_share": 0.8,
+        "z_cap": 2.0,
+        "low_conf_mult": 0.8,
+        "markets": "all"
+      },
+      "train_hit_rate": 0.587,
+      "oos": {
+        "n": 1355,
+        "hit_rate": 0.5904
+      },
+      "default_config_oos": {
+        "n": 1355,
+        "hit_rate": 0.5882
+      }
+    },
+    {
+      "eval_season": 2023,
+      "chosen_on_train": {
+        "conf_share": 0.8,
+        "z_cap": 1.5,
+        "low_conf_mult": 0.8,
+        "markets": "all"
+      },
+      "train_hit_rate": 0.5883,
+      "oos": {
+        "n": 1360,
+        "hit_rate": 0.5949
+      },
+      "default_config_oos": {
+        "n": 1360,
+        "hit_rate": 0.5882
+      }
+    },
+    {
+      "eval_season": 2024,
+      "chosen_on_train": {
+        "conf_share": 0.8,
+        "z_cap": 1.5,
+        "low_conf_mult": 0.8,
+        "markets": "all"
+      },
+      "train_hit_rate": 0.5897,
+      "oos": {
+        "n": 1360,
+        "hit_rate": 0.5926
+      },
+      "default_config_oos": {
+        "n": 1360,
+        "hit_rate": 0.5919
+      }
+    },
+    {
+      "eval_season": 2025,
+      "chosen_on_train": {
+        "conf_share": 0.8,
+        "z_cap": 1.5,
+        "low_conf_mult": 0.8,
+        "markets": "all"
+      },
+      "train_hit_rate": 0.5902,
+      "oos": {
+        "n": 1360,
+        "hit_rate": 0.5706
+      },
+      "default_config_oos": {
+        "n": 1360,
+        "hit_rate": 0.5647
+      }
+    }
+  ],
+  "pooled_top10": [
+    {
+      "conf_share": 0.8,
+      "z_cap": 1.5,
+      "low_conf_mult": 0.6,
+      "markets": "core4",
+      "n": 9115,
+      "hit_rate": 0.5884
+    },
+    {
+      "conf_share": 0.8,
+      "z_cap": 1.5,
+      "low_conf_mult": 0.8,
+      "markets": "core4",
+      "n": 9115,
+      "hit_rate": 0.5884
+    },
+    {
+      "conf_share": 0.8,
+      "z_cap": 1.5,
+      "low_conf_mult": 1.0,
+      "markets": "core4",
+      "n": 9115,
+      "hit_rate": 0.5884
+    },
+    {
+      "conf_share": 0.8,
+      "z_cap": 1.5,
+      "low_conf_mult": 0.8,
+      "markets": "all",
+      "n": 9115,
+      "hit_rate": 0.5873
+    },
+    {
+      "conf_share": 0.8,
+      "z_cap": 1.5,
+      "low_conf_mult": 0.6,
+      "markets": "all",
+      "n": 9115,
+      "hit_rate": 0.5867
+    },
+    {
+      "conf_share": 0.8,
+      "z_cap": 1.5,
+      "low_conf_mult": 1.0,
+      "markets": "all",
+      "n": 9115,
+      "hit_rate": 0.5854
+    },
+    {
+      "conf_share": 0.8,
+      "z_cap": 2.0,
+      "low_conf_mult": 0.6,
+      "markets": "core4",
+      "n": 9115,
+      "hit_rate": 0.5854
+    },
+    {
+      "conf_share": 0.8,
+      "z_cap": 2.0,
+      "low_conf_mult": 0.8,
+      "markets": "core4",
+      "n": 9115,
+      "hit_rate": 0.5854
+    },
+    {
+      "conf_share": 0.8,
+      "z_cap": 2.0,
+      "low_conf_mult": 1.0,
+      "markets": "core4",
+      "n": 9115,
+      "hit_rate": 0.5854
+    },
+    {
+      "conf_share": 0.8,
+      "z_cap": 2.0,
+      "low_conf_mult": 0.8,
+      "markets": "all",
+      "n": 9115,
+      "hit_rate": 0.5852
+    }
+  ],
+  "ship_for_2026": {
+    "conf_share": 0.8,
+    "z_cap": 1.5,
+    "low_conf_mult": 0.6,
+    "markets": "core4",
+    "n": 9115,
+    "hit_rate": 0.5884
+  },
+  "grid_size": 90,
+  "note": "walk_forward rows are OUT-OF-SAMPLE (config chosen on prior seasons only); pooled_top10 is in-sample across 2019-2025 and shown for transparency, with ship_for_2026 = pooled argmax. Directional hit rate at synthetic lines; breakeven proxy 52.38%."
+}

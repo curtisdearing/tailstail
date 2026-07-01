@@ -494,7 +494,19 @@ def main() -> None:
     ap.add_argument("--resolve-clv", action="store_true", help="post-slate CLV resolution")
     ap.add_argument("--grade", action="store_true",
                     help="grade a completed week + update the learning loop")
+    ap.add_argument("--no-refresh", action="store_true",
+                    help="skip the automatic current-season data ingest")
     args = ap.parse_args()
+
+    if args.mode == "live" and not args.no_refresh:
+        from nflvalue import ingest
+        r = ingest.refresh()
+        print(f"[ingest] season {r['season']}: pbp_rows={r['pbp_rows']} "
+              f"sched_rows={r['sched_rows']} stale={r['stale']}"
+              + (f" errors={r['errors']}" if r["errors"] else ""))
+        if r["stale"]:
+            print("[ingest] WARNING: serving cached data; the freshness gate "
+                  "and report banners reflect anything load-bearing that's missing.")
 
     if args.grade:
         res = run_grade(args.season, args.week)

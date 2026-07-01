@@ -68,7 +68,10 @@ MIN_SD_HISTORY = 30        # walk-forward residuals needed before trusting a mar
 # Schedule / slate
 # --------------------------------------------------------------------------- #
 def load_schedules(path: Optional[str] = None) -> pd.DataFrame:
-    return pd.read_parquet(path or SCHEDULES_PATH)
+    if path is not None:
+        return pd.read_parquet(path)
+    from . import ingest
+    return ingest.load_all_schedules()   # base 2019-2023 + everything ingested since
 
 
 def games_for_week(season: int, week: int, schedules: Optional[pd.DataFrame] = None) -> pd.DataFrame:
@@ -105,9 +108,18 @@ class WeekInputs:
 
 
 def build_week_inputs(pbp: Optional[pd.DataFrame] = None,
-                      schedules: Optional[pd.DataFrame] = None) -> WeekInputs:
+                      schedules: Optional[pd.DataFrame] = None,
+                      full_history: bool = True) -> WeekInputs:
+    """Build all walk-forward tables. ``full_history=True`` (default) composes
+    the frozen 2019-2023 base with every season ingested since
+    (``nflvalue.ingest``); False keeps the base-only behavior the Phase-1
+    backtests were reviewed on."""
     if pbp is None:
-        pbp = load_pbp()
+        if full_history:
+            from . import ingest
+            pbp = ingest.load_all_pbp()
+        else:
+            pbp = load_pbp()
     return WeekInputs(
         pw=build_player_week(pbp),
         opd=build_opp_pos_def(pbp),

@@ -147,3 +147,19 @@ reversible; config keys are noted where one exists.
   from this run onward (baseline commit = pre-existing Phase 1A/1B-1 state).
 - `historical/sleeper_players.parquet` (sleeper_id↔gsis map, 3,893 rows) was
   recorded live during the 1B build and is committed as a cache.
+
+## Hands-off ingest + weight tuning (2026-07-01, user-requested)
+
+- `nflvalue/ingest.py`: live runs auto-refresh current-season pbp/schedules/
+  rosters (per-season parquet caches; frozen 2019-2023 base untouched);
+  failures degrade loudly to cache, never silently. `--no-refresh` to skip.
+- Weight tuning is WALK-FORWARD (tune_weights.py): each season's config chosen
+  only from prior seasons, scored out-of-sample (57.5–59.5%/season). Shipped
+  2026 config = walk-forward majority: conf_share 0.8 → weights
+  {edge .5, confidence .4, matchup .1}, z_cap 1.5, low_confidence_mult 0.8,
+  all markets ("core4" beat "all" pooled by 0.1pt — inside noise; keeping
+  TD/attempts preserves live-price optionality). In-sample pooled argmax is
+  reported for transparency but NOT what shipped.
+- Combined validation, 2025 replay at identical volume (synthetic-line
+  caveats apply): static default 56.5% → learning 58.5% → tuned+learning
+  59.9% overall; top-1 per game 58.8% → 64.0% → 64.7%.
