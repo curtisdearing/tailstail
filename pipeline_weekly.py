@@ -110,7 +110,16 @@ def _maybe_stamp_ml(cfg: Dict, cands: pd.DataFrame,
         print(f"[pipeline] ml_ranker enabled but no model at {path} — "
               "run `python3 ml_test.py --stage fit` after grading; using composite ranking")
         return cands
-    feats = mlrmod.build_features(cands, inputs.pw)
+    try:
+        from nflvalue.context_features import ContextPack
+        from nflvalue.sources import rosters as rostersmod
+        seasons = sorted(inputs.pw["season"].unique().tolist())
+        pack = ContextPack(rostersmod.fetch_rosters_weekly(seasons), seasons,
+                           opd=inputs.opd)
+    except Exception as exc:  # noqa: BLE001 -- degrade to neutral stamps, loudly
+        print(f"[pipeline] context features unavailable ({exc}); using neutral values")
+        pack = None
+    feats = mlrmod.build_features(cands, inputs.pw, pack=pack)
     try:
         p = model.predict_p_over(feats)
     except mlrmod.WalkForwardViolation as exc:

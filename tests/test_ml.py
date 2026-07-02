@@ -40,6 +40,9 @@ def _frame(n=600, seasons=(2022, 2023), weeks=range(1, 10)):
                     "roll_ypt": 8.0, "roll_catch_rate": 0.65, "roll_ypc": 0.0,
                     "roll_ypa": 0.0, "team_margin": 2.0, "total_line": 45.0,
                     "home": 1, "low_confidence": False,
+                    "is_birthday_week": 0, "revenge_game": 0,
+                    "def_out_total": float(RNG.integers(0, 3)),
+                    "def_out_db": 0.0, "opp_epa_factor": 1.0,
                     # learnable signal: y correlates with z
                     "y_over": 1.0 if (z + RNG.normal(0, 0.8)) > 0 else 0.0,
                 })

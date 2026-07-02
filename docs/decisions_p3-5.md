@@ -190,3 +190,24 @@ reversible; config keys are noted where one exists.
   on raw beliefs; reliability/context multipliers remain display-consistent).
 - RF n_jobs=-1 is reproducible to one float ULP (parallel vote averaging);
   GBDT byte-reproducible. Seed 20260701.
+
+## Deterministic context features (2026-07-01, user-requested)
+
+- "Base projections on birthdays, revenge, defensive injuries" implemented as
+  FACTS, not news: DOBs (nflverse load_players), roster-history former teams
+  (≥3 weeks, walk-forward, current team excluded), official injury-report
+  Out/Doubtful counts for the OPPOSING defense (total + DB-only). All enter
+  as ML-ranker features (the classifier weights them from outcomes) and as
+  context-panel lines feeding the context_ledger; the deterministic composite
+  still never scores them.
+- Empirical answers, 2019–2025 candidates (n=73,925): birthday weeks
+  (n=2,275) over-rate 36.3% vs 36.6% baseline — nothing; revenge (n=1,111)
+  33.7% vs 36.7% — if anything slightly negative; 2+ secondary players Out
+  (n=3,540 pass-family rows) 43.9% vs 41.4% — real, directionally sensible.
+- Ablation (GBDT OOS): 2025 flat (67.1%→67.1%, log-loss .62942→.62846);
+  2024 +0.4pt (63.2%→63.6%). Features kept: free, def-outs earns it, the
+  rest is now measured instead of mythologized.
+- Correction to the design doc: nflverse injuries data is empirically
+  available through 2025 via nflreadpy (the FEED concern stands for live
+  T-90; ESPN remains the live backstop). Ingest now refreshes injuries +
+  players_meta each run.

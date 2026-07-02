@@ -217,11 +217,11 @@ def enumerate_candidates(
         team_to_game[g.home_team] = {"game_id": g.game_id, "opp": g.away_team,
                                      "margin": float(g.spread_line) if pd.notna(g.spread_line) else None,
                                      "home": True, "spread_line": g.spread_line,
-                                     "total_line": g.total_line}
+                                     "total_line": g.total_line, "gameday": g.gameday}
         team_to_game[g.away_team] = {"game_id": g.game_id, "opp": g.home_team,
                                      "margin": -float(g.spread_line) if pd.notna(g.spread_line) else None,
                                      "home": False, "spread_line": g.spread_line,
-                                     "total_line": g.total_line}
+                                     "total_line": g.total_line, "gameday": g.gameday}
 
     pw = inputs.pw
     if roster_mode == "as_played":
@@ -303,6 +303,7 @@ def enumerate_candidates(
                 "home": ginfo["home"], "matchup": ginfo["game_id"].split("_", 2)[-1].replace("_", " @ "),
                 "line_source": line_source, "prices": prices,
                 "spread_line": ginfo["spread_line"], "total_line": ginfo["total_line"],
+                "gameday": ginfo.get("gameday"),
                 "sd_source": ("walk_forward_residuals" if sd_by_market.get(market) else "default_fraction"),
             })
             out.append(proj)

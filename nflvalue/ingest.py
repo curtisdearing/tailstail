@@ -124,6 +124,16 @@ def refresh(season: Optional[int] = None, force: bool = False) -> Dict:
         errors.append(f"rosters {season}: {exc}")
         print(f"[ingest] roster refresh failed: {exc}")
 
+    # -- injury reports + player DOBs (context features) ---------------------- #
+    try:
+        from . import context_features as cf
+        if force or not os.path.exists(cf.PLAYERS_META):
+            cf.load_players_meta(refresh=True)
+        cf.load_injury_history([season], refresh=True)
+    except Exception as exc:  # noqa: BLE001
+        errors.append(f"context data {season}: {exc}")
+        print(f"[ingest] context data refresh failed: {exc}")
+
     return {"season": season, "pbp_rows": pbp_rows, "sched_rows": sched_rows,
             "stale": stale, "errors": errors}
 

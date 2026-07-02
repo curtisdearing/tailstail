@@ -49,10 +49,15 @@ TUNED = {"conf_share": 0.8, "z_cap": 1.5, "low_conf_mult": 0.8, "markets": "all"
 def build_frame(inputs: WeekInputs, seasons: List[int], append: bool) -> pd.DataFrame:
     import lean_backtest as lb
     from nflvalue.candidates import synthetic_lines
+    from nflvalue.context_features import ContextPack
+    from nflvalue.sources import rosters as rostersmod
 
     sd_map = lb.precompute_sds(inputs, list(MARKETS))
     synth_map = {m: synthetic_lines(inputs, m) for m in MARKETS}
     min_usage = (cfgmod.load_config().get("candidates") or {}).get("min_usage")
+    all_seasons = sorted(inputs.pw["season"].unique().tolist())
+    pack = ContextPack(rostersmod.fetch_rosters_weekly(all_seasons), all_seasons,
+                       opd=inputs.opd)
 
     chunks = []
     for season in seasons:
@@ -69,7 +74,7 @@ def build_frame(inputs: WeekInputs, seasons: List[int], append: bool) -> pd.Data
             if cands.empty:
                 continue
             actuals = lb._actuals_for_week(inputs.pw, season, wk)
-            feats = mlr.build_features(cands, inputs.pw)
+            feats = mlr.build_features(cands, inputs.pw, pack=pack)
             feats["y_over"] = mlr.label_over(feats, actuals)
             # baseline-composite fields (tune_weights conventions)
             feats["side"] = np.where(

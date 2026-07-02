@@ -57,16 +57,24 @@ NUMERIC_FEATURES = [
     "roll_ypt", "roll_catch_rate", "roll_ypc", "roll_ypa",
     # game context
     "team_margin", "total_line", "home", "week",
+    # deterministic personal/defensive context (context_features.py) -- the
+    # classifier decides their weight from outcomes; NaN = data unavailable
+    "is_birthday_week", "revenge_game", "def_out_total", "def_out_db",
+    "opp_epa_factor",
 ]
 
 
-def build_features(cands: pd.DataFrame, pw: pd.DataFrame) -> pd.DataFrame:
+def build_features(cands: pd.DataFrame, pw: pd.DataFrame,
+                   pack=None) -> pd.DataFrame:
     """Candidate frame + player_week join -> model-ready feature frame.
 
     Every input column is walk-forward by construction (candidate rows carry
     strictly-prior-week features; the pw join brings the SAME week's roll_*
-    columns, which are also prior-week by features.py's shift-then-roll)."""
-    f = cands.copy()
+    columns, which are also prior-week by features.py's shift-then-roll).
+    ``pack`` (context_features.ContextPack) adds birthday/revenge/defensive-
+    injury/opp-EPA features; None stamps neutral values."""
+    from .context_features import attach
+    f = attach(cands, pack)
     comps = f["components"].apply(lambda c: c or {})
     f["opp_factor"] = comps.apply(lambda c: c.get("opp_factor", 1.0)).astype(float)
     f["game_script"] = comps.apply(lambda c: c.get("game_script", 1.0)).astype(float)
