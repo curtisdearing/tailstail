@@ -110,8 +110,17 @@ def score_candidate(cand: Dict, weights: Optional[Dict[str, float]] = None,
 
     if yes_only:
         side = "over"  # rendered as YES; the only side a book quotes
-        edge_raw = (float(p_over) - fair["over"]) if (fair is not None and p_over is not None) else None
-        market_prob = fair["over"] if fair is not None else None
+        if fair is not None and p_over is not None:
+            edge_raw = float(p_over) - fair["over"]
+            market_prob = fair["over"]
+        elif (prices and prm["calibration_passed"] and prices.get("over")
+              and p_over is not None):
+            # one-sided market: no de-vig possible; compare against the RAW
+            # implied probability (vig included -> conservative, edge understated)
+            market_prob = oddsmath.implied_prob(float(prices["over"]))
+            edge_raw = float(p_over) - market_prob
+        else:
+            edge_raw, market_prob = None, None
     elif fair is not None and p_over is not None:
         edge_over = float(p_over) - fair["over"]
         edge_under = float(p_under) - fair["under"]

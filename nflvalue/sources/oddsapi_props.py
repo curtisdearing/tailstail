@@ -267,3 +267,41 @@ def pull_week_props(cfg: Dict, event_map: Dict[str, str], conn=None,
     return {"pulled": pulled, "skipped_budget": skipped_budget, "skipped_cap": skipped_cap,
             "rows_written": written, "credits_spent": spent,
             "budget_remaining": budget.remaining, "ts": ts}
+
+
+def resnap_lines(cfg: Dict, event_map: Dict[str, str], conn=None,
+                 fetch: Optional[Callable] = None, ts: Optional[str] = None) -> Dict:
+    """Second snapshot for SPECIFIC games (no rotation, no per-run cap — the
+    caller passes exactly the games that already have entry lines and kick
+    soon). This is what makes CLV resolvable: entry = Wednesday snapshot,
+    close = this pre-kickoff snapshot. Budget hard-stop still applies."""
+    fetch = fetch or get_json
+    conn = conn or dbmod.connect()
+    ob = cfg.get("odds_budget") or {}
+    budget = CreditBudget(conn, int(ob.get("monthly_credits", 500)),
+                          int(ob.get("reserve", 50)))
+    markets = [MARKET_TO_ODDS[m] for m in
+               (cfg.get("prop_markets_internal")
+                or ["receiving_yards", "receptions", "rushing_yards", "passing_yards", "anytime_td"])
+               if m in MARKET_TO_ODDS]
+    regions = str(cfg.get("regions", "us"))
+    cost = float(len(markets) * len(regions.split(",")))
+    ts = ts or stamp_now()
+    pulled, skipped, rows = [], [], []
+    for game_id, event_id in sorted(event_map.items()):
+        if not budget.can_spend(cost):
+            skipped.append(game_id)
+            continue
+        payload = fetch(f"{BASE}/sports/{SPORT}/events/{event_id}/odds", {
+            "apiKey": cfg.get("odds_api_key", ""), "regions": regions,
+            "markets": ",".join(markets), "oddsFormat": "decimal"})
+        headers = payload.pop("_headers", None) if isinstance(payload, dict) else None
+        budget.spend(cost, headers=headers)
+        for r in parse_event_props(payload, ts):
+            r["game_id"] = game_id
+            rows.append(r)
+        pulled.append(game_id)
+    written = dbmod.upsert(conn, "lines", rows,
+                           ["ts", "game_id", "book", "market", "player_name", "side"]) if rows else 0
+    return {"pulled": pulled, "skipped_budget": skipped, "rows_written": written,
+            "ts": ts, "budget_remaining": budget.remaining}

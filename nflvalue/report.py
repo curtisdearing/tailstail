@@ -79,13 +79,17 @@ def _side_label(lean: Dict) -> str:
 
 
 def _lean_row_md(lean: Dict) -> str:
+    # the Score column shows the RANKING score: the ML side-probability x100
+    # when the classifier ordered this list, else the composite
+    rank_score = lean.get("ml_score") if lean.get("ml_score") is not None \
+        else lean.get("composite", 0.0)
     return ("| {name} ({pos}, {team}) | {market} | {line} | **{side}** | {mean} | "
             "{conf:.2f} | {edge} | **{comp:.1f}** | {reason} |").format(
         name=lean.get("name"), pos=lean.get("pos"), team=lean.get("team"),
         market=str(lean.get("market")).replace("_", " "),
         line=_fmt_line(lean), side=_side_label(lean),
         mean=lean.get("mean"), conf=lean.get("confidence", 0.0),
-        edge=_fmt_edge(lean), comp=lean.get("composite", 0.0),
+        edge=_fmt_edge(lean), comp=float(rank_score),
         reason=_one_line_reason(lean),
     )
 

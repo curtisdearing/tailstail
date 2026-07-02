@@ -29,6 +29,24 @@ ET = ZoneInfo("America/New_York")
 T90_WINDOW_HOURS = 2.75      # refresh games kicking off within this window
 
 
+def ensure_dependencies() -> None:
+    """Scheduled-task sessions can start with a fresh sandbox: self-heal by
+    installing requirements when core imports are missing (evaluation catch —
+    without this, every scheduled run in a new sandbox would die on import)."""
+    try:
+        import pandas, numpy, scipy, sklearn, pyarrow  # noqa: F401
+    except ImportError:
+        import subprocess
+        root = str(Path(__file__).resolve().parents[1])
+        print("[auto] bootstrapping python dependencies (fresh sandbox)…")
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q",
+                        "--break-system-packages", "-r", f"{root}/requirements.txt"],
+                       check=False, timeout=600)
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q",
+                        "--break-system-packages", "nflreadpy"],
+                       check=False, timeout=600)
+
+
 def now_et() -> dt.datetime:
     return dt.datetime.now(ET)
 
@@ -99,8 +117,27 @@ def job_t90() -> int:
     conn = dbmod.connect()
     done = set(dbmod.query_df(conn, "SELECT DISTINCT game_id FROM leans WHERE clock='t90'")
                ["game_id"].tolist())
-    conn.close()
     cfg = cfgmod.load_config()
+
+    # CLOSING SNAPSHOT (evaluation catch): without a second pre-kick line
+    # pull, entry == close and CLV could never resolve — the kill-check
+    # would starve forever. Resnap exactly the games that have entry lines.
+    if cfg.get("odds_api_key"):
+        try:
+            from nflvalue.sources import oddsapi_props as oap
+            import pipeline_weekly as pwmod
+            have_lines = set(dbmod.query_df(
+                conn, "SELECT DISTINCT game_id FROM lines")["game_id"].tolist())
+            targets = [g.game_id for g in soon.itertuples(index=False)
+                       if g.game_id in have_lines]
+            if targets:
+                emap = pwmod.build_event_map(cfg, soon[soon.game_id.isin(targets)])
+                res = oap.resnap_lines(cfg, emap, conn=conn)
+                print(f"[auto] closing resnap: {len(res['pulled'])} game(s), "
+                      f"{res['rows_written']} rows, {res['budget_remaining']:.0f} credits left")
+        except Exception as exc:  # noqa: BLE001
+            print(f"[auto] closing resnap failed (CLV close may be stale): {exc}")
+    conn.close()
     from nflvalue.notify import resolve_webhook
     post_live = bool(cfg.get("discord_enabled") and resolve_webhook())
     inputs = None
@@ -148,6 +185,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--job", choices=["wed", "t90", "tuesday"], required=True)
     args = ap.parse_args()
+    ensure_dependencies()
     raise SystemExit({"wed": job_wed, "t90": job_t90, "tuesday": job_tuesday}[args.job]())
 
 

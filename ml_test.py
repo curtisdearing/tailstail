@@ -179,6 +179,46 @@ def eval_weekly(frame: pd.DataFrame, season: int, model_name: str = "gbdt") -> D
                         for w, g in leans.groupby("week")}}
 
 
+def augment_with_real_lines(frame: pd.DataFrame, conn=None) -> pd.DataFrame:
+    """SELF-UPDATING LABELS: as real sportsbook lines accrue live, graded
+    leans that had an odds_api line get RE-LABELED against that real line
+    (y = actual > real line) with the line-dependent features recomputed --
+    the model's training target migrates from the synthetic reference to the
+    actual betting market, week by week, automatically. Rows without a real
+    line keep the synthetic label. No real-line rows yet -> frame unchanged."""
+    from nflvalue import db as dbmod
+    try:
+        conn = conn or dbmod.connect()
+        real = dbmod.query_df(conn, """
+            SELECT o.season, o.week, o.player_id, o.market, o.actual, l.line AS real_line
+            FROM lean_outcomes o
+            JOIN leans l ON l.season=o.season AND l.week=o.week AND l.clock=o.clock
+                 AND l.game_id=o.game_id AND l.player_id=o.player_id AND l.market=o.market
+            WHERE l.line_source='odds_api' AND l.line IS NOT NULL
+        """)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[ml] real-line lookup unavailable ({exc}); synthetic labels only")
+        return frame
+    if real.empty:
+        return frame
+    merged = frame.merge(real, on=["season", "week", "player_id", "market"], how="left")
+    mask = merged["real_line"].notna()
+    n = int(mask.sum())
+    if n:
+        m = merged.loc[mask]
+        merged.loc[mask, "line"] = m["real_line"]
+        merged.loc[mask, "mean_minus_line"] = m["mean"] - m["real_line"]
+        merged.loc[mask, "sd_over_line"] = m["sd"] / m["real_line"].abs().clip(lower=1.0)
+        merged.loc[mask, "z"] = (m["mean"] - m["real_line"]) / m["sd"].clip(lower=1e-6)
+        is_td = m["market"] == "anytime_td"
+        merged.loc[mask, "y_over"] = np.where(
+            is_td, (m["actual"] >= 1.0).astype(float),
+            (m["actual"] > m["real_line"]).astype(float))
+        print(f"[ml] {n:,} rows re-labeled against REAL lines "
+              f"({n / len(merged):.1%} of training data and growing weekly)")
+    return merged.drop(columns=["actual", "real_line"])
+
+
 def _load_results() -> Dict:
     return cfgmod.load_json(EVAL_PATH, {"seasons": {}, "weekly": {}}) or {"seasons": {}, "weekly": {}}
 
@@ -208,6 +248,7 @@ def main() -> None:
     results = _load_results()
     if args.stage == "fit":
         # production fit: train on EVERYTHING graded so far, save for the pipeline
+        frame = augment_with_real_lines(frame)
         model_name = (args.models or ["rf"])[0]
         model = mlr.MLRanker(model=model_name).fit(frame, frame["y_over"])
         path = model.save()

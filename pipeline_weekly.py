@@ -92,6 +92,30 @@ def _players_frame(cands: pd.DataFrame) -> pd.DataFrame:
             .rename(columns={"name": "player_name"}))
 
 
+def _apply_forecast_weather(adv, slate: pd.DataFrame) -> None:
+    """Override the pack's (post-game, NaN-for-future) schedule weather with
+    live Open-Meteo forecasts for this slate's outdoor games (evaluation
+    catch: without this, the weather feature is dead all season)."""
+    try:
+        from build_ratings import ABBR
+        from nflvalue.sources.weather import forecast_for_game
+        for g in slate.itertuples(index=False):
+            wx = adv.weather.get(g.game_id, (None, None))
+            if wx[0] is not None and not pd.isna(wx[0]):
+                continue  # dome-neutralized or already known
+            commence = f"{g.gameday}T{(g.gametime or '13:00')}:00+00:00"
+            fc = (forecast_for_game(g.home_team, commence)
+                  or forecast_for_game(ABBR.get(g.home_team, g.home_team), commence))
+            if not fc:
+                continue
+            if fc.get("dome"):
+                adv.weather[g.game_id] = (70.0, 0.0)
+            elif fc.get("temp_f") is not None:
+                adv.weather[g.game_id] = (float(fc["temp_f"]), float(fc.get("wind_mph") or 0.0))
+    except Exception as exc:  # noqa: BLE001 -- forecast is enhancement, not load-bearing
+        print(f"[pipeline] forecast weather unavailable ({exc}); schedule values kept")
+
+
 _PACK_CACHE: Dict = {}
 
 
@@ -351,35 +375,10 @@ def run_week(season: int, week: int, mode: str = "historical", clock: str = "wed
             cands = cands[~cands["player_id"].isin(out_ids)].reset_index(drop=True)
             cands = candmod.apply_reallocation(cands, realloc)
 
-    # 2b. learning loop: walk-forward per-market corrections + (evidence-gated,
-    # human-promoted) context multipliers. All no-ops until weeks are graded.
-    # When the ML ranker is on, the bias-mean correction is SKIPPED -- the
-    # classifier was trained on raw deterministic beliefs and subsumes
-    # calibration; double-correcting would shift its features off-distribution.
-    ml_on = bool((cfg.get("ml_ranker") or {}).get("enabled"))
-    learn_cfg = {**{"enabled": True}, **(cfg.get("learning") or {})}
-    if learn_cfg.get("enabled") and not ml_on:
-        from nflvalue import context_study, prop_learning
-        adjustments = prop_learning.load_adjustments(conn, season, week)
-        cands = prop_learning.apply_to_candidates(cands, adjustments, enabled=True)
-        ctx_mults = context_study.enabled_multipliers(cfg, conn)
-        if ctx_mults:
-            cands = context_study.apply_context_multipliers(cands, conn, season, week, ctx_mults)
-
-    # 2c. stamp deterministic context/advanced features onto the candidates
-    # themselves (leans carry them -> panel + game notes render facts even
-    # when the ML layer is off or falls back)
-    if mode == "live" and not cands.empty:
-        pack, adv = _feature_packs(inputs)
-        from nflvalue.advanced_features import attach_neutral
-        from nflvalue.context_features import attach as ctx_attach
-        cands = ctx_attach(cands, pack)
-        cands = adv.attach(cands) if adv is not None else attach_neutral(cands)
-
-    # 2d. flag-gated ML ranking layer (see reports/ml_improvement_test.md)
-    cands = _maybe_stamp_ml(cfg, cands, inputs)
-
-    # 3. real prop lines (budgeted, rotating) -- optional
+    # 3. real prop lines (budgeted, rotating) -- pulled BEFORE any learning/
+    # feature/ML stamping so the re-enumerated frame keeps every layer.
+    # (Evaluation catch: the old order re-enumerated AFTER stamping, silently
+    # dropping ML/learning/context exactly when real lines existed.)
     prop_lines, line_note = None, None
     if live_odds and cfg.get("odds_api_key"):
         event_map = build_event_map(cfg, slate, list_events_fn=list_events_fn)
@@ -394,18 +393,52 @@ def run_week(season: int, week: int, mode: str = "historical", clock: str = "wed
                      f"{len(pull['skipped_budget'])} skipped by credit budget, "
                      f"{len(pull['skipped_cap'])} by per-run cap; "
                      f"{pull['budget_remaining']:.0f} credits left this month.")
+        if not prop_lines.empty:
+            cands = candmod.enumerate_candidates(
+                season, week, inputs=inputs,
+                min_usage=(cfg.get("candidates") or {}).get("min_usage"),
+                prop_lines=prop_lines, roster_mode=roster_mode)
+            out_ids = {pid for pid, s in statuses.items() if s["status"] == "OUT"}
+            if out_ids:
+                realloc = [avmod.reallocate_usage(inputs.pw, season, week, pid)
+                           for pid in sorted(out_ids)]
+                cands = cands[~cands["player_id"].isin(out_ids)].reset_index(drop=True)
+                cands = candmod.apply_reallocation(cands, realloc)
     elif live_odds:
         line_note = "live-odds requested but no odds_api_key configured — all games no_market."
 
-    # 3b. attach real lines to the (availability-filtered) candidate frame
-    if prop_lines is not None and not prop_lines.empty:
-        cands = candmod.enumerate_candidates(
-            season, week, inputs=inputs,
-            min_usage=(cfg.get("candidates") or {}).get("min_usage"),
-            prop_lines=prop_lines, roster_mode=roster_mode)
-        out_ids = {pid for pid, s in statuses.items() if s["status"] == "OUT"}
-        if out_ids:
-            cands = cands[~cands["player_id"].isin(out_ids)].reset_index(drop=True)
+    # 4a. learning loop: walk-forward per-market corrections + (evidence-gated,
+    # human-promoted) context multipliers. All no-ops until weeks are graded.
+    # When the ML ranker is on, the bias-mean correction is SKIPPED -- the
+    # classifier was trained on raw deterministic beliefs and subsumes
+    # calibration; double-correcting would shift its features off-distribution.
+    ml_on = bool((cfg.get("ml_ranker") or {}).get("enabled"))
+    learn_cfg = {**{"enabled": True}, **(cfg.get("learning") or {})}
+    if learn_cfg.get("enabled") and not ml_on:
+        from nflvalue import context_study, prop_learning
+        adjustments = prop_learning.load_adjustments(conn, season, week)
+        cands = prop_learning.apply_to_candidates(cands, adjustments, enabled=True)
+        ctx_mults = context_study.enabled_multipliers(cfg, conn)
+        if ctx_mults:
+            cands = context_study.apply_context_multipliers(cands, conn, season, week, ctx_mults)
+
+    # 4b. stamp deterministic context/advanced features onto the candidates
+    # (leans carry them -> panel + game notes render facts even when the ML
+    # layer is off or falls back). Live weather comes from the FORECAST
+    # (schedule temp/wind are observed post-game and NaN for future games).
+    if mode == "live" and not cands.empty:
+        pack, adv = _feature_packs(inputs)
+        from nflvalue.advanced_features import attach_neutral
+        from nflvalue.context_features import attach as ctx_attach
+        cands = ctx_attach(cands, pack)
+        if adv is not None:
+            _apply_forecast_weather(adv, slate)
+            cands = adv.attach(cands)
+        else:
+            cands = attach_neutral(cands)
+
+    # 4c. flag-gated ML ranking layer (see reports/ml_improvement_test.md)
+    cands = _maybe_stamp_ml(cfg, cands, inputs)
 
     # 4. rank + report (context panel via synthesis on the ranked leans)
     result = rptmod.generate(
@@ -441,6 +474,8 @@ def run_week(season: int, week: int, mode: str = "historical", clock: str = "wed
     with open(md_path, "w") as f:
         f.write(result["markdown"])
     result["md_path"] = md_path
+    from nflvalue.document import write_drop
+    result["drop_path"] = write_drop(result, result.get("contexts"))
     cfgmod.save_json(rptmod.WEEKLY_PROPS_JSON, {k: v for k, v in result.items() if k != "markdown"})
     rptmod.persist_leans(conn, season, week, clock, result["games"], result["as_of"])
 
@@ -477,6 +512,14 @@ def run_t90(season: int, week: int, game_id: str, mode: str = "live",
         conn.close()
         raise ValueError(f"no candidates for game {game_id} — check season/week/game_id")
 
+    # stamp context/advanced features + ML so t90 leans carry the same
+    # writeup facts and ranking as the Wednesday run
+    if mode == "live" and not cands.empty:
+        pack, adv = _feature_packs(inputs)
+        from nflvalue.advanced_features import attach_neutral
+        from nflvalue.context_features import attach as ctx_attach
+        cands = ctx_attach(cands, pack)
+        cands = adv.attach(cands) if adv is not None else attach_neutral(cands)
     cands = _maybe_stamp_ml(cfg, cands, inputs)
     live = gather_live_feeds(cfg, season, week, _players_frame(cands), clock="t90",
                              inject=inject_feeds)
@@ -510,6 +553,8 @@ def run_t90(season: int, week: int, game_id: str, mode: str = "live",
                                  top_n=int((cfg.get("shortlist") or {}).get("top_n", 5)),
                                  max_per_player=int((cfg.get("shortlist") or {})
                                                     .get("max_per_player", 2)))
+    from nflvalue.game_notes import attach_notes
+    attach_notes(games, cands2, inputs.schedules, season, week)
     contexts = {gm["game_id"]: slmod.build_context_panel(
         gm, availability=statuses, mode=mode) for gm in games}
 
@@ -529,6 +574,8 @@ def run_t90(season: int, week: int, game_id: str, mode: str = "live",
                "publish": g["publish"], "publish_reasons": g["reasons"],
                "mode": mode, "games": games, "contexts": contexts,
                "voided": voided, "md_path": md_path}
+    from nflvalue.document import write_drop
+    payload["drop_path"] = write_drop(payload, contexts)
     dash = update_dashboard(payload, conn)
     notice = None
     if discord:

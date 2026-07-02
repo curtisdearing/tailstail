@@ -117,6 +117,21 @@ def build_game_notes(game_id: str, game_cands: List[Dict],
         if q < 0.5:
             notes.append(f"{team}: projected starting QB threw only {q:.0%} of trailing "
                          "attempts — receiver histories discounted")
+
+    # mismatched matchups: extreme opponent-vs-position factors on this slate
+    mismatches: Dict[str, Tuple[float, str]] = {}
+    for c in game_cands:
+        pc = c.get("proj_components") or c.get("components") or {}
+        f = pc.get("opp_factor")
+        if f in (None, 1.0) or (isinstance(f, float) and np.isnan(f)):
+            continue
+        key = f"{c.get('pos')} ({c.get('team')}) vs {c.get('defteam')} D"
+        if abs(f - 1.0) > abs(mismatches.get(key, (1.0, ""))[0] - 1.0):
+            mismatches[key] = (float(f), c.get("market", ""))
+    hot = {k: v for k, v in mismatches.items() if v[0] >= 1.12 or v[0] <= 0.88}
+    for key, (f, _) in sorted(hot.items(), key=lambda x: -abs(x[1][0] - 1.0))[:3]:
+        direction = "soft" if f > 1.0 else "tough"
+        notes.append(f"Mismatch: {key} is {direction} ({(f-1)*100:+.0f}% vs league avg)")
     return notes
 
 

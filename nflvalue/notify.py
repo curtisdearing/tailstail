@@ -59,8 +59,9 @@ def _game_embed(game: Dict, context: Optional[Dict]) -> Dict:
         edge = (f"{l['edge']*100:+.1f}%" if l.get("edge") is not None else "no_market")
         synth = "" if l.get("line_source") == "odds_api" else "†"
         name = f"{l.get('name')} · {str(l.get('market','')).replace('_',' ')}"
+        rank_score = l.get("ml_score") if l.get("ml_score") is not None else l.get("composite")
         value = (f"**{_side_label(l)} {l.get('line')}{synth}** · proj {l.get('mean')} · "
-                 f"edge {edge} · score {l.get('composite')}\n{l.get('reason','')[:140]}")
+                 f"edge {edge} · score {rank_score}\n{l.get('reason','')[:140]}")
         fields.append({"name": name[:256], "value": value[:1024], "inline": False})
     desc_parts = []
     notes = game.get("notes") or []
