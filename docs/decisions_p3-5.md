@@ -211,3 +211,30 @@ reversible; config keys are noted where one exists.
   available through 2025 via nflreadpy (the FEED concern stands for live
   T-90; ESPN remains the live backstop). Ingest now refreshes injuries +
   players_meta each run.
+
+## Advanced process features (2026-07-01, user-requested spec)
+
+- Implemented per the user's PBP spec: neutral-situation PROE (1st/2nd down,
+  Q1-Q3, score ±7, wp 20-80% — nflverse `pass_oe`), early-down passing,
+  neutral pace (median snap gap ≤45s within drive), rolling EPA/play,
+  shotgun/no-huddle rates, team CPOE; NGS receiving (avg separation,
+  intended-air-yards share, YAC-above-expected; 2016+, 32% row coverage =
+  qualifying receivers); red-zone target/carry shares; O-line Out/Doubtful
+  counts; QB continuity (projected starter's share of trailing attempts —
+  schedule QB ids are recorded starters, effectively pre-game-knowable);
+  contract final-year flag (nflverse/OTC; specific bonus clauses aren't
+  structured free data → news keywords 'incentive/bonus/escalator' feed the
+  context_ledger instead); age from DOB; temp/wind from schedules (domes
+  neutralized 70F/0mph; HISTORICAL VALUES ARE OBSERVED, live uses forecast —
+  small train/serve mismatch, accepted + noted). PROE-vs-total edge left to
+  the GBDT as a learned interaction (it sees both columns).
+- **CAUGHT LEAK (the important lesson):** first build joined RZ/NGS rolls at
+  exact (season, week) keys, but those rows only EXIST for weeks a player had
+  RZ usage / NGS qualification — the NaN pattern itself revealed current-week
+  involvement. GBDT feasted: 2025 OOS jumped to an impossible 88.2%
+  (AUC .764). Fixed with `AsOfLookup` (strictly-before as-of joins; regression
+  test pins it) — a NaN now only ever means 'no prior history'.
+- Honest post-fix ablation (GBDT OOS): 2024 63.6%→65.7% (AUC .6312→.6332);
+  2025 67.1%→67.3% (AUC .6298→.6341, log-loss .62846→.62786), top-1 69.9%.
+  Artifact refit on the full feature set; ingest refreshes NGS + contracts +
+  extended pbp columns each run.

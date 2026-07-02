@@ -43,6 +43,8 @@ TAG_KEYWORDS = {
     "contract": "contract_year", "extension": "contract_year", "holdout": "contract_year",
     "baby": "new_baby", "born": "new_baby", "wedding": "wedding",
     "homecoming": "homecoming", "milestone": "milestone", "record": "milestone",
+    "incentive": "contract_incentive", "bonus": "contract_incentive",
+    "escalator": "contract_incentive",
 }
 
 

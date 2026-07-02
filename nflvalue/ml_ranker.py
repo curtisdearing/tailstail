@@ -63,18 +63,26 @@ NUMERIC_FEATURES = [
     "opp_epa_factor",
 ]
 
+# advanced process metrics (advanced_features.py): strategic aggression,
+# NGS, red-zone roles, O-line health, QB continuity, contract year, weather
+from .advanced_features import FEATURES as _ADV_FEATURES  # noqa: E402
+NUMERIC_FEATURES = NUMERIC_FEATURES + _ADV_FEATURES
+
 
 def build_features(cands: pd.DataFrame, pw: pd.DataFrame,
-                   pack=None) -> pd.DataFrame:
+                   pack=None, adv=None) -> pd.DataFrame:
     """Candidate frame + player_week join -> model-ready feature frame.
 
     Every input column is walk-forward by construction (candidate rows carry
     strictly-prior-week features; the pw join brings the SAME week's roll_*
     columns, which are also prior-week by features.py's shift-then-roll).
     ``pack`` (context_features.ContextPack) adds birthday/revenge/defensive-
-    injury/opp-EPA features; None stamps neutral values."""
+    injury/opp-EPA features; ``adv`` (advanced_features.AdvancedPack) adds
+    the process metrics. Either None stamps neutral values."""
+    from .advanced_features import attach_neutral
     from .context_features import attach
     f = attach(cands, pack)
+    f = adv.attach(f) if adv is not None else attach_neutral(f)
     comps = f["components"].apply(lambda c: c or {})
     f["opp_factor"] = comps.apply(lambda c: c.get("opp_factor", 1.0)).astype(float)
     f["game_script"] = comps.apply(lambda c: c.get("game_script", 1.0)).astype(float)

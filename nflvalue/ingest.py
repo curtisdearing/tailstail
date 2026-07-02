@@ -88,13 +88,15 @@ def refresh(season: Optional[int] = None, force: bool = False) -> Dict:
                 "errors": ["nflreadpy not installed -- run: pip install nflreadpy"]}
 
     # -- play-by-play: refresh current season, backfill any missing prior ---- #
+    from .advanced_features import EXT_PBP_COLUMNS
     need = [s for s in range(2024, season + 1)
             if force or s == season or not os.path.exists(_season_pbp_path(s))]
     for s in need:
         try:
             pbp = nfl.load_pbp(seasons=[s]).to_pandas()
             if len(pbp):
-                pbp[PBP_COLUMNS].to_parquet(_season_pbp_path(s), index=False)
+                cols = [c for c in EXT_PBP_COLUMNS if c in pbp.columns]
+                pbp[cols].to_parquet(_season_pbp_path(s), index=False)
                 if s == season:
                     pbp_rows = int(len(pbp))
         except Exception as exc:  # noqa: BLE001
@@ -133,6 +135,26 @@ def refresh(season: Optional[int] = None, force: bool = False) -> Dict:
     except Exception as exc:  # noqa: BLE001
         errors.append(f"context data {season}: {exc}")
         print(f"[ingest] context data refresh failed: {exc}")
+
+    # -- NGS weekly tracking metrics + contracts (advanced features) ---------- #
+    try:
+        for st in ("receiving", "passing"):
+            path = os.path.join(HIST, f"ngs_{st}.parquet")
+            cached = pd.read_parquet(path) if os.path.exists(path) else pd.DataFrame()
+            fresh = nfl.load_nextgen_stats(seasons=[season], stat_type=st).to_pandas()
+            fresh = fresh[fresh["week"] > 0]
+            if len(fresh):
+                merged = pd.concat([cached[cached["season"] != season] if len(cached) else cached,
+                                    fresh], ignore_index=True)
+                merged.to_parquet(path, index=False)
+        cpath = os.path.join(HIST, "contracts.parquet")
+        if force or not os.path.exists(cpath):
+            con = nfl.load_contracts().to_pandas()
+            con[["gsis_id", "player", "position", "year_signed", "years",
+                 "value", "apy", "is_active"]].to_parquet(cpath, index=False)
+    except Exception as exc:  # noqa: BLE001
+        errors.append(f"ngs/contracts {season}: {exc}")
+        print(f"[ingest] NGS/contracts refresh failed: {exc}")
 
     return {"season": season, "pbp_rows": pbp_rows, "sched_rows": sched_rows,
             "stale": stale, "errors": errors}

@@ -92,6 +92,33 @@ def _players_frame(cands: pd.DataFrame) -> pd.DataFrame:
             .rename(columns={"name": "player_name"}))
 
 
+_PACK_CACHE: Dict = {}
+
+
+def _feature_packs(inputs: candmod.WeekInputs):
+    """Context/advanced packs are expensive (~10s) and season-static: build
+    once per (seasons) signature per process; degrade to None loudly."""
+    key = tuple(sorted(int(s) for s in inputs.pw["season"].unique()))
+    if key in _PACK_CACHE:
+        return _PACK_CACHE[key]
+    try:
+        from nflvalue.context_features import ContextPack
+        from nflvalue.sources import rosters as rostersmod
+        pack = ContextPack(rostersmod.fetch_rosters_weekly(list(key)), list(key),
+                           opd=inputs.opd)
+    except Exception as exc:  # noqa: BLE001 -- degrade to neutral stamps, loudly
+        print(f"[pipeline] context features unavailable ({exc}); using neutral values")
+        pack = None
+    try:
+        from nflvalue.advanced_features import AdvancedPack
+        adv = AdvancedPack(schedules=inputs.schedules)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[pipeline] advanced features unavailable ({exc}); using neutral values")
+        adv = None
+    _PACK_CACHE[key] = (pack, adv)
+    return pack, adv
+
+
 def _maybe_stamp_ml(cfg: Dict, cands: pd.DataFrame,
                     inputs: candmod.WeekInputs) -> pd.DataFrame:
     """Flag-gated ML ranking (config "ml_ranker"): the trained classifier's
@@ -110,16 +137,8 @@ def _maybe_stamp_ml(cfg: Dict, cands: pd.DataFrame,
         print(f"[pipeline] ml_ranker enabled but no model at {path} — "
               "run `python3 ml_test.py --stage fit` after grading; using composite ranking")
         return cands
-    try:
-        from nflvalue.context_features import ContextPack
-        from nflvalue.sources import rosters as rostersmod
-        seasons = sorted(inputs.pw["season"].unique().tolist())
-        pack = ContextPack(rostersmod.fetch_rosters_weekly(seasons), seasons,
-                           opd=inputs.opd)
-    except Exception as exc:  # noqa: BLE001 -- degrade to neutral stamps, loudly
-        print(f"[pipeline] context features unavailable ({exc}); using neutral values")
-        pack = None
-    feats = mlrmod.build_features(cands, inputs.pw, pack=pack)
+    pack, adv = _feature_packs(inputs)
+    feats = mlrmod.build_features(cands, inputs.pw, pack=pack, adv=adv)
     try:
         p = model.predict_p_over(feats)
     except mlrmod.WalkForwardViolation as exc:

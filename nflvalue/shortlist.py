@@ -137,10 +137,13 @@ def build_context_panel(game_shortlist: Dict,
         pid, name = lean.get("player_id"), lean.get("name")
         items: List[str] = []
 
-        # deterministic context facts (birthday/revenge/defensive outs) --
-        # computed from DOBs, roster history, and injury reports, no news needed
+        # deterministic context facts (birthday/revenge/defensive outs,
+        # contract year, O-line health, wind, QB continuity) -- computed from
+        # fact tables, no news needed
+        from .advanced_features import panel_items as adv_panel_items
         from .context_features import panel_items
         items.extend(panel_items(lean))
+        items.extend(adv_panel_items(lean))
 
         if availability and pid in availability:
             a = availability[pid]

@@ -52,6 +52,11 @@ def _frame(n=600, seasons=(2022, 2023), weeks=range(1, 10)):
         f[f"mkt_{m}"] = (f["market"] == m).astype(int)
     for p in mlr.POSITIONS:
         f[f"pos_{p}"] = (f["pos"] == p).astype(int)
+    # future-proof: any numeric feature this synthetic frame doesn't model
+    # gets a neutral column (mirrors attach_neutral's behavior)
+    for col in mlr.feature_columns():
+        if col not in f.columns:
+            f[col] = 0.0
     return f
 
 
