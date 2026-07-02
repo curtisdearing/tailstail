@@ -62,15 +62,19 @@ def _game_embed(game: Dict, context: Optional[Dict]) -> Dict:
         value = (f"**{_side_label(l)} {l.get('line')}{synth}** · proj {l.get('mean')} · "
                  f"edge {edge} · score {l.get('composite')}\n{l.get('reason','')[:140]}")
         fields.append({"name": name[:256], "value": value[:1024], "inline": False})
-    top_ctx = ""
+    desc_parts = []
+    notes = game.get("notes") or []
+    if notes:
+        desc_parts.append("\n".join(f"• {n}" for n in notes[:7]))
     if context and context.get("entries"):
         first = context["entries"][0]
         if first["items"]:
-            top_ctx = f"\nContext (not scored): {first['name']} — {first['items'][0]}"[:200]
+            desc_parts.append(f"Context (not scored): {first['name']} — {first['items'][0]}"[:220])
+    desc_parts.append("† = synthetic reference line, not a market price")
     return {
         "title": f"{game.get('matchup')} — top {len(game.get('leans', []))} "
                  f"of {game.get('screened_n')} screened",
-        "description": (f"† = synthetic reference line, not a market price{top_ctx}")[:4096],
+        "description": "\n".join(desc_parts)[:4096],
         "fields": fields,
     }
 

@@ -366,7 +366,17 @@ def run_week(season: int, week: int, mode: str = "historical", clock: str = "wed
         if ctx_mults:
             cands = context_study.apply_context_multipliers(cands, conn, season, week, ctx_mults)
 
-    # 2c. flag-gated ML ranking layer (see reports/ml_improvement_test.md)
+    # 2c. stamp deterministic context/advanced features onto the candidates
+    # themselves (leans carry them -> panel + game notes render facts even
+    # when the ML layer is off or falls back)
+    if mode == "live" and not cands.empty:
+        pack, adv = _feature_packs(inputs)
+        from nflvalue.advanced_features import attach_neutral
+        from nflvalue.context_features import attach as ctx_attach
+        cands = ctx_attach(cands, pack)
+        cands = adv.attach(cands) if adv is not None else attach_neutral(cands)
+
+    # 2d. flag-gated ML ranking layer (see reports/ml_improvement_test.md)
     cands = _maybe_stamp_ml(cfg, cands, inputs)
 
     # 3. real prop lines (budgeted, rotating) -- optional
@@ -406,6 +416,8 @@ def run_week(season: int, week: int, mode: str = "historical", clock: str = "wed
         candidates_df=cands)
 
     if mode == "live":
+        from nflvalue.game_notes import attach_notes
+        attach_notes(result["games"], cands, inputs.schedules, season, week)
         syn = _synthesis_for_games(result["games"], statuses, sleeper_df,
                                    as_of, week, feeds_ts, news_by_player=news_by_player)
         notes = rptmod.load_manual_notes(conn, season, week)

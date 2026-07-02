@@ -200,3 +200,22 @@ Evidence: `reports/ml_improvement_test.md` (walk-forward OOS 2021–2025:
 GBDT 63.2–67.1%, RF 63.8–69.0% vs tuned composite 57.1–59.5% at synthetic
 lines — the caveat section there matters). Disable via config
 `ml_ranker.enabled=false` to fall back to the tuned composite instantly.
+
+## Fully scheduled (Cowork tasks — installed)
+
+Four scheduled tasks now run the whole loop automatically (they no-op cleanly
+in the offseason; the Cowork app must be open, or they fire on next launch):
+
+| Task | When (ET) | Does |
+|---|---|---|
+| nfl-props-wednesday-run | Wed ~10:00 | `auto_weekly.py --job wed` — ingest → leans + game notes → report/dashboard → Discord |
+| nfl-props-t90-sunday | Sun ~11:45 | `--job t90` — void inactives, re-rank early games |
+| nfl-props-t90-late-windows | Sun/Mon/Thu ~15:45+19:45 | `--job t90` — late slate + SNF/MNF/TNF |
+| nfl-props-tuesday-learn | Tue ~09:00 | `--job tuesday` — grade, CLV + kill-check, retrain ML |
+
+`scripts/auto_weekly.py` self-detects season/week from the schedules table —
+no variables to maintain. Discord posts go LIVE automatically once
+`DISCORD_WEBHOOK_URL` (or config.local.json) exists; until then runs are
+dry-run. Game notes (records, birthdays, revenge, contract-incentive watch,
+defensive/O-line outs, wind, QB continuity) render in the report and in each
+game's Discord embed — display-only, never scored.

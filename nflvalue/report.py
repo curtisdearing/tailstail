@@ -122,6 +122,12 @@ def render_markdown(season: int, week: int, games: List[Dict],
         lines += [
             f"## {g['matchup']}  ·  top {len(g['leans'])} of {g['screened_n']} screened",
             "",
+        ]
+        if g.get("notes"):
+            lines += ["**Game notes** *(display-only — never scored)*", ""]
+            lines += [f"- {n}" for n in g["notes"]]
+            lines += [""]
+        lines += [
             "| Player | Market | Line | Side | Proj | Conf | Edge | Composite | Why |",
             "|---|---|---|---|---|---|---|---|---|",
         ]

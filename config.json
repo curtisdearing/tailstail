@@ -34,7 +34,7 @@
   "candidates": {"min_usage": {"targets": 2.5, "carries": 5.0, "pass_attempts": 12.0}},
 
   "odds_budget": {"monthly_credits": 500, "reserve": 50},
-  "discord_enabled": false,
+  "discord_enabled": true,
   "rag": {"vectorstore_enabled": false, "row_cap": 200},
 
   "learning": {"enabled": true, "lr": 0.35, "bias_clip": 0.08,
