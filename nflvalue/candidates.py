@@ -335,6 +335,63 @@ REALLOC_EFF_FLOOR = 0.85
 BACKUP_QB_PASS_EFF_MULT = 0.92
 _PASS_FAMILY = ("receiving_yards", "receptions", "passing_yards")
 
+# Cross-position absence matrix (data/absence_matrix.json; pooled 2019-2025,
+# n=1,146-1,514 absent team-weeks per cause). The same-position volume shifts
+# are handled per-player by reallocate_usage's with/without splits; what THIS
+# encodes is the cross-market effect nothing else prices: the QB's passing
+# output when his skill-position leader sits (attempts x efficiency, pooled).
+ABSENCE_QB_MULT = {"WR": 0.921, "TE": 0.947, "RB": 0.971}
+_QB_MARKETS = ("passing_yards", "pass_attempts")
+
+
+def team_leaders(pw: pd.DataFrame, season: int, week: int) -> Dict:
+    """{(team, role): player_id} -- trailing-usage leader (>=30 touches)
+    strictly before (season, week); the measurement's leader definition."""
+    ucol = {"WR": "targets", "TE": "targets", "RB": "carries"}
+    hist = pw[((pw["season"] < season) |
+               ((pw["season"] == season) & (pw["week"] < week)))]
+    out: Dict = {}
+    for role, col in ucol.items():
+        d = hist[hist["role"] == role]
+        cum = d.groupby(["team", "player_id"])[col].sum().reset_index()
+        cum = cum[cum[col] >= 30].sort_values(col)
+        for r in cum.itertuples(index=False):
+            out[(r.team, role)] = r.player_id      # last write = max (sorted asc)
+    return out
+
+
+def apply_absence_qb_adjustment(cands: pd.DataFrame, pw: pd.DataFrame,
+                                season: int, week: int,
+                                out_player_ids: set) -> pd.DataFrame:
+    """Dampen a QB's passing markets when his team's WR1/TE1/RB1 is OUT
+    (measured cross-effects; multiplicative when several leaders sit,
+    floored at 0.85)."""
+    if cands.empty or not out_player_ids:
+        return cands
+    leaders = team_leaders(pw, season, week)
+    team_mult: Dict[str, float] = {}
+    for (team, role), pid in leaders.items():
+        if pid in out_player_ids:
+            team_mult[team] = max(0.85, team_mult.get(team, 1.0) * ABSENCE_QB_MULT[role])
+    if not team_mult:
+        return cands
+    from .projection import p_over as p_over_fn
+    cands = cands.copy()
+    mask = cands["market"].isin(_QB_MARKETS) & cands["team"].isin(team_mult)
+    if not mask.any():
+        return cands
+    cands.loc[mask, "absence_qb_mult"] = cands.loc[mask, "team"].map(team_mult)
+    cands.loc[mask, "mean"] = (cands.loc[mask, "mean"]
+                               * cands.loc[mask, "absence_qb_mult"]).round(3)
+    for i in cands.index[mask]:
+        line = cands.at[i, "line"]
+        if line is None or (isinstance(line, float) and math.isnan(line)):
+            continue
+        po = p_over_fn(cands.at[i, "mean"], cands.at[i, "sd"], float(line), cands.at[i, "dist"])
+        cands.at[i, "p_over"] = round(po, 4)
+        cands.at[i, "p_under"] = round(1 - po, 4)
+    return cands
+
 
 def apply_backup_qb_adjustment(cands: pd.DataFrame,
                                threshold: float = 0.5) -> pd.DataFrame:

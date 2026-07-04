@@ -1,0 +1,80 @@
+{
+ "provenance": "pooled 2019-2025 REG; leader = argmax trailing cum usage (>=30) carried forward from strictly-prior weeks; absent = no positive-usage row that week; targets ranked among ACTIVE players",
+ "matrix": {
+  "WR1_out->WR1_active": {
+   "vol_mult": 0.734,
+   "eff_mult": 0.975,
+   "n_absent": 1152
+  },
+  "WR1_out->WR2": {
+   "vol_mult": 0.844,
+   "eff_mult": 0.944,
+   "n_absent": 1149
+  },
+  "WR1_out->TE1": {
+   "vol_mult": 1.135,
+   "eff_mult": 1.007,
+   "n_absent": 1146
+  },
+  "WR1_out->RB1_active": {
+   "vol_mult": 0.958,
+   "eff_mult": 0.989,
+   "n_absent": 1152
+  },
+  "WR1_out->QB": {
+   "vol_mult": 0.949,
+   "eff_mult": 0.971,
+   "n_absent": 1152
+  },
+  "TE1_out->WR1_active": {
+   "vol_mult": 0.999,
+   "eff_mult": 0.978,
+   "n_absent": 1378
+  },
+  "TE1_out->WR2": {
+   "vol_mult": 1.03,
+   "eff_mult": 1.009,
+   "n_absent": 1377
+  },
+  "TE1_out->TE1": {
+   "vol_mult": 0.778,
+   "eff_mult": 0.998,
+   "n_absent": 1360
+  },
+  "TE1_out->RB1_active": {
+   "vol_mult": 1.048,
+   "eff_mult": 0.971,
+   "n_absent": 1378
+  },
+  "TE1_out->QB": {
+   "vol_mult": 0.973,
+   "eff_mult": 0.973,
+   "n_absent": 1378
+  },
+  "RB1_out->WR1_active": {
+   "vol_mult": 0.975,
+   "eff_mult": 0.98,
+   "n_absent": 1514
+  },
+  "RB1_out->WR2": {
+   "vol_mult": 0.981,
+   "eff_mult": 0.956,
+   "n_absent": 1511
+  },
+  "RB1_out->TE1": {
+   "vol_mult": 1.019,
+   "eff_mult": 0.981,
+   "n_absent": 1502
+  },
+  "RB1_out->RB1_active": {
+   "vol_mult": 0.817,
+   "eff_mult": 0.962,
+   "n_absent": 1514
+  },
+  "RB1_out->QB": {
+   "vol_mult": 0.995,
+   "eff_mult": 0.976,
+   "n_absent": 1514
+  }
+ }
+}

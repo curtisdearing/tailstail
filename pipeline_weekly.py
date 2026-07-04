@@ -457,8 +457,10 @@ def run_week(season: int, week: int, mode: str = "historical", clock: str = "wed
             cands = chem_neutral(cands)
         from nflvalue.ftn_features import attach_neutral as ftn_neutral
         cands = ftn.attach(cands) if ftn is not None else ftn_neutral(cands)
-        # measured second-order: backup QB -> pass-family efficiency x0.92
+        # measured second-order: backup QB -> pass-family efficiency x0.92;
+        # skill-leader absence -> QB passing markets (absence matrix)
         cands = candmod.apply_backup_qb_adjustment(cands)
+        cands = candmod.apply_absence_qb_adjustment(cands, inputs.pw, season, week, outs_now)
 
     # 4c. flag-gated ML ranking layer (see reports/ml_improvement_test.md)
     cands = _maybe_stamp_ml(cfg, cands, inputs)
