@@ -136,9 +136,13 @@ not presented as the final result.
    stages using final practice and game-status timestamps.
 3. Add in-season depth-chart snapshots with an as-of timestamp and explicit
    source-change handling for 2025 onward.
-4. Evaluate NGS passing, receiving, and rushing metrics as lagged talent priors,
+4. Study a separate long-term incumbent-vacancy cohort for reserve/IR and
+   multi-week roster absences. It must exclude traded/cut players, distinguish
+   the early and established replacement windows, and earn promotion through a
+   season-forward ablation rather than borrowing the short-notice injury effect.
+5. Evaluate NGS passing, receiving, and rushing metrics as lagged talent priors,
    with missing-source controls and position-specific ablations.
-5. Score decisions, not only projections: lineup points lost versus the best
+6. Score decisions, not only projections: lineup points lost versus the best
    available pregame choice, calibration by start threshold, and trade value
    under replacement-level uncertainty.
 

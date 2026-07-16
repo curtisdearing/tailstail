@@ -14,3 +14,4 @@ data/fantasy_latest.json
 reports/fantasy_model_card.json
 historical/fantasy/
 fantasy.html
+.DS_Store
