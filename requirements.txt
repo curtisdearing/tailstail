@@ -12,9 +12,8 @@ numpy>=1.23
 # negative binomial, Poisson survival functions) for p_over/p_under:
 scipy>=1.9
 
-# Needed for real player positions (nflvalue/sources/rosters.py, Phase 1B).
-# Only required to (re)build historical/rosters_weekly.parquet for NEW
-# seasons; the 2019-2023 cache already on disk works without it.
+# Needed for real player positions and the fantasy engine's official stats,
+# weekly roster, schedule, snap, injury, and expected-opportunity refresh.
 nflreadpy>=0.1
 
 # Phases 2-5 (composite ranker, weekly pipeline, odds client, CLV, Discord

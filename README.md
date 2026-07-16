@@ -32,6 +32,22 @@ python3 lean_backtest.py --season 2025 --learn                         # graded 
 python3 -m nflvalue.rag.nl2sql "why did we miss in week 14"            # query the warehouse
 ```
 
+Fantasy football is a separate consumer of the same pregame evidence. It fits
+position-specific Bayesian, gradient-boosting, random-forest, and
+gradient-descent models; simulates correlated player events; and translates the
+samples into custom scoring, rest-of-season lineups, and trades:
+
+```bash
+python -m nflvalue.fantasy.cli fetch --seasons 2019:2026
+python -m nflvalue.fantasy.cli build
+python -m nflvalue.fantasy.cli backtest --test-seasons 2023:2025
+python scripts/fantasy_weekly.py --season 2026 --week 1
+```
+
+Start with **[docs/FANTASY_ENGINE.md](docs/FANTASY_ENGINE.md)**. The measured
+season-forward result and its failure regimes are in
+**[reports/fantasy_model_search.md](reports/fantasy_model_search.md)**.
+
 Live setup: put `ODDS_API_KEY` and `DISCORD_WEBHOOK_URL` in the environment or
 gitignored `config.local.json`. Scheduling, budgets, weekly cadence:
 **[docs/phases_3-5.md](docs/phases_3-5.md)**.
@@ -61,6 +77,7 @@ marks missing integrations instead of presenting synthetic lines as live odds.
 | Delivery | `pipeline_weekly.py` (two-clock), `report.py`, `document.py` (HTML drop), `notify.py` (Discord), dashboard Weekly Leans tab |
 | Self-updating | `prop_learning.py` (grade→attribute→adjust), `context_study.py` (evidence-gated narrative tags), Tuesday ML retrain w/ real-line label migration |
 | Data plumbing | `ingest.py` (auto-refresh), `scripts/auto_weekly.py` (self-scheduling jobs) |
+| Fantasy | `nflvalue/fantasy/` (roster-first features, constrained ensemble, correlated event/season/trade simulation) |
 
 The original game-line dashboard this grew from still works:
 [docs/README_game_line_app.md](docs/README_game_line_app.md).
@@ -81,6 +98,9 @@ The original game-line dashboard this grew from still works:
   pregame-only, nested season-forward protocol.
 - **[PREMORTEM.md](PREMORTEM.md) / [PROP_SHORTLISTER_SPEC.md](PROP_SHORTLISTER_SPEC.md)** —
   the design contracts the code is held to.
+- **[docs/FANTASY_PREMORTEM.md](docs/FANTASY_PREMORTEM.md) / [docs/FANTASY_FACTOR_CATALOG.md](docs/FANTASY_FACTOR_CATALOG.md) / [docs/FANTASY_PROJECTION_METHODS.md](docs/FANTASY_PROJECTION_METHODS.md)** —
+  fantasy-specific failure gates, factor ledger, professional-method audit,
+  and admitted/rejected season-forward iterations.
 
 ## Honesty invariants (enforced by ~200 tests)
 
