@@ -1,0 +1,52 @@
+{
+ "schema_version": 1,
+ "generated": "2026-07-16 03:27 UTC",
+ "git_head": "9ee6293",
+ "holdout_policy": "tune on 2020-2024 walk-forward; 2025 evaluated once per lever at accept time",
+ "accept_gates": {
+  "fantasy_mae_points": -0.05,
+  "fantasy_rank_spearman": 0.01,
+  "sim_coverage_error_pp": -2.0,
+  "ranker_log_loss": -0.002
+ },
+ "inputs": {
+  "historical/historical_pbp.parquet": null,
+  "historical_lines.parquet": null,
+  "historical/rosters_weekly.parquet": null,
+  "historical/injuries.parquet": null,
+  "historical/players_meta.parquet": null,
+  "historical/fantasy/feature_frame.parquet": null,
+  "data/factor_frame.parquet": null,
+  "config.json": "49060b2d58282f0945efc3cc1db3a316490e8b4b037c9113b97c5362b6fc68ff"
+ },
+ "metrics": {
+  "fantasy_model_card": "not built yet (run: python -m nflvalue.fantasy.cli train)",
+  "fantasy_red_team_backtest": "not built yet (run: python -m nflvalue.fantasy.cli backtest)",
+  "fantasy_data_quality": {
+   "present": false
+  },
+  "factor_audit": {
+   "frame_rows": 116554,
+   "status": "research_only_summary",
+   "surviving_pregame": [
+    "RB1 officially out -> RB2 rushing yards",
+    "RB1 officially out -> RB2 anytime TD",
+    "Two-plus opponent DBs officially out -> QB passing yards",
+    "Post-bye -> WR receiving yards"
+   ]
+  },
+  "nested_projection": {
+   "conclusion": "No eligible factor-combination procedure beat its segment reference accuracy, no combination scored 100%, and no factor changes live scoring.",
+   "highest_eligible": {
+    "segment": "WR1 receiving yards",
+    "accuracy": 0.5836,
+    "outer_n": 281,
+    "selective_lift_pp": -0.28
+   }
+  },
+  "baselines_required": [
+   "trailing-mean (3-game rolling)",
+   "public consensus"
+  ]
+ }
+}
