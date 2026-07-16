@@ -29,7 +29,9 @@ jobs:
           tests/test_market_config.py
           tests/test_state_store.py
           tests/test_availability.py
+          tests/test_accuracy_protocol.py
           tests/test_clv_killcheck.py
+          tests/test_eval_harness.py
           tests/test_freshness.py
           tests/test_learning.py
           tests/test_notify_secrets_app.py
@@ -38,6 +40,7 @@ jobs:
           tests/test_refresh_preserves_history.py
           tests/test_sleeper.py
           tests/test_synthesis.py
+          tests/test_sanity_diff.py
           tests/test_fantasy_scoring.py
           tests/test_fantasy_features.py
           tests/test_fantasy_models.py

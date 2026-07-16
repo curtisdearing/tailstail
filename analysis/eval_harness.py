@@ -15,8 +15,8 @@ the audited CLIs (python -m nflvalue.fantasy.cli backtest/train, analysis/all_da
 Rerun those first when a lever changes the model, then this collector.
 
 Accept gates (pre-registered, accuracy_loop_plan.md): a lever is accepted
-only if it moves a primary metric by at least the gate on the 2025 holdout,
-evaluated once at accept time.
+only if it moves a primary metric by at least the gate at a declared 2025
+locked-regression checkpoint. Prospective 2026 predictions are the final judge.
 """
 from __future__ import annotations
 
@@ -34,14 +34,21 @@ INPUTS = [
     "historical/historical_pbp.parquet", "historical_lines.parquet",
     "historical/rosters_weekly.parquet", "historical/injuries.parquet",
     "historical/players_meta.parquet", "historical/fantasy/feature_frame.parquet",
-    "data/factor_frame.parquet", "config.json",
+    "data/factor_frame.parquet", "config.json", "analysis/accuracy_protocol.json",
 ]
 
 ACCEPT_GATES = {
     "fantasy_mae_points": -0.05,        # paired bootstrap p<0.10 on 2025 holdout
     "fantasy_rank_spearman": +0.01,
     "sim_coverage_error_pp": -2.0,      # PIT/interval calibration
+    "sim_undercoverage_penalty_pp": -1.0,
     "ranker_log_loss": -0.002,          # fablesfable-side gate, mirrored
+}
+
+RELEASE_THRESHOLDS = {
+    "nominal_interval_coverage": 0.80,
+    "sanity_top10_overlap_min": 0.50,
+    "minimum_probability_of_improvement": 0.90,
 }
 
 
@@ -78,6 +85,10 @@ def collect() -> dict:
     card = jload("reports/fantasy_model_card.json", {}) or {}
     red = jload("reports/fantasy_red_team.json", {}) or {}
     quality = jload("reports/fantasy_data_quality.json", {}) or {}
+    mc = jload("reports/fantasy_monte_carlo_history.json", {}) or {}
+    calibrated = (mc.get("methods") or {}).get("calibrated_monte_carlo") or {}
+    coverage = calibrated.get("coverage80")
+    nominal = RELEASE_THRESHOLDS["nominal_interval_coverage"]
 
     metrics = {
         "fantasy_model_card": card or "not built yet (run: python -m nflvalue.fantasy.cli train)",
@@ -92,6 +103,21 @@ def collect() -> dict:
         "nested_projection": {
             "conclusion": nested.get("conclusion"),
             "highest_eligible": nested.get("highest_eligible_accuracy"),
+        },
+        "simulation_calibration": {
+            "n": calibrated.get("n"),
+            "nominal_coverage": nominal,
+            "observed_coverage": coverage,
+            "absolute_coverage_error_pp": (
+                round(abs(float(coverage) - nominal) * 100, 4)
+                if coverage is not None else None
+            ),
+            "undercoverage_penalty_pp": (
+                round(max(nominal - float(coverage), 0.0) * 100, 4)
+                if coverage is not None else None
+            ),
+            "mean_interval_width": calibrated.get("mean_interval_width"),
+            "release_gate": mc.get("release_gate"),
         },
         "baselines_required": ["trailing-mean (3-game rolling)", "public consensus"],
     }
@@ -124,11 +150,13 @@ def main() -> int:
         return 0
 
     registry = {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "git_head": git_head(),
-        "holdout_policy": "tune on 2020-2024 walk-forward; 2025 evaluated once per lever at accept time",
+        "holdout_policy": "tune on 2020-2024 walk-forward; 2025 is a locked regression checkpoint; 2026 prospective predictions are final",
         "accept_gates": ACCEPT_GATES,
+        "release_thresholds": RELEASE_THRESHOLDS,
+        "protocol": jload("analysis/accuracy_protocol.json", {}),
         "inputs": inputs,
         "metrics": collect(),
     }
@@ -148,6 +176,10 @@ def main() -> int:
     fa = m.get("factor_audit") or {}
     print(f"  factor audit: {fa.get('frame_rows')} rows, surviving pregame: {len(fa.get('surviving_pregame') or [])}")
     print(f"  nested: {(m.get('nested_projection') or {}).get('conclusion')}")
+    sc = m.get("simulation_calibration") or {}
+    print(f"  simulation 80% interval: observed {sc.get('observed_coverage')} "
+          f"absolute error {sc.get('absolute_coverage_error_pp')}pp "
+          f"undercoverage penalty {sc.get('undercoverage_penalty_pp')}pp")
     return 0
 
 
