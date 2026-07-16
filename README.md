@@ -1,4 +1,34 @@
-# NFL Prop Lean Screener
+# tailstail — fantasy football projections & simulation
+
+Fantasy-football consumer of the shared NFL data engine: player stat
+distributions rescorable for PPR / half-PPR / standard / custom rules,
+weekly lineups, rest-of-season value, waivers, and trades. It ranks no bets
+and never uses fantasy consensus as a training target. The gambling model
+lives in its sister repo, [fablesfable](https://github.com/curtisdearing/fablesfable);
+the two share the nflverse data layer, walk-forward feature discipline, and
+weekly automation.
+
+## Quickstart (fantasy engine)
+
+```
+pip install -r requirements.txt
+python -m nflvalue.fantasy.cli fetch --seasons 2019:2026   # official tables
+python -m nflvalue.fantasy.cli build                       # roster-first feature frame
+python -m nflvalue.fantasy.cli backtest --test-seasons 2023:2025
+python -m nflvalue.fantasy.cli train
+python -m nflvalue.fantasy.cli project --season 2026 --week 1
+python -m nflvalue.fantasy.cli simulate --season 2026 --week 1 --simulations 10000
+```
+
+Full engine documentation: **[docs/FANTASY_ENGINE.md](docs/FANTASY_ENGINE.md)**,
+factor catalog: **[docs/FANTASY_FACTOR_CATALOG.md](docs/FANTASY_FACTOR_CATALOG.md)**,
+failure-mode premortem: **[docs/FANTASY_PREMORTEM.md](docs/FANTASY_PREMORTEM.md)**.
+Weekly automation: `.github/workflows/fantasy-weekly.yml` (plus the shared
+`live-weekly.yml` inherited from the engine).
+
+---
+
+# Shared engine (inherited from fablesfable): NFL Prop Lean Screener
 
 A fully automated, free-data NFL player-prop research tool. Every Wednesday in
 season it ranks the **top 5 value leans for every game** — deterministic
