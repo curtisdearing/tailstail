@@ -81,6 +81,7 @@ Read:
 - [Historical Monte Carlo audit](reports/fantasy_monte_carlo_history.md)
 - [Contrarian engineering review and execution plan](reports/fantasy_engineering_review.md)
 - [Reproducible factor audit](reports/all_data_factor_audit.md)
+- [Preregistered 2026 accuracy protocol](docs/ACCURACY_PROTOCOL.md)
 
 ## Honesty invariants
 
