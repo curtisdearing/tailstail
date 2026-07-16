@@ -38,3 +38,8 @@ jobs:
           tests/test_refresh_preserves_history.py
           tests/test_sleeper.py
           tests/test_synthesis.py
+          tests/test_fantasy_scoring.py
+          tests/test_fantasy_features.py
+          tests/test_fantasy_models.py
+          tests/test_fantasy_simulation.py
+          tests/test_fantasy_season.py

@@ -10,3 +10,7 @@ data/*.db-journal
 # secrets (webhooks, API keys) live here — NEVER tracked
 config.local.json
 data/*.joblib
+data/fantasy_latest.json
+reports/fantasy_model_card.json
+historical/fantasy/
+fantasy.html
