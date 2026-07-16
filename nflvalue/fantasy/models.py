@@ -15,6 +15,16 @@ from scipy.optimize import minimize
 
 from .config import ModelConfig, ScoringRules
 from .features import model_features
+from .recalibration import (
+    SCALE_COLUMN,
+    SHOCK_COMBINED_COLUMN,
+    SHOCK_DECREASE_COLUMN,
+    SHOCK_INCREASE_COLUMN,
+    ShockDispersionScaler,
+    apply_dispersion_scaling,
+    combine_shock_probability,
+    fit_shock_dispersion_scaler,
+)
 
 
 @dataclass
@@ -36,6 +46,7 @@ class FantasyEnsemble:
     trained_at: str
     training_seasons: list[int]
     target: str = "fantasy_points"
+    shock_scaler: dict[str, Any] | None = None
 
     def predict(self, frame: pd.DataFrame) -> pd.DataFrame:
         missing = sorted(set(self.feature_columns) - set(frame.columns))
@@ -63,17 +74,7 @@ class FantasyEnsemble:
             center = np.clip(center, floor, 60.0)
             disagreement = np.std(base, axis=1)
             lower_q, upper_q = artifact.residual_quantiles
-            role_short = pd.to_numeric(out.loc[mask]["pre_opportunities_ewm4"], errors="coerce")
-            if "pre_opportunities_ewm8" in out:
-                role_long = pd.to_numeric(out.loc[mask]["pre_opportunities_ewm8"], errors="coerce")
-            else:
-                role_long = role_short.copy()
-            role_volatility = ((role_short - role_long).abs() / (role_long.abs() + 2.0)).fillna(0.0).clip(0, 2)
-            injury = (
-                pd.to_numeric(out.loc[mask].get("injury_questionable"), errors="coerce").fillna(0.0)
-                + pd.to_numeric(out.loc[mask].get("practice_dnp"), errors="coerce").fillna(0.0)
-            ).clip(0, 1)
-            interval_scale = 1.0 + 0.35 * role_volatility.to_numpy() + 0.15 * injury.to_numpy()
+            interval_scale = _interval_heuristic_scale(out.loc[mask])
             lower = center + lower_q * interval_scale
             upper = center + upper_q * interval_scale
             inactive = (
@@ -88,6 +89,14 @@ class FantasyEnsemble:
             out.loc[mask, "projection_lower80"] = lower
             out.loc[mask, "projection_upper80"] = upper
             out.loc[mask, "projection_model_sd"] = disagreement
+        scaler_payload = getattr(self, "shock_scaler", None)
+        if scaler_payload:
+            probability = combine_shock_probability(out)
+            if probability.notna().any():
+                out[SHOCK_COMBINED_COLUMN] = probability
+                out["projection_lower80_base"] = out["projection_lower80"]
+                out["projection_upper80_base"] = out["projection_upper80"]
+                apply_dispersion_scaling(out, ShockDispersionScaler.from_dict(scaler_payload))
         return out
 
     def save(self, path: str | Path) -> None:
@@ -118,6 +127,7 @@ class FantasyEnsemble:
             "feature_count": len(self.feature_columns),
             "config": self.config,
             "scoring": self.scoring,
+            "shock_scaler": getattr(self, "shock_scaler", None),
             "positions": {
                 position: {
                     "weights": artifact.weights,
@@ -133,6 +143,22 @@ class FantasyEnsemble:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(self.model_card(), indent=2, sort_keys=True) + "\n")
+
+
+def _interval_heuristic_scale(rows: pd.DataFrame) -> np.ndarray:
+    """Pre-shock heuristic width multiplier shared by predict and OOF fitting."""
+
+    role_short = pd.to_numeric(rows["pre_opportunities_ewm4"], errors="coerce")
+    if "pre_opportunities_ewm8" in rows:
+        role_long = pd.to_numeric(rows["pre_opportunities_ewm8"], errors="coerce")
+    else:
+        role_long = role_short.copy()
+    role_volatility = ((role_short - role_long).abs() / (role_long.abs() + 2.0)).fillna(0.0).clip(0, 2)
+    injury = (
+        pd.to_numeric(rows.get("injury_questionable"), errors="coerce").fillna(0.0)
+        + pd.to_numeric(rows.get("practice_dnp"), errors="coerce").fillna(0.0)
+    ).clip(0, 1)
+    return 1.0 + 0.35 * role_volatility.to_numpy() + 0.15 * injury.to_numpy()
 
 
 def _make_estimator(name: str, config: ModelConfig):
@@ -259,6 +285,7 @@ def fit_ensemble(
     config: ModelConfig | None = None,
     scoring: ScoringRules | None = None,
     target: str = "fantasy_points",
+    diagnostics: dict | None = None,
 ) -> FantasyEnsemble:
     """Fit position models using multi-season out-of-fold stack weights."""
 
@@ -282,6 +309,7 @@ def fit_ensemble(
         raise ValueError("insufficient eligible history; need multiple seasons and more training rows")
     position_models: dict[str, PositionModel] = {}
     families = list(cfg.model_families)
+    oof_records: list[pd.DataFrame] = []
 
     for position in cfg.positions:
         data = eligible[eligible["position"].eq(position)].copy()
@@ -292,6 +320,7 @@ def fit_ensemble(
         validation_seasons = candidates[-cfg.stack_validation_seasons:]
         oof_actual: list[np.ndarray] = []
         oof_by_family: dict[str, list[np.ndarray]] = {name: [] for name in families}
+        oof_slices: list[pd.DataFrame] = []
 
         for validation_season in validation_seasons:
             train = data[data["season"].astype(int) < validation_season]
@@ -299,6 +328,7 @@ def fit_ensemble(
             if len(train) < cfg.min_position_rows or len(validation) < 10:
                 continue
             oof_actual.append(validation[target].to_numpy(dtype=float))
+            oof_slices.append(validation)
             for family in families:
                 estimator = _make_estimator(family, cfg)
                 with warnings.catch_warnings():
@@ -318,6 +348,33 @@ def fit_ensemble(
             float(np.quantile(residual, alpha / 2)),
             float(np.quantile(residual, 1 - alpha / 2)),
         )
+        oof_slice = pd.concat(oof_slices, ignore_index=True)
+        oof_floor = -4.0 if position == "QB" else -2.0
+        oof_center = np.clip(stacked, oof_floor, 60.0)
+        oof_heuristic = _interval_heuristic_scale(oof_slice)
+        oof_record = pd.DataFrame({
+            "position": position,
+            "fantasy_points": actual,
+            "projection_mean": oof_center,
+            "projection_lower80": oof_center + residual_quantiles[0] * oof_heuristic,
+            "projection_upper80": oof_center + residual_quantiles[1] * oof_heuristic,
+            SHOCK_COMBINED_COLUMN: combine_shock_probability(oof_slice).to_numpy(),
+        })
+        for extra_column in (
+            SHOCK_INCREASE_COLUMN, SHOCK_DECREASE_COLUMN,
+            "opportunities", "pre_opportunities_ewm4",
+        ):
+            if extra_column in oof_slice:
+                oof_record[extra_column] = pd.to_numeric(
+                    oof_slice[extra_column], errors="coerce"
+                ).to_numpy()
+        if "season" in oof_slice:
+            oof_record["season"] = pd.to_numeric(oof_slice["season"], errors="coerce").to_numpy()
+        inactive = np.zeros(len(oof_slice), dtype=bool)
+        for column in ("status_inactive", "injury_out"):
+            if column in oof_slice:
+                inactive |= pd.to_numeric(oof_slice[column], errors="coerce").fillna(0).eq(1).to_numpy()
+        oof_records.append(oof_record.loc[~inactive])
         validation_metrics = {
             family: _metrics(actual, matrix[:, index])
             for index, family in enumerate(families)
@@ -342,6 +399,15 @@ def fit_ensemble(
 
     if not position_models:
         raise ValueError("no position model could be trained")
+    shock_scaler_payload = None
+    pooled_oof = pd.concat(oof_records, ignore_index=True) if oof_records else pd.DataFrame()
+    if not pooled_oof.empty and pooled_oof[SHOCK_COMBINED_COLUMN].notna().any():
+        fitted_scaler = fit_shock_dispersion_scaler(pooled_oof, nominal=1.0 - cfg.conformal_alpha)
+        if fitted_scaler is not None:
+            shock_scaler_payload = fitted_scaler.to_dict()
+    if diagnostics is not None:
+        diagnostics["oof"] = pooled_oof
+        diagnostics["shock_scaler"] = shock_scaler_payload
     return FantasyEnsemble(
         feature_columns=features,
         positions=position_models,
@@ -350,6 +416,7 @@ def fit_ensemble(
         trained_at=datetime.now(timezone.utc).isoformat(),
         training_seasons=seasons,
         target=target,
+        shock_scaler=shock_scaler_payload,
     )
 
 
@@ -374,14 +441,23 @@ def season_forward_backtest(
             continue
         artifact = fit_ensemble(train, config=cfg, scoring=scoring)
         projected = artifact.predict(test)
-        predictions.append(projected[[
+        columns = [
             "season", "week", "player_id", "player_name", "position", "team",
             "fantasy_points", "projection_mean", "projection_lower80",
             "projection_upper80", "pre_fantasy_points_ewm4",
             "pre_expected_points_ewm4", "total_tds", "opportunities",
             "pre_opportunities_ewm4", "team_changed", "qb_changed",
             "injury_questionable", "practice_dnp",
-        ]])
+        ]
+        columns += [
+            column
+            for column in (
+                SHOCK_COMBINED_COLUMN, SHOCK_INCREASE_COLUMN, SHOCK_DECREASE_COLUMN,
+                SCALE_COLUMN, "projection_lower80_base", "projection_upper80_base",
+            )
+            if column in projected.columns
+        ]
+        predictions.append(projected[columns])
     if not predictions:
         raise ValueError("no season-forward predictions were produced")
     output = pd.concat(predictions, ignore_index=True)

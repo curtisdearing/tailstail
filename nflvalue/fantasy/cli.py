@@ -14,6 +14,7 @@ from .config import ModelConfig, ScoringRules, SimulationConfig
 from .data import HistoricalData, fetch_historical
 from .features import build_feature_frame, frame_quality_report
 from .models import FantasyEnsemble, fit_ensemble, season_forward_backtest
+from .recalibration import attach_shock_probabilities, load_shock_table
 from .simulation import simulate_week
 
 
@@ -63,6 +64,7 @@ def build_parser() -> argparse.ArgumentParser:
     train.add_argument("--model-card", default="reports/fantasy_model_card.json")
     train.add_argument("--scoring", choices=["ppr", "half_ppr", "standard"], default="ppr")
     train.add_argument("--fast", action="store_true")
+    train.add_argument("--shock-probabilities", default=None, help="optional pregame role-shock probability parquet (season, week, player_id, p_increase*/p_decrease*)")
 
     backtest = sub.add_parser("backtest", help="run untouched season-forward evaluation")
     backtest.add_argument("--frame", default="historical/fantasy/feature_frame.parquet")
@@ -71,6 +73,7 @@ def build_parser() -> argparse.ArgumentParser:
     backtest.add_argument("--report", default="reports/fantasy_red_team.json")
     backtest.add_argument("--scoring", choices=["ppr", "half_ppr", "standard"], default="ppr")
     backtest.add_argument("--full", action="store_true", help="use production-size learners")
+    backtest.add_argument("--shock-probabilities", default=None, help="optional pregame role-shock probability parquet (season, week, player_id, p_increase*/p_decrease*)")
 
     project = sub.add_parser("project", help="project one season/week snapshot")
     project.add_argument("--frame", default="historical/fantasy/feature_frame.parquet")
@@ -78,6 +81,7 @@ def build_parser() -> argparse.ArgumentParser:
     project.add_argument("--season", type=int, required=True)
     project.add_argument("--week", type=int, required=True)
     project.add_argument("--output", default="data/fantasy_weekly_projections.json")
+    project.add_argument("--shock-probabilities", default=None, help="optional pregame role-shock probability parquet (season, week, player_id, p_increase*/p_decrease*)")
 
     simulate = sub.add_parser("simulate", help="run correlated event Monte Carlo for one week")
     simulate.add_argument("--frame", default="historical/fantasy/feature_frame.parquet")
@@ -89,6 +93,7 @@ def build_parser() -> argparse.ArgumentParser:
     simulate.add_argument("--scoring", choices=["ppr", "half_ppr", "standard"], default="ppr")
     simulate.add_argument("--output", default="data/fantasy_weekly_simulation.json")
     simulate.add_argument("--samples", default=None, help="optional Parquet path for player sample matrix")
+    simulate.add_argument("--shock-probabilities", default=None, help="optional pregame role-shock probability parquet (season, week, player_id, p_increase*/p_decrease*)")
     return parser
 
 
@@ -111,6 +116,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     frame = pd.read_parquet(args.frame)
+    shock_path = getattr(args, "shock_probabilities", None)
+    if shock_path:
+        frame = attach_shock_probabilities(frame, load_shock_table(shock_path))
     if args.command == "train":
         config = ModelConfig(fast=args.fast)
         artifact = fit_ensemble(frame, config=config, scoring=_rules(args.scoring))
