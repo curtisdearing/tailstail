@@ -14,6 +14,11 @@ def test_tailstail_has_only_fantasy_production_workflow():
     assert "ODDS_API_KEY" not in text
     assert "DISCORD_WEBHOOK_URL" not in text
     assert "actions/deploy-pages" in text
+    assert "branches: [main]" in text
+    assert "- site/**" in text
+    assert "github.event_name == 'push'" in text
+    assert "site/index.html" in text
+    assert (ROOT / "site" / "index.html").exists()
 
 
 def test_tailstail_readme_does_not_claim_fablesfable_operations():

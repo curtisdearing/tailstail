@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tailstail · fantasy football projections</title>
+  <style>
+    :root{--bg:#07111f;--panel:#0f2035;--ink:#eff7ff;--muted:#9db0c7;--line:#29425f;--accent:#65e6b4;--warn:#ffd479}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#173656 0,var(--bg) 42%);color:var(--ink);font:16px/1.55 system-ui,sans-serif}
+    main{max-width:980px;margin:auto;padding:64px 22px}h1{font-size:clamp(38px,7vw,72px);line-height:1;margin:0 0 18px}h1 span{color:var(--accent)}
+    .lead{max-width:760px;color:var(--muted);font-size:20px}.status{display:inline-block;margin:18px 0 34px;padding:8px 13px;border:1px solid var(--line);border-radius:999px;color:var(--warn);background:#0c1a2b}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.card{padding:22px;background:color-mix(in srgb,var(--panel) 90%,transparent);border:1px solid var(--line);border-radius:16px}
+    .number{font-size:32px;font-weight:750;color:var(--accent)}.label{color:var(--muted)}h2{margin-top:46px}a{color:var(--accent)}
+    code{color:#c5d8ef}.foot{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+  </style>
+</head>
+<body><main>
+  <h1>tails<span>tail</span></h1>
+  <p class="lead">Fantasy football projections, correlated weekly simulations, lineup decisions, waivers, and trades—kept separate from sportsbook recommendations.</p>
+  <div class="status">Model active · current-week projections publish only after an in-season source refresh</div>
+  <div class="grid">
+    <div class="card"><div class="number">11,481</div><div class="label">untouched 2023–2025 player-weeks</div></div>
+    <div class="card"><div class="number">5.091</div><div class="label">direct ensemble MAE</div></div>
+    <div class="card"><div class="number">82.2%</div><div class="label">Monte Carlo 80% interval coverage</div></div>
+    <div class="card"><div class="number">54</div><div class="label">season-week bootstrap blocks</div></div>
+  </div>
+  <h2>What is live</h2>
+  <p>The validated ensemble is the production projection center. Correlated Monte Carlo supplies ranges, tails, and alternate-scoring outcomes. Raw event-component probabilities remain <code>research_only</code> until each market clears its own historical and prospective gate.</p>
+  <p><a href="model-audit.json">Machine-readable historical audit</a> · <a href="https://github.com/curtisdearing/tailstail/blob/main/reports/fantasy_monte_carlo_history.md">Readable Monte Carlo report</a> · <a href="https://github.com/curtisdearing/tailstail/blob/main/reports/fantasy_engineering_review.md">Engineering review and roadmap</a> · <a href="https://github.com/curtisdearing/tailstail">Source</a></p>
+  <p class="foot">No current-player table is shown during the offseason because stale projections are worse than an honest empty state. Scheduled Wednesday/Sunday runs replace this landing page with the current fantasy dashboard in season.</p>
+</main></body>
+</html>

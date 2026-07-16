@@ -1,6 +1,11 @@
 name: Tailstail fantasy projections
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fantasy-weekly.yml
+      - site/**
   workflow_dispatch:
     inputs:
       season:
@@ -32,6 +37,7 @@ concurrency:
 
 jobs:
   project:
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 75
     env:
@@ -128,6 +134,7 @@ jobs:
           path: _site
 
   deploy-dashboard:
+    if: github.event_name != 'push'
     needs: project
     runs-on: ubuntu-latest
     permissions:
@@ -138,5 +145,29 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy Tailstail dashboard
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  deploy-landing:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Prepare honest offseason landing site
+        run: |
+          mkdir -p _landing
+          cp site/index.html _landing/index.html
+          cp reports/fantasy_monte_carlo_history.json _landing/model-audit.json
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _landing
+      - name: Deploy Tailstail landing site
         id: deployment
         uses: actions/deploy-pages@v4
