@@ -41,3 +41,25 @@ def test_restore_rejects_path_traversal(tmp_path):
         tar.addfile(info, io.BytesIO(payload))
     with pytest.raises(ValueError, match="unsafe member"):
         state_store.restore(archive, state_store.sha256(archive), tmp_path / "repo")
+
+
+def test_fantasy_state_profile_excludes_prop_state(tmp_path):
+    root = tmp_path / "repo"
+    (root / "data").mkdir(parents=True)
+    (root / "data" / "fantasy_model.joblib").write_bytes(b"fantasy")
+    (root / "data" / "player_projection_snapshot.json").write_text('{"schema_version": 1}')
+    (root / "data" / "nfl_props.db").write_bytes(b"props")
+    (root / "data" / "latest.json").write_text('{"betting": true}')
+    archive = tmp_path / "fantasy-state.tar.gz"
+    manifest = state_store.pack(archive, root, profile="fantasy")
+    assert manifest["profile"] == "fantasy"
+    assert manifest["files"] == [
+        "data/fantasy_model.joblib",
+        "data/player_projection_snapshot.json",
+    ]
+    restored_root = tmp_path / "restored"
+    restored = state_store.restore(
+        archive, manifest["sha256"], restored_root, profile="fantasy"
+    )
+    assert set(restored) == set(manifest["files"])
+    assert not (restored_root / "data" / "nfl_props.db").exists()

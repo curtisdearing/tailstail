@@ -120,12 +120,14 @@ def _center_hurdle_distribution(
     target_mean: float,
     target_sd: float,
     position: str,
-) -> np.ndarray:
+    target_interval_width: float | None = None,
+    residual_noise: np.ndarray | None = None,
+) -> tuple[np.ndarray, bool]:
     """Calibrate the event simulator while preserving a true inactive zero mass."""
 
     p = float(available.mean())
     if p <= 0:
-        return np.zeros_like(raw)
+        return np.zeros_like(raw), False
     active_values = raw[available]
     active_mean = float(active_values.mean()) if len(active_values) else 0.0
     active_var = float(active_values.var()) if len(active_values) else 0.0
@@ -135,16 +137,60 @@ def _center_hurdle_distribution(
     remaining = max(target_var - hurdle_var, 0.25)
     scale = np.sqrt(remaining / max(p * active_var, 0.25))
     scale = float(np.clip(scale, 0.45, 2.75))
-    calibrated = np.zeros_like(raw, dtype=float)
-    calibrated[available] = conditional_target + scale * (active_values - active_mean)
-    floor = -6.0 if position == "QB" else -3.0
-    calibrated[available] = np.maximum(calibrated[available], floor)
-    # Clipping can move the mean. Bounded corrections restore the requested
-    # center without assigning points to unavailable samples or breaking floor.
-    for _ in range(3):
-        correction = (target_mean - calibrated.mean()) / p
-        calibrated[available] = np.maximum(calibrated[available] + correction, floor)
-    return calibrated
+    default_floor = -6.0 if position == "QB" else -3.0
+    residual_floor = (
+        conditional_target - 1.5 * target_interval_width
+        if target_interval_width is not None
+        else default_floor
+    )
+    floor = min(default_floor, conditional_target - 0.25, residual_floor)
+
+    def locate(centered: np.ndarray) -> np.ndarray:
+        """Shift a clipped active distribution to its exact conditional mean."""
+
+        low = floor - float(centered.max()) - 1.0
+        high = conditional_target - float(centered.min()) + 1.0
+        for _ in range(45):
+            midpoint = (low + high) / 2.0
+            candidate_mean = float(np.maximum(centered + midpoint, floor).mean())
+            if candidate_mean < conditional_target:
+                low = midpoint
+            else:
+                high = midpoint
+        return np.maximum(centered + (low + high) / 2.0, floor)
+
+    def calibrate_shape(active_shape: np.ndarray) -> np.ndarray:
+        centered = scale * active_shape
+        output = np.zeros_like(raw, dtype=float)
+        output[available] = locate(centered)
+        # SD matching assumes a symmetric distribution and was narrowing
+        # p10-p90 for skewed event draws. Match the already out-of-sample
+        # conformal width directly while retaining the supplied shape.
+        if target_interval_width is not None and target_interval_width > 0:
+            for _ in range(3):
+                current_width = float(np.quantile(output, 0.90) - np.quantile(output, 0.10))
+                if current_width <= 1e-9:
+                    break
+                ratio = float(np.clip(target_interval_width / current_width, 0.25, 4.0))
+                if abs(ratio - 1.0) < 0.005:
+                    break
+                active = output[available]
+                output[available] = locate((active - active.mean()) * ratio)
+        return output
+
+    calibrated = calibrate_shape(active_values - active_mean)
+    used_residual_fallback = False
+    if target_interval_width is not None and target_interval_width > 0:
+        calibrated_width = float(np.quantile(calibrated, 0.90) - np.quantile(calibrated, 0.10))
+        width_ratio = calibrated_width / target_interval_width
+        unstable_scale = float(calibrated.std()) > 2.0 * max(target_sd, 1.0)
+        if (not 0.90 <= width_ratio <= 1.10 or unstable_scale) and residual_noise is not None:
+            fallback_shape = np.asarray(residual_noise, dtype=float)[available]
+            fallback_shape -= fallback_shape.mean()
+            fallback_shape /= max(float(fallback_shape.std()), 1e-9)
+            calibrated = calibrate_shape(fallback_shape)
+            used_residual_fallback = True
+    return calibrated, used_residual_fallback
 
 
 def simulate_week(
@@ -303,6 +349,7 @@ def simulate_week(
 
     raw_points = score_components(components, rules)
     calibrated = np.zeros_like(raw_points)
+    residual_fallback = np.zeros(p, dtype=bool)
     for index, row in players.iterrows():
         model_mean = float(row["projection_mean"])
         target_mean = (
@@ -313,10 +360,18 @@ def simulate_week(
         upper = float(row.get("projection_upper80", np.nan))
         if np.isfinite(lower) and np.isfinite(upper) and upper > lower:
             target_sd = (upper - lower) / (2 * 1.2815515655446004)
+            target_interval_width = upper - lower
         else:
             target_sd = {"QB": 7.5, "RB": 6.5, "WR": 6.5, "TE": 5.5}.get(row["position"], 6.5)
-        calibrated[:, index] = _center_hurdle_distribution(
-            raw_points[:, index], available_all[:, index], target_mean, target_sd, str(row["position"])
+            target_interval_width = None
+        calibrated[:, index], residual_fallback[index] = _center_hurdle_distribution(
+            raw_points[:, index],
+            available_all[:, index],
+            target_mean,
+            target_sd,
+            str(row["position"]),
+            target_interval_width,
+            rng.standard_normal(n),
         )
 
     ids = players["player_id"].astype(str).tolist()
@@ -351,7 +406,9 @@ def simulate_week(
             "prob_25_plus": float(np.mean(values >= 25)),
             "availability_probability": float(available_all[:, index].mean()),
             "event_simulator_mean": float(raw.mean()),
+            "event_simulator_sd": float(raw.std()),
             "model_residual_adjustment": adjustment,
+            "calibration_residual_fallback": bool(residual_fallback[index]),
             "component_model_disagreement": bool(
                 abs(adjustment) > max(5.0, 0.40 * abs(float(values.mean())))
             ),
