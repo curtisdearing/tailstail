@@ -11,6 +11,7 @@ data/*.db-journal
 config.local.json
 data/*.joblib
 data/fantasy_latest.json
+data/player_projection_snapshot.json
 reports/fantasy_model_card.json
 historical/fantasy/
 fantasy.html

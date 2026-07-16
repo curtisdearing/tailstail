@@ -38,6 +38,8 @@ def test_simulation_is_reproducible_centered_and_correlated():
     means = first.summaries.set_index("player_id")["mean"]
     expected = _slate().set_index("player_id")["projection_mean"]
     assert np.allclose(means.sort_index(), expected.sort_index(), atol=0.05)
+    widths = first.summaries.set_index("player_id")["p90"] - first.summaries.set_index("player_id")["p10"]
+    assert np.allclose(widths, 17.0, atol=0.15)
     assert {"expected_targets", "expected_carries", "component_model_disagreement"}.issubset(
         first.summaries.columns
     )
@@ -55,3 +57,35 @@ def test_official_inactive_has_zero_mass():
     result = simulate_week(slate, config=SimulationConfig(simulations=500, random_seed=3))
     assert (result.points["AAA-2"] == 0).all()
     assert result.summaries.set_index("player_id").loc["AAA-2", "availability_probability"] == 0
+
+
+def test_low_negative_center_survives_floor_and_availability_hurdle():
+    slate = _slate()
+    slate["projection_mean"] = slate["projection_mean"].astype(float)
+    row = slate.player_id.eq("AAA-2")
+    slate.loc[row, "projection_mean"] = -1.75
+    slate.loc[row, "projection_lower80"] = -10.0
+    slate.loc[row, "projection_upper80"] = 8.0
+    slate.loc[row, "practice_dnp"] = 1
+    result = simulate_week(slate, config=SimulationConfig(simulations=1_000, random_seed=17))
+    summary = result.summaries.set_index("player_id").loc["AAA-2"]
+    assert np.isclose(summary["mean"], -1.75, atol=1e-8)
+    assert 0 < summary["availability_probability"] < 1
+
+
+def test_degenerate_backup_role_uses_explicit_residual_uncertainty():
+    slate = _slate()
+    backup = slate[slate.player_id.eq("AAA-1")].copy()
+    backup["player_id"] = "AAA-backup"
+    backup["player_name"] = "AAA Backup QB"
+    backup["projection_mean"] = -1.0
+    backup["projection_lower80"] = -11.0
+    backup["projection_upper80"] = 9.0
+    backup["pre_target_share_calc_ewm4"] = 0.0
+    backup["pre_carry_share_ewm4"] = 0.0
+    slate = pd.concat([slate, backup], ignore_index=True)
+    result = simulate_week(slate, config=SimulationConfig(simulations=1_000, random_seed=23))
+    summary = result.summaries.set_index("player_id").loc["AAA-backup"]
+    assert summary["calibration_residual_fallback"]
+    assert np.isclose(summary["p90"] - summary["p10"], 20.0, atol=0.2)
+    assert np.isclose(summary["mean"], -1.0, atol=1e-8)

@@ -1,4 +1,4 @@
-name: Fantasy weekly projections
+name: Tailstail fantasy projections
 
 on:
   workflow_dispatch:
@@ -17,21 +17,26 @@ on:
         default: false
         type: boolean
   schedule:
-    # Refresh after Wednesday practice reports and again Sunday morning.
+    # Wednesday after practice reports and Sunday before the early window.
     - cron: "35 23 * 9-12,1 3"
     - cron: "15 14 * 9-12,1 0"
 
 permissions:
-  contents: read
+  contents: write
+  pages: write
+  id-token: write
 
 concurrency:
-  group: fantasy-weekly-${{ github.ref }}
-  cancel-in-progress: true
+  group: tailstail-fantasy-production
+  cancel-in-progress: false
 
 jobs:
   project:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
+    env:
+      GH_TOKEN: ${{ github.token }}
+      STATE_TAG: fantasy-model-state
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -39,11 +44,14 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: pip install -r requirements.txt
-      - uses: actions/cache@v5
+
+      - name: Restore rebuildable fantasy history
+        uses: actions/cache/restore@v5
         with:
           path: historical/fantasy
-          key: fantasy-history-${{ runner.os }}-${{ hashFiles('requirements.txt', 'nflvalue/fantasy/data.py', 'nflvalue/fantasy/features.py') }}
+          key: fantasy-history-${{ runner.os }}-${{ github.run_id }}
           restore-keys: fantasy-history-${{ runner.os }}-
+
       - name: Build current projections
         shell: bash
         run: |
@@ -52,23 +60,83 @@ jobs:
           [[ -z "${{ inputs.week }}" ]] || args+=(--week "${{ inputs.week }}")
           [[ "${{ inputs.fast }}" != "true" ]] || args+=(--fast)
           python scripts/fantasy_weekly.py "${args[@]}"
-      - name: Verify generated contract
+
+      - name: Verify generated contracts
         shell: bash
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          payload = json.loads(Path("data/fantasy_latest.json").read_text())
-          assert payload["players"], "weekly fantasy output contains no players"
-          assert payload["simulation"]["simulations"] >= 1000
+          fantasy = json.loads(Path("data/fantasy_latest.json").read_text())
+          snapshot = json.loads(Path("data/player_projection_snapshot.json").read_text())
+          assert fantasy["players"], "weekly fantasy output contains no players"
+          assert fantasy["simulation"]["simulations"] >= 1000
+          assert snapshot["schema_version"] == 1
+          assert snapshot["players"], "shared projection snapshot contains no players"
+          assert Path("data/player_projection_samples.parquet").stat().st_size > 1000
           assert Path("fantasy.html").stat().st_size > 1000
           PY
+
+      - name: Publish checksummed fantasy state
+        shell: bash
+        run: |
+          asset="fantasy-state-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.tar.gz"
+          archive="$RUNNER_TEMP/$asset"
+          python scripts/state_store.py pack --profile fantasy --archive "$archive"
+          if ! gh release view "$STATE_TAG" >/dev/null 2>&1; then
+            gh release create "$STATE_TAG" --prerelease --title "Tailstail fantasy model state" --notes "{}"
+          fi
+          gh release upload "$STATE_TAG" "$archive"
+          python scripts/state_store.py pointer --profile fantasy --archive "$archive" --asset "$asset" --output "$RUNNER_TEMP/fantasy-state.json"
+          gh release edit "$STATE_TAG" --notes-file "$RUNNER_TEMP/fantasy-state.json"
+
+      - name: Keep the eight newest fantasy states
+        shell: bash
+        run: |
+          gh release view "$STATE_TAG" --json assets --jq '.assets | sort_by(.createdAt) | reverse | map(select(.name | test("^fantasy-state-[0-9]+-[0-9]+\\.tar\\.gz$"))) | .[8:] | .[].name' |
+          while read -r old_asset; do
+            [[ -z "$old_asset" ]] || gh release delete-asset "$STATE_TAG" "$old_asset" --yes
+          done
+
+      - name: Save refreshed fantasy history
+        uses: actions/cache/save@v5
+        with:
+          path: historical/fantasy
+          key: fantasy-history-${{ runner.os }}-${{ github.run_id }}
+
       - uses: actions/upload-artifact@v6
         with:
-          name: fantasy-${{ github.run_id }}
+          name: tailstail-fantasy-${{ github.run_id }}
           retention-days: 30
           path: |
             data/fantasy_latest.json
             data/fantasy_model.joblib
+            data/player_projection_snapshot.json
+            data/player_projection_samples.parquet
             reports/fantasy_model_card.json
             fantasy.html
+
+      - name: Prepare Tailstail Pages site
+        run: |
+          mkdir -p _site
+          cp fantasy.html _site/index.html
+          cp data/fantasy_latest.json _site/fantasy_latest.json
+          cp data/player_projection_snapshot.json _site/player_projection_snapshot.json
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy-dashboard:
+    needs: project
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Tailstail dashboard
+        id: deployment
+        uses: actions/deploy-pages@v4

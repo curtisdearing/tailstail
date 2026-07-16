@@ -13,16 +13,22 @@ from pathlib import Path, PurePosixPath
 
 
 ROOT = Path(__file__).resolve().parents[1]
-STATE_GLOBS = (
-    "data/*.db",
-    "data/*.joblib",
-    "data/ml_frame.parquet",
-    "data/history.json",
-    "data/latest.json",
-    "data/weekly.json",
-    "data/weekly_props.json",
-    "data/weights.json",
-)
+STATE_PROFILES = {
+    "prop": (
+        "data/*.db",
+        "data/*.joblib",
+        "data/ml_frame.parquet",
+        "data/history.json",
+        "data/latest.json",
+        "data/weekly.json",
+        "data/weekly_props.json",
+        "data/weights.json",
+    ),
+    "fantasy": (
+        "data/fantasy_model.joblib",
+        "data/player_projection_snapshot.json",
+    ),
+}
 
 
 def sha256(path: Path) -> str:
@@ -33,16 +39,18 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def state_files(root: Path = ROOT) -> list[Path]:
+def state_files(root: Path = ROOT, profile: str = "prop") -> list[Path]:
+    if profile not in STATE_PROFILES:
+        raise ValueError(f"unknown state profile: {profile}")
     files: set[Path] = set()
-    for pattern in STATE_GLOBS:
+    for pattern in STATE_PROFILES[profile]:
         files.update(path for path in root.glob(pattern) if path.is_file())
     return sorted(files)
 
 
-def pack(archive: Path, root: Path = ROOT) -> dict[str, object]:
+def pack(archive: Path, root: Path = ROOT, profile: str = "prop") -> dict[str, object]:
     archive.parent.mkdir(parents=True, exist_ok=True)
-    files = state_files(root)
+    files = state_files(root, profile)
     fd, tmp_name = tempfile.mkstemp(prefix=f".{archive.name}.", dir=archive.parent)
     os.close(fd)
     tmp = Path(tmp_name)
@@ -55,24 +63,29 @@ def pack(archive: Path, root: Path = ROOT) -> dict[str, object]:
         tmp.unlink(missing_ok=True)
     return {
         "schema_version": 1,
+        "profile": profile,
         "sha256": sha256(archive),
         "files": [path.relative_to(root).as_posix() for path in files],
     }
 
 
-def _safe_member(member: tarfile.TarInfo) -> PurePosixPath:
+def _safe_member(member: tarfile.TarInfo, profile: str = "prop") -> PurePosixPath:
     path = PurePosixPath(member.name)
     if member.issym() or member.islnk() or not member.isfile():
         raise ValueError(f"state archive contains unsupported member: {member.name}")
     if path.is_absolute() or ".." in path.parts or not path.parts or path.parts[0] != "data":
         raise ValueError(f"state archive contains unsafe member: {member.name}")
-    allowed = any(Path(path.as_posix()).match(pattern) for pattern in STATE_GLOBS)
+    if profile not in STATE_PROFILES:
+        raise ValueError(f"unknown state profile: {profile}")
+    allowed = any(Path(path.as_posix()).match(pattern) for pattern in STATE_PROFILES[profile])
     if not allowed:
         raise ValueError(f"state archive contains undeclared state: {member.name}")
     return path
 
 
-def restore(archive: Path, expected_sha: str, root: Path = ROOT) -> list[str]:
+def restore(
+    archive: Path, expected_sha: str, root: Path = ROOT, profile: str = "prop"
+) -> list[str]:
     actual = sha256(archive)
     if actual != expected_sha:
         raise ValueError(f"state archive checksum mismatch: expected {expected_sha}, got {actual}")
@@ -81,7 +94,7 @@ def restore(archive: Path, expected_sha: str, root: Path = ROOT) -> list[str]:
     with tempfile.TemporaryDirectory(prefix="state-restore-", dir=root) as tmp_name:
         staging = Path(tmp_name)
         with tarfile.open(archive, "r:gz") as tar:
-            members = [(member, _safe_member(member)) for member in tar.getmembers()]
+            members = [(member, _safe_member(member, profile)) for member in tar.getmembers()]
             for member, relative in members:
                 source = tar.extractfile(member)
                 if source is None:
@@ -100,8 +113,13 @@ def restore(archive: Path, expected_sha: str, root: Path = ROOT) -> list[str]:
     return restored
 
 
-def write_pointer(archive: Path, asset: str, output: Path) -> dict[str, object]:
-    pointer = {"schema_version": 1, "asset": asset, "sha256": sha256(archive)}
+def write_pointer(
+    archive: Path, asset: str, output: Path, profile: str = "prop"
+) -> dict[str, object]:
+    pointer = {
+        "schema_version": 1, "profile": profile,
+        "asset": asset, "sha256": sha256(archive),
+    }
     output.write_text(json.dumps(pointer, indent=2) + "\n")
     return pointer
 
@@ -111,20 +129,27 @@ def main() -> None:
     sub = parser.add_subparsers(dest="command", required=True)
     p_pack = sub.add_parser("pack")
     p_pack.add_argument("--archive", type=Path, required=True)
+    p_pack.add_argument("--profile", choices=sorted(STATE_PROFILES), default="prop")
     p_restore = sub.add_parser("restore")
     p_restore.add_argument("--archive", type=Path, required=True)
     p_restore.add_argument("--sha", required=True)
+    p_restore.add_argument("--profile", choices=sorted(STATE_PROFILES), default="prop")
     p_pointer = sub.add_parser("pointer")
     p_pointer.add_argument("--archive", type=Path, required=True)
     p_pointer.add_argument("--asset", required=True)
     p_pointer.add_argument("--output", type=Path, required=True)
+    p_pointer.add_argument("--profile", choices=sorted(STATE_PROFILES), default="prop")
     args = parser.parse_args()
     if args.command == "pack":
-        print(json.dumps(pack(args.archive), sort_keys=True))
+        print(json.dumps(pack(args.archive, profile=args.profile), sort_keys=True))
     elif args.command == "restore":
-        print(json.dumps({"restored": restore(args.archive, args.sha)}, sort_keys=True))
+        print(json.dumps({"restored": restore(
+            args.archive, args.sha, profile=args.profile
+        )}, sort_keys=True))
     else:
-        print(json.dumps(write_pointer(args.archive, args.asset, args.output), sort_keys=True))
+        print(json.dumps(write_pointer(
+            args.archive, args.asset, args.output, profile=args.profile
+        ), sort_keys=True))
 
 
 if __name__ == "__main__":

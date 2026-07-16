@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -19,6 +20,11 @@ from nflvalue.fantasy.data import HistoricalData, fetch_historical, materialize_
 from nflvalue.fantasy.features import build_feature_frame, frame_quality_report
 from nflvalue.fantasy.models import fit_ensemble
 from nflvalue.fantasy.simulation import simulate_week
+from nflvalue.projection_snapshot import (
+    build_projection_snapshot,
+    write_component_samples,
+    write_projection_snapshot,
+)
 
 
 def current_nfl_season() -> int:
@@ -60,6 +66,8 @@ def main(argv=None) -> int:
     parser.add_argument("--output", default="data/fantasy_latest.json")
     parser.add_argument("--dashboard", default="fantasy.html")
     parser.add_argument("--model", default="data/fantasy_model.joblib")
+    parser.add_argument("--projection-snapshot", default="data/player_projection_snapshot.json")
+    parser.add_argument("--component-samples", default="data/player_projection_samples.parquet")
     args = parser.parse_args(argv)
 
     data_dir = Path(args.data_dir)
@@ -93,6 +101,41 @@ def main(argv=None) -> int:
         scoring=rules,
     )
     generated = datetime.now(timezone.utc).isoformat()
+    manifest_path = data_dir / "manifest.json"
+    source_manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
+    historical_audit_path = Path("reports/fantasy_monte_carlo_history.json")
+    historical_audit = (
+        json.loads(historical_audit_path.read_text())
+        if historical_audit_path.exists()
+        else {}
+    )
+    component_validation = {
+        "status": "research_only",
+        "reason": (
+            "The 2023-2025 replay found the raw event center 0.359 MAE worse than the direct "
+            "ensemble; component probabilities require market-level validation before use."
+        ),
+        "evaluated_through": "2025-18",
+        "audit_replay_canonical_csv_sha256": historical_audit.get("metadata", {}).get(
+            "replay_outputs_canonical_csv_sha256"
+        ),
+    }
+    sample_artifact = write_component_samples(result.components, args.component_samples)
+    projection_snapshot = build_projection_snapshot(
+        projected,
+        result.summaries,
+        result.components,
+        season=season,
+        week=week,
+        generated_at=generated,
+        information_as_of=str(source_manifest.get("retrieved_at", generated)),
+        model_version=os.environ.get("GITHUB_SHA", "local"),
+        simulation_metadata=result.metadata,
+        sample_artifact=sample_artifact,
+        source_manifest=source_manifest,
+        component_validation=component_validation,
+    )
+    write_projection_snapshot(projection_snapshot, args.projection_snapshot)
     payload = {
         "generated_at": generated,
         "season": season,
@@ -100,6 +143,12 @@ def main(argv=None) -> int:
         "data_quality": frame_quality_report(frame),
         "model_card": artifact.model_card(),
         "simulation": result.metadata,
+        "projection_snapshot": {
+            "path": str(args.projection_snapshot),
+            "players_canonical_csv_sha256": projection_snapshot["players_canonical_csv_sha256"],
+            "samples_canonical_csv_sha256": sample_artifact["canonical_csv_sha256"],
+            "component_validation": projection_snapshot["component_validation"],
+        },
         "players": result.summaries.to_dict("records"),
     }
     output = Path(args.output)

@@ -13,6 +13,7 @@ from .audit import red_team_report
 from .config import ModelConfig, ScoringRules, SimulationConfig
 from .data import HistoricalData, fetch_historical
 from .features import build_feature_frame, frame_quality_report
+from .monte_carlo_audit import historical_monte_carlo_replay, render_monte_carlo_markdown
 from .models import FantasyEnsemble, fit_ensemble, season_forward_backtest
 from .simulation import simulate_week
 
@@ -72,6 +73,20 @@ def build_parser() -> argparse.ArgumentParser:
     backtest.add_argument("--scoring", choices=["ppr", "half_ppr", "standard"], default="ppr")
     backtest.add_argument("--full", action="store_true", help="use production-size learners")
 
+    replay = sub.add_parser(
+        "audit-monte-carlo",
+        help="replay frozen outer predictions through the historical event simulator",
+    )
+    replay.add_argument("--frame", default="historical/fantasy/feature_frame.parquet")
+    replay.add_argument("--predictions", default="reports/fantasy_outer_predictions.parquet")
+    replay.add_argument("--simulations", type=int, default=1_000)
+    replay.add_argument("--seed", type=int, default=6102026)
+    replay.add_argument("--bootstrap-iterations", type=int, default=20_000)
+    replay.add_argument("--scoring", choices=["ppr", "half_ppr", "standard"], default="ppr")
+    replay.add_argument("--output", default="reports/fantasy_monte_carlo_history.parquet")
+    replay.add_argument("--report", default="reports/fantasy_monte_carlo_history.json")
+    replay.add_argument("--markdown", default="reports/fantasy_monte_carlo_history.md")
+
     project = sub.add_parser("project", help="project one season/week snapshot")
     project.add_argument("--frame", default="historical/fantasy/feature_frame.parquet")
     project.add_argument("--model", default="data/fantasy_model.joblib")
@@ -111,6 +126,26 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     frame = pd.read_parquet(args.frame)
+    if args.command == "audit-monte-carlo":
+        predictions = pd.read_parquet(args.predictions)
+        replayed, report = historical_monte_carlo_replay(
+            frame,
+            predictions,
+            simulations=args.simulations,
+            random_seed=args.seed,
+            scoring=_rules(args.scoring),
+            bootstrap_iterations=args.bootstrap_iterations,
+        )
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        replayed.to_parquet(output, index=False)
+        _json(args.report, report)
+        markdown = Path(args.markdown)
+        markdown.parent.mkdir(parents=True, exist_ok=True)
+        markdown.write_text(render_monte_carlo_markdown(report))
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 0
+
     if args.command == "train":
         config = ModelConfig(fast=args.fast)
         artifact = fit_ensemble(frame, config=config, scoring=_rules(args.scoring))

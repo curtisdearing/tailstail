@@ -42,4 +42,7 @@ jobs:
           tests/test_fantasy_features.py
           tests/test_fantasy_models.py
           tests/test_fantasy_simulation.py
+          tests/test_fantasy_monte_carlo_audit.py
           tests/test_fantasy_season.py
+          tests/test_projection_snapshot.py
+          tests/test_product_boundary.py
