@@ -1,0 +1,2771 @@
+[
+ {
+  "id": "fam_A01_opp_qb_points_soft",
+  "family": "A",
+  "definition": "Opponent trailing QB fantasy points allowed, within-week top vs bottom tercile",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "QB"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "1373 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 1442,
+   "control": 1290
+  },
+  "n_effective": 1226,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 1.4273634044935661,
+   "ci95": [
+    0.8180088379297618,
+    2.0485781911221976
+   ],
+   "p": 0.0006662225183211193
+  },
+  "posterior": {
+   "mean": 1.3009003019333443,
+   "ci95": [
+    0.717494547391412,
+    1.8843060564752765
+   ]
+  },
+  "multiplicity_q": 0.0024226273393495247,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 1.9148466559984298,
+    "n_exposed": 776,
+    "n_control": 697
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": 1.0,
+   "mae_delta_mean": 0.006955990494338593,
+   "mae_delta_ci": [
+    0.0030667474155011585,
+    0.010389850075856312
+   ],
+   "n_rows_touched": 545,
+   "exposed_model_residual_mean": -0.1479722835494215,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": 0.006955990494338593,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_A02_opp_rb_points_soft",
+  "family": "A",
+  "definition": "Opponent trailing RB fantasy points allowed, top vs bottom tercile",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "RB"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "2843 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 3026,
+   "control": 2697
+  },
+  "n_effective": 1278,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 1.26485050105095,
+   "ci95": [
+    0.9386207009420532,
+    1.5959941972693608
+   ],
+   "p": 0.0006662225183211193
+  },
+  "posterior": {
+   "mean": 1.2300298961483176,
+   "ci95": [
+    0.9048268323635256,
+    1.5552329599331096
+   ]
+  },
+  "multiplicity_q": 0.0024226273393495247,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 1.241416520939117,
+    "n_exposed": 1676,
+    "n_control": 1497
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": 1.0,
+   "mae_delta_mean": 0.014792007397631757,
+   "mae_delta_ci": [
+    0.010148407073625456,
+    0.020363242366886098
+   ],
+   "n_rows_touched": 985,
+   "exposed_model_residual_mean": 0.3975532611737864,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": 0.014792007397631757,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_A03_opp_wr_points_soft",
+  "family": "A",
+  "definition": "Opponent trailing WR fantasy points allowed, top vs bottom tercile",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "WR"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "4429 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 4765,
+   "control": 4263
+  },
+  "n_effective": 1279,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.46069433098897,
+   "ci95": [
+    0.16744093829662668,
+    0.7302167656620553
+   ],
+   "p": 0.0019995558516544528
+  },
+  "posterior": {
+   "mean": 0.45131229033017944,
+   "ci95": [
+    0.17160853799280096,
+    0.7310160426675579
+   ]
+  },
+  "multiplicity_q": 0.006152479543552162,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.6652959494838829,
+    "n_exposed": 2641,
+    "n_control": 2344
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": false
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "research_only",
+  "status_reason": "q<0.05 but 2023-25 sign/order unstable"
+ },
+ {
+  "id": "fam_A04_opp_te_points_soft",
+  "family": "A",
+  "definition": "Opponent trailing TE fantasy points allowed, top vs bottom tercile",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "2179 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 2354,
+   "control": 2120
+  },
+  "n_effective": 1257,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.5275460710420181,
+   "ci95": [
+    0.23289462855264892,
+    0.800103888865073
+   ],
+   "p": 0.0006662225183211193
+  },
+  "posterior": {
+   "mean": 0.5165669736110095,
+   "ci95": [
+    0.2338126890718354,
+    0.7993212581501835
+   ]
+  },
+  "multiplicity_q": 0.0024226273393495247,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.6678959308241111,
+    "n_exposed": 1268,
+    "n_control": 1148
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": 0.6678959308241111,
+   "mae_delta_mean": 0.006319822485894022,
+   "mae_delta_ci": [
+    0.002718567306243516,
+    0.009468718167783517
+   ],
+   "n_rows_touched": 614,
+   "exposed_model_residual_mean": 0.2616461634807392,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": 0.006319822485894022,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_A05_opp_pass_epa_soft_qb",
+  "family": "A",
+  "definition": "Opponent trailing EPA/dropback allowed, top (softest) vs bottom tercile",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "QB"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "1334 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 1465,
+   "control": 1306
+  },
+  "n_effective": 1238,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 1.1433944030179735,
+   "ci95": [
+    0.5524932934664423,
+    1.7273466812964977
+   ],
+   "p": 0.0006662225183211193
+  },
+  "posterior": {
+   "mean": 1.0459010638764037,
+   "ci95": [
+    0.47357237919293704,
+    1.6182297485598705
+   ]
+  },
+  "multiplicity_q": 0.0024226273393495247,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 1.4735616524300126,
+    "n_exposed": 777,
+    "n_control": 701
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": 1.0,
+   "mae_delta_mean": 0.008421988945456427,
+   "mae_delta_ci": [
+    0.004342298118967007,
+    0.012241035119197333
+   ],
+   "n_rows_touched": 546,
+   "exposed_model_residual_mean": -0.5451177817403656,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": 0.008421988945456427,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_A06_opp_pass_epa_soft_wr",
+  "family": "A",
+  "definition": "Opponent trailing EPA/dropback allowed, top vs bottom tercile",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "WR"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "4468 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 4714,
+   "control": 4275
+  },
+  "n_effective": 1279,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.34389212400625924,
+   "ci95": [
+    0.0830953847884143,
+    0.6012765070451876
+   ],
+   "p": 0.009999555851654454
+  },
+  "posterior": {
+   "mean": 0.3381247054528719,
+   "ci95": [
+    0.08429894750446609,
+    0.5919504634012777
+   ]
+  },
+  "multiplicity_q": 0.024998889629136135,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.3641537870491775,
+    "n_exposed": 2591,
+    "n_control": 2347
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": 0.3641537870491775,
+   "mae_delta_mean": 0.009263656360572803,
+   "mae_delta_ci": [
+    0.006625430554009741,
+    0.012171591359804914
+   ],
+   "n_rows_touched": 1533,
+   "exposed_model_residual_mean": -0.07588126344510368,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": 0.009263656360572803,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_A07_opp_rush_epa_soft_rb",
+  "family": "A",
+  "definition": "Opponent trailing EPA/rush allowed, top vs bottom tercile",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "RB"
+  ],
+  "component_node": "d_rush_yards",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "2856 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 3022,
+   "control": 2688
+  },
+  "n_effective": 1278,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 5.0) on the d_rush_yards effect",
+  "effect": {
+   "point": 5.463835423891233,
+   "ci95": [
+    3.8554115534750655,
+    7.099140758345764
+   ],
+   "p": 0.0006662225183211193
+  },
+  "posterior": {
+   "mean": 5.314910917756009,
+   "ci95": [
+    3.6969785805565327,
+    6.932843254955486
+   ]
+  },
+  "multiplicity_q": 0.0024226273393495247,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 5.417602012461291,
+    "n_exposed": 1670,
+    "n_control": 1493
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": 0.5417602012461291,
+   "mae_delta_mean": 0.0066437937947423364,
+   "mae_delta_ci": [
+    0.003475281774420704,
+    0.010022006792385551
+   ],
+   "n_rows_touched": 1002,
+   "exposed_model_residual_mean": 0.5794172284376429,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": 0.0066437937947423364,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_A08_opp_pressure_high_qb",
+  "family": "A",
+  "definition": "Opponent trailing (sack+qb_hit)/dropback, top vs bottom tercile",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "QB"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "1351 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 1434,
+   "control": 1320
+  },
+  "n_effective": 1234,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": -0.8175348425273392,
+   "ci95": [
+    -1.4538031199390717,
+    -0.218677435306055
+   ],
+   "p": 0.011332889184987786
+  },
+  "posterior": {
+   "mean": -0.741847704713342,
+   "ci95": [
+    -1.3382152173035609,
+    -0.14548019212312324
+   ]
+  },
+  "multiplicity_q": 0.026665621611735968,
+  "season_forward": {
+   "train_le2022": {
+    "effect": -1.4338492014972288,
+    "n_exposed": 777,
+    "n_control": 705
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": false
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "research_only",
+  "status_reason": "q<0.05 but 2023-25 sign/order unstable"
+ },
+ {
+  "id": "fam_A09_opp_blitz_high_qb",
+  "family": "A",
+  "definition": "Opponent trailing blitz share (FTN n_blitzers>0 on dropbacks), top vs bottom tercile",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2022-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "QB"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "2518 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 826,
+   "control": 761
+  },
+  "n_effective": 699,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.3890309791482814,
+   "ci95": [
+    -0.22519413297310414,
+    1.0830257869268978
+   ],
+   "p": 0.2393328891849878
+  },
+  "posterior": {
+   "mean": 0.3487481235152121,
+   "ci95": [
+    -0.28195372401318675,
+    0.979449971043611
+   ]
+  },
+  "multiplicity_q": 0.29916611148123473,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 1.3148258850076304,
+    "n_exposed": 172,
+    "n_control": 161
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": false
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_A10_opp_heavy_box_rb",
+  "family": "A",
+  "definition": "Opponent trailing share of rushes faced with 8+ box (FTN), top vs bottom tercile",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2022-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "RB"
+  ],
+  "component_node": "d_rush_yards",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "5278 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 1699,
+   "control": 1589
+  },
+  "n_effective": 728,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 5.0) on the d_rush_yards effect",
+  "effect": {
+   "point": -3.146591218915176,
+   "ci95": [
+    -5.520324215238163,
+    -0.6679806673180002
+   ],
+   "p": 0.017999555851654452
+  },
+  "posterior": {
+   "mean": -2.961767711049181,
+   "ci95": [
+    -5.336882024236456,
+    -0.5866533978619057
+   ]
+  },
+  "multiplicity_q": 0.03428486828886562,
+  "season_forward": {
+   "train_le2022": {
+    "effect": -2.5869692499583796,
+    "n_exposed": 381,
+    "n_control": 351
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": -0.25869692499583796,
+   "mae_delta_mean": -0.003085221363219759,
+   "mae_delta_ci": [
+    -0.004380163780609431,
+    -0.0018090961461617824
+   ],
+   "n_rows_touched": 993,
+   "exposed_model_residual_mean": -0.1581391636601542,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": -0.003085221363219759,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_A11_opp_pace_fast_all",
+  "family": "A",
+  "definition": "Opponent trailing offensive plays/game, top vs bottom tercile (pace-up spillover)",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "10931 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 11456,
+   "control": 10394
+  },
+  "n_effective": 1279,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": -0.09177055640493743,
+   "ci95": [
+    -0.2834215610731353,
+    0.10175289712244344
+   ],
+   "p": 0.3846662225183211
+  },
+  "posterior": {
+   "mean": -0.09086967003603856,
+   "ci95": [
+    -0.2850652750395581,
+    0.10332593496748098
+   ]
+  },
+  "multiplicity_q": 0.46626208790099527,
+  "season_forward": {
+   "train_le2022": {
+    "effect": -0.26593331935265874,
+    "n_exposed": 6227,
+    "n_control": 5693
+   },
+   "sign_agreement_2023_25": "1/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_A12_opp_proe_allowed_qb",
+  "family": "A",
+  "definition": "Opponent trailing PROE allowed (mean pass_oe faced), top vs bottom tercile",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "QB"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "1361 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 1456,
+   "control": 1288
+  },
+  "n_effective": 1228,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.9170228144980359,
+   "ci95": [
+    0.3016430806600758,
+    1.5667389704533186
+   ],
+   "p": 0.003332889184987786
+  },
+  "posterior": {
+   "mean": 0.8329453042546076,
+   "ci95": [
+    0.2394655306038338,
+    1.4264250779053813
+   ]
+  },
+  "multiplicity_q": 0.009522540528536532,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 1.3229871123855117,
+    "n_exposed": 780,
+    "n_control": 686
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": 1.0,
+   "mae_delta_mean": 0.006329705471451064,
+   "mae_delta_ci": [
+    0.002085786991182159,
+    0.010480645817491793
+   ],
+   "n_rows_touched": 525,
+   "exposed_model_residual_mean": -0.3109595909359334,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": 0.006329705471451064,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_A13_opp_explosive_pass_wr",
+  "family": "A",
+  "definition": "Opponent trailing 20+yd completions per dropback allowed, top vs bottom tercile",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "WR"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "4491 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 4729,
+   "control": 4237
+  },
+  "n_effective": 1279,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.37722810190042455,
+   "ci95": [
+    0.07692125545495647,
+    0.6833064546091118
+   ],
+   "p": 0.013999555851654454
+  },
+  "posterior": {
+   "mean": 0.3681078848702406,
+   "ci95": [
+    0.06334881546856608,
+    0.6728669542719151
+   ]
+  },
+  "multiplicity_q": 0.0294727491613778,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.3275040552469176,
+    "n_exposed": 2614,
+    "n_control": 2309
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": 0.3275040552469176,
+   "mae_delta_mean": 0.0069517652802595364,
+   "mae_delta_ci": [
+    0.004910568368742093,
+    0.009152193977953247
+   ],
+   "n_rows_touched": 1521,
+   "exposed_model_residual_mean": 0.18892368670925855,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": 0.0069517652802595364,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_A14_opp_db2_out_qb",
+  "family": "A",
+  "definition": "2+ opponent DBs officially Out/Doubtful pregame (factor_frame flag)",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "QB"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "13 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 429,
+   "control": 3663
+  },
+  "n_effective": 357,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.6541976614967135,
+   "ci95": [
+    -0.11059424260703055,
+    1.3675854653512292
+   ],
+   "p": 0.08866622251832111
+  },
+  "posterior": {
+   "mean": 0.5721534215811124,
+   "ci95": [
+    -0.1219523020627179,
+    1.2662591452249425
+   ]
+  },
+  "multiplicity_q": 0.1364095731051094,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.5523797824766652,
+    "n_exposed": 209,
+    "n_control": 1977
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_A15_opp_db2_out_wr",
+  "family": "A",
+  "definition": "2+ opponent DBs officially Out/Doubtful pregame",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "WR"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "38 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 1391,
+   "control": 12028
+  },
+  "n_effective": 372,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.3022018305325405,
+   "ci95": [
+    -0.04804125370341774,
+    0.6414243303288384
+   ],
+   "p": 0.08866622251832111
+  },
+  "posterior": {
+   "mean": 0.29289798937986683,
+   "ci95": [
+    -0.05100715272944706,
+    0.6368031314891807
+   ]
+  },
+  "multiplicity_q": 0.1364095731051094,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.19997635220257723,
+    "n_exposed": 710,
+    "n_control": 6631
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_A16_opp_front2_out_rb",
+  "family": "A",
+  "definition": "2+ opponent front-7 defenders officially Out/Doubtful pregame",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "RB"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "36 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 1060,
+   "control": 7470
+  },
+  "n_effective": 445,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.11015091689805896,
+   "ci95": [
+    -0.34544022892552734,
+    0.5778643512502413
+   ],
+   "p": 0.6313328891849879
+  },
+  "posterior": {
+   "mean": 0.104596894476377,
+   "ci95": [
+    -0.3355177578903088,
+    0.5447115468430628
+   ]
+  },
+  "multiplicity_q": 0.6645609359841977,
+  "season_forward": {
+   "train_le2022": {
+    "effect": -0.38720666980427676,
+    "n_exposed": 509,
+    "n_control": 4193
+   },
+   "sign_agreement_2023_25": "0/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_A17_opp_man_rate_wr",
+  "family": "A",
+  "definition": "Opponent trailing man-coverage share (participation MAN/(MAN+ZONE)), top vs bottom tercile",
+  "source": "pbp caches 2019-2025 + FTN charting 2022-25 + pbp_participation man/zone + fantasy feature_frame + data/factor_frame.parquet injury flags",
+  "years": "2019-2025 (tag coverage varies)",
+  "as_of_clock": "opponent trailing stats strictly shift-then-roll (ewm hl=5, min 3 prior games, cross-season carry); DB/front-7 flags from official pregame Out/Doubtful designations",
+  "positions": [
+   "WR"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "opponent quality/scheme shifts player opportunity and efficiency",
+  "missingness": "4423 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 4778,
+   "control": 4256
+  },
+  "n_effective": 1279,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.08143770831037117,
+   "ci95": [
+    -0.15906748330008533,
+    0.2960451115940834
+   ],
+   "p": 0.5259995558516545
+  },
+  "posterior": {
+   "mean": 0.08035847660731066,
+   "ci95": [
+    -0.1452734993068041,
+    0.3059904525214254
+   ]
+  },
+  "multiplicity_q": 0.5686481684882752,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.2146464378867202,
+    "n_exposed": 2619,
+    "n_control": 2357
+   },
+   "sign_agreement_2023_25": "1/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_B01_turf_all",
+  "family": "B",
+  "definition": "Game on artificial turf vs natural grass",
+  "source": "nflverse schedules (roof/surface/site/rest/stadium) + static team geodesy table",
+  "years": "2019-2025",
+  "as_of_clock": "fully schedule-derivable before kickoff",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "surface/roof/altitude/travel/recovery affects execution",
+  "missingness": "731 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 14193,
+   "control": 17857
+  },
+  "n_effective": 1572,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.3501740018964668,
+   "ci95": [
+    0.15900427775402007,
+    0.5483860989506734
+   ],
+   "p": 0.0006662225183211193
+  },
+  "posterior": {
+   "mean": 0.3468112887131922,
+   "ci95": [
+    0.15474151050182652,
+    0.538881066924558
+   ]
+  },
+  "multiplicity_q": 0.0024226273393495247,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.35281408842193157,
+    "n_exposed": 7609,
+    "n_control": 10175
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": 0.35281408842193157,
+   "mae_delta_mean": 0.020670026856830503,
+   "mae_delta_ci": [
+    0.015558306264313504,
+    0.025434938990209197
+   ],
+   "n_rows_touched": 4632,
+   "exposed_model_residual_mean": 0.11397434592854012,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": 0.020670026856830503,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_B02_closed_roof_all",
+  "family": "B",
+  "definition": "Roof dome/closed vs outdoors/open",
+  "source": "nflverse schedules (roof/surface/site/rest/stadium) + static team geodesy table",
+  "years": "2019-2025",
+  "as_of_clock": "fully schedule-derivable before kickoff",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "surface/roof/altitude/travel/recovery affects execution",
+  "missingness": "0 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 10282,
+   "control": 22499
+  },
+  "n_effective": 1140,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.5344564249961189,
+   "ci95": [
+    0.33428605631895175,
+    0.7497057690546989
+   ],
+   "p": 0.0006662225183211193
+  },
+  "posterior": {
+   "mean": 0.528729343952967,
+   "ci95": [
+    0.32583656779301895,
+    0.731622120112915
+   ]
+  },
+  "multiplicity_q": 0.0024226273393495247,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.5929765566087649,
+    "n_exposed": 5444,
+    "n_control": 12454
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": 0.5929765566087649,
+   "mae_delta_mean": 0.028904424489311964,
+   "mae_delta_ci": [
+    0.021343503612866847,
+    0.036339918392884404
+   ],
+   "n_rows_touched": 3403,
+   "exposed_model_residual_mean": 0.11679938336508609,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": 0.028904424489311964,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_B03_closed_roof_qb_passyds",
+  "family": "B",
+  "definition": "Roof dome/closed vs outdoors/open, QB passing yards vs trailing",
+  "source": "nflverse schedules (roof/surface/site/rest/stadium) + static team geodesy table",
+  "years": "2019-2025",
+  "as_of_clock": "fully schedule-derivable before kickoff",
+  "positions": [
+   "QB"
+  ],
+  "component_node": "d_pass_yards",
+  "mechanism": "surface/roof/altitude/travel/recovery affects execution",
+  "missingness": "0 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 1308,
+   "control": 2797
+  },
+  "n_effective": 1101,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 8.0) on the d_pass_yards effect",
+  "effect": {
+   "point": 6.584969668506935,
+   "ci95": [
+    0.7501796386053027,
+    12.666703172292543
+   ],
+   "p": 0.02866622251832112
+  },
+  "posterior": {
+   "mean": 5.754352852496335,
+   "ci95": [
+    0.18545145293468757,
+    11.323254252057982
+   ]
+  },
+  "multiplicity_q": 0.052120404578765676,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 6.126770664371982,
+    "n_exposed": 683,
+    "n_control": 1516
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_B04_altitude_road_all",
+  "family": "B",
+  "definition": "Road team at Denver / any team at Azteca (5,280ft+); Denver home rows excluded",
+  "source": "nflverse schedules (roof/surface/site/rest/stadium) + static team geodesy table",
+  "years": "2019-2025",
+  "as_of_clock": "fully schedule-derivable before kickoff",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "surface/roof/altitude/travel/recovery affects execution",
+  "missingness": "529 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 571,
+   "control": 31681
+  },
+  "n_effective": 62,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": -0.7288811706537529,
+   "ci95": [
+    -1.3509376831341304,
+    -0.12735015149571077
+   ],
+   "p": 0.013999555851654454
+  },
+  "posterior": {
+   "mean": -0.6629679214678923,
+   "ci95": [
+    -1.2523732613087766,
+    -0.07356258162700802
+   ]
+  },
+  "multiplicity_q": 0.0294727491613778,
+  "season_forward": {
+   "train_le2022": {
+    "effect": -0.7020358074363949,
+    "n_exposed": 326,
+    "n_control": 17298
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": -0.7020358074363949,
+   "mae_delta_mean": -0.002199558253416889,
+   "mae_delta_ci": [
+    -0.003996263858783759,
+    -0.00029474952795323166
+   ],
+   "n_rows_touched": 155,
+   "exposed_model_residual_mean": -0.7526491766542073,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": -0.002199558253416889,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_B05_travel_1500_all",
+  "family": "B",
+  "definition": "Road great-circle travel >=1500mi vs shorter road trips; international excluded",
+  "source": "nflverse schedules (roof/surface/site/rest/stadium) + static team geodesy table",
+  "years": "2019-2025",
+  "as_of_clock": "fully schedule-derivable before kickoff",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "surface/roof/altitude/travel/recovery affects execution",
+  "missingness": "16554 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 3410,
+   "control": 12817
+  },
+  "n_effective": 385,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.22015861962302935,
+   "ci95": [
+    -0.12228649286421377,
+    0.574487771026341
+   ],
+   "p": 0.1993328891849878
+  },
+  "posterior": {
+   "mean": 0.2134602889728254,
+   "ci95": [
+    -0.12841799508025395,
+    0.5553385730259047
+   ]
+  },
+  "multiplicity_q": 0.2657771855799837,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.07369502784137487,
+    "n_exposed": 1796,
+    "n_control": 7091
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": false
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_B06_tz2_all",
+  "family": "B",
+  "definition": "Road 2+ time zones crossed vs 0-1; international excluded",
+  "source": "nflverse schedules (roof/surface/site/rest/stadium) + static team geodesy table",
+  "years": "2019-2025",
+  "as_of_clock": "fully schedule-derivable before kickoff",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "surface/roof/altitude/travel/recovery affects execution",
+  "missingness": "16554 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 4096,
+   "control": 12131
+  },
+  "n_effective": 460,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.26382292068681684,
+   "ci95": [
+    -0.03858613171154028,
+    0.5815643864600774
+   ],
+   "p": 0.09666622251832112
+  },
+  "posterior": {
+   "mean": 0.2577086167879594,
+   "ci95": [
+    -0.04067386351573088,
+    0.5560910970916497
+   ]
+  },
+  "multiplicity_q": 0.1419041274071254,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.23084315535929406,
+    "n_exposed": 2151,
+    "n_control": 6736
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_B07_body_clock_all",
+  "family": "B",
+  "definition": "Pacific-home team on road at 13:xx ET kickoff vs other road games",
+  "source": "nflverse schedules (roof/surface/site/rest/stadium) + static team geodesy table",
+  "years": "2019-2025",
+  "as_of_clock": "fully schedule-derivable before kickoff",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "surface/roof/altitude/travel/recovery affects execution",
+  "missingness": "16358 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 1122,
+   "control": 15301
+  },
+  "n_effective": 129,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.2405807961318909,
+   "ci95": [
+    -0.3419641106093088,
+    0.7846981305869493
+   ],
+   "p": 0.4086662225183211
+  },
+  "posterior": {
+   "mean": 0.22184088478226005,
+   "ci95": [
+    -0.3251868658011302,
+    0.7688686353656503
+   ]
+  },
+  "multiplicity_q": 0.48078379119802483,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.5456817226607742,
+    "n_exposed": 559,
+    "n_control": 8433
+   },
+   "sign_agreement_2023_25": "1/3",
+   "magnitude_order_holds": false
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_B08_international_all",
+  "family": "B",
+  "definition": "International site (London/Mexico City/Munich/Frankfurt/Sao Paulo/Dublin/Madrid/Berlin)",
+  "source": "nflverse schedules (roof/surface/site/rest/stadium) + static team geodesy table",
+  "years": "2019-2025",
+  "as_of_clock": "fully schedule-derivable before kickoff",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "surface/roof/altitude/travel/recovery affects execution",
+  "missingness": "0 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 397,
+   "control": 32384
+  },
+  "n_effective": 44,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": -0.10031825708982096,
+   "ci95": [
+    -0.7098317343099715,
+    0.46311328030594107
+   ],
+   "p": 0.7406662225183211
+  },
+  "posterior": {
+   "mean": -0.09240671138013971,
+   "ci95": [
+    -0.6428299395123172,
+    0.45801651675203775
+   ]
+  },
+  "multiplicity_q": 0.7406662225183211,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.3358671522190581,
+    "n_exposed": 216,
+    "n_control": 17682
+   },
+   "sign_agreement_2023_25": "0/2",
+   "magnitude_order_holds": true
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_B09_short_rest_all",
+  "family": "B",
+  "definition": "Rest <=5 days vs regular 6-11 day rest (post-bye excluded from control)",
+  "source": "nflverse schedules (roof/surface/site/rest/stadium) + static team geodesy table",
+  "years": "2019-2025",
+  "as_of_clock": "fully schedule-derivable before kickoff",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "surface/roof/altitude/travel/recovery affects execution",
+  "missingness": "3674 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 2098,
+   "control": 27009
+  },
+  "n_effective": 239,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.4376723069428572,
+   "ci95": [
+    0.03368541255189238,
+    0.8367148323106409
+   ],
+   "p": 0.03266622251832112
+  },
+  "posterior": {
+   "mean": 0.41934009515650056,
+   "ci95": [
+    0.018206560671966687,
+    0.8204736296410344
+   ]
+  },
+  "multiplicity_q": 0.05681082177099325,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.33281309032572914,
+    "n_exposed": 1066,
+    "n_control": 14859
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_B10_post_bye_all",
+  "family": "B",
+  "definition": "Rest >=12 days (post-bye) vs regular 6-11 day rest (short rest excluded)",
+  "source": "nflverse schedules (roof/surface/site/rest/stadium) + static team geodesy table",
+  "years": "2019-2025",
+  "as_of_clock": "fully schedule-derivable before kickoff",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "surface/roof/altitude/travel/recovery affects execution",
+  "missingness": "3686 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 2086,
+   "control": 27009
+  },
+  "n_effective": 225,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": -0.4323843326215979,
+   "ci95": [
+    -0.7484963857755209,
+    -0.09508898222518085
+   ],
+   "p": 0.015332889184987786
+  },
+  "posterior": {
+   "mean": -0.42061993212886134,
+   "ci95": [
+    -0.7439201499434731,
+    -0.09731971431424957
+   ]
+  },
+  "multiplicity_q": 0.030665778369975572,
+  "season_forward": {
+   "train_le2022": {
+    "effect": -0.5731886703154335,
+    "n_exposed": 1166,
+    "n_control": 14859
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "research_only",
+   "adjustment_fp": -0.5731886703154335,
+   "mae_delta_mean": -0.0028058893230626936,
+   "mae_delta_ci": [
+    -0.006008760159034896,
+    0.00024058221526252738
+   ],
+   "n_rows_touched": 643,
+   "exposed_model_residual_mean": 0.05469666539164555,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": -0.0028058893230626936,
+  "status": "research_only",
+  "status_reason": "battery survivor; adjustment-gate CI straddles 0"
+ },
+ {
+  "id": "fam_B11_post_bye_wr_recyds",
+  "family": "B",
+  "definition": "Post-bye WR receiving yards vs trailing (fantasy-space re-derivation of prop survivor)",
+  "source": "nflverse schedules (roof/surface/site/rest/stadium) + static team geodesy table",
+  "years": "2019-2025",
+  "as_of_clock": "fully schedule-derivable before kickoff",
+  "positions": [
+   "WR"
+  ],
+  "component_node": "d_rec_yards",
+  "mechanism": "surface/roof/altitude/travel/recovery affects execution",
+  "missingness": "1506 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 861,
+   "control": 11090
+  },
+  "n_effective": 225,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 5.0) on the d_rec_yards effect",
+  "effect": {
+   "point": -1.8626157868522226,
+   "ci95": [
+    -4.2812134761377765,
+    0.4786462026085484
+   ],
+   "p": 0.09933288918498778
+  },
+  "posterior": {
+   "mean": -1.7602447940886161,
+   "ci95": [
+    -4.057730898599878,
+    0.5372413104226463
+   ]
+  },
+  "multiplicity_q": 0.1419041274071254,
+  "season_forward": {
+   "train_le2022": {
+    "effect": -2.7240395706310556,
+    "n_exposed": 486,
+    "n_control": 6134
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_B12_after_ot_all",
+  "family": "B",
+  "definition": "Team played overtime last week (fatigue carryover)",
+  "source": "nflverse schedules (roof/surface/site/rest/stadium) + static team geodesy table",
+  "years": "2019-2025",
+  "as_of_clock": "fully schedule-derivable before kickoff",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "surface/roof/altitude/travel/recovery affects execution",
+  "missingness": "1588 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 1691,
+   "control": 29502
+  },
+  "n_effective": 186,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": -0.3106413275374458,
+   "ci95": [
+    -0.6209949097067801,
+    0.031071932152333722
+   ],
+   "p": 0.07133288918498779
+  },
+  "posterior": {
+   "mean": -0.30227555458509786,
+   "ci95": [
+    -0.62392254445124,
+    0.01937143528104418
+   ]
+  },
+  "multiplicity_q": 0.11888814864164632,
+  "season_forward": {
+   "train_le2022": {
+    "effect": -0.33180991918575026,
+    "n_exposed": 958,
+    "n_control": 16133
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_C01_big_fav_all",
+  "family": "C",
+  "definition": "Team spread <= -7 (big favorite) vs all other lined games",
+  "source": "nflverse schedules (closing lines, kickoff, coaches, referee) + pbp trailing rates",
+  "years": "2019-2025",
+  "as_of_clock": "closing line stamped pregame (leakage-adjacent for LIVE use: acceptable as projection feature, flag before intra-week deployment); schedule flags; trailing rates shift-then-roll",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "expected game state drives team volume and script",
+  "missingness": "0 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 4665,
+   "control": 28116
+  },
+  "n_effective": 530,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": -0.49732408802089134,
+   "ci95": [
+    -0.7112201708327851,
+    -0.28769526255320993
+   ],
+   "p": 0.0006662225183211193
+  },
+  "posterior": {
+   "mean": -0.49139100035749755,
+   "ci95": [
+    -0.705471301262524,
+    -0.2773106994524711
+   ]
+  },
+  "multiplicity_q": 0.0024226273393495247,
+  "season_forward": {
+   "train_le2022": {
+    "effect": -0.4993754831134153,
+    "n_exposed": 2788,
+    "n_control": 15110
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": -0.4993754831134153,
+   "mae_delta_mean": -0.009236258888637217,
+   "mae_delta_ci": [
+    -0.012823581803720606,
+    -0.0053178166474050865
+   ],
+   "n_rows_touched": 1271,
+   "exposed_model_residual_mean": -0.25609300256517054,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": -0.009236258888637217,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_C02_big_dog_all",
+  "family": "C",
+  "definition": "Team spread >= +7 (big underdog) vs all other lined games",
+  "source": "nflverse schedules (closing lines, kickoff, coaches, referee) + pbp trailing rates",
+  "years": "2019-2025",
+  "as_of_clock": "closing line stamped pregame (leakage-adjacent for LIVE use: acceptable as projection feature, flag before intra-week deployment); schedule flags; trailing rates shift-then-roll",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "expected game state drives team volume and script",
+  "missingness": "0 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 4922,
+   "control": 27859
+  },
+  "n_effective": 530,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.5036993621566414,
+   "ci95": [
+    0.29570712215649203,
+    0.7087501916675721
+   ],
+   "p": 0.0006662225183211193
+  },
+  "posterior": {
+   "mean": 0.497658052905363,
+   "ci95": [
+    0.28300557576709706,
+    0.712310530043629
+   ]
+  },
+  "multiplicity_q": 0.0024226273393495247,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.526401449168122,
+    "n_exposed": 2935,
+    "n_control": 14963
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": 0.526401449168122,
+   "mae_delta_mean": 0.006850338385395283,
+   "mae_delta_ci": [
+    0.003455388901849506,
+    0.010524672758770245
+   ],
+   "n_rows_touched": 1394,
+   "exposed_model_residual_mean": 0.2194957368201365,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": 0.006850338385395283,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_C03_high_total_all",
+  "family": "C",
+  "definition": "Game total >= 47.5 vs all other lined games",
+  "source": "nflverse schedules (closing lines, kickoff, coaches, referee) + pbp trailing rates",
+  "years": "2019-2025",
+  "as_of_clock": "closing line stamped pregame (leakage-adjacent for LIVE use: acceptable as projection feature, flag before intra-week deployment); schedule flags; trailing rates shift-then-roll",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "expected game state drives team volume and script",
+  "missingness": "0 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 10399,
+   "control": 22382
+  },
+  "n_effective": 1144,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.4104367463747189,
+   "ci95": [
+    0.20692956853456318,
+    0.6082976012427947
+   ],
+   "p": 0.0006662225183211193
+  },
+  "posterior": {
+   "mean": 0.4061508508060635,
+   "ci95": [
+    0.20586339696752792,
+    0.6064383046445991
+   ]
+  },
+  "multiplicity_q": 0.0024226273393495247,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.33220140089087585,
+    "n_exposed": 6674,
+    "n_control": 11224
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": 0.33220140089087585,
+   "mae_delta_mean": 0.009530939180892872,
+   "mae_delta_ci": [
+    0.006592049647927347,
+    0.0125169992985729
+   ],
+   "n_rows_touched": 2701,
+   "exposed_model_residual_mean": 0.38394920770924157,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": 0.009530939180892872,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_C04_low_total_all",
+  "family": "C",
+  "definition": "Game total <= 41.5 vs all other lined games",
+  "source": "nflverse schedules (closing lines, kickoff, coaches, referee) + pbp trailing rates",
+  "years": "2019-2025",
+  "as_of_clock": "closing line stamped pregame (leakage-adjacent for LIVE use: acceptable as projection feature, flag before intra-week deployment); schedule flags; trailing rates shift-then-roll",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "expected game state drives team volume and script",
+  "missingness": "0 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 7576,
+   "control": 25205
+  },
+  "n_effective": 844,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": -0.5288375304974435,
+   "ci95": [
+    -0.7291137449372339,
+    -0.32725227163450404
+   ],
+   "p": 0.0006662225183211193
+  },
+  "posterior": {
+   "mean": -0.5233072462179392,
+   "ci95": [
+    -0.7237399870428942,
+    -0.32287450539298423
+   ]
+  },
+  "multiplicity_q": 0.0024226273393495247,
+  "season_forward": {
+   "train_le2022": {
+    "effect": -0.699765244886226,
+    "n_exposed": 3075,
+    "n_control": 14823
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": -0.699765244886226,
+   "mae_delta_mean": -0.027299956669536662,
+   "mae_delta_ci": [
+    -0.03521908401219369,
+    -0.019371734998893865
+   ],
+   "n_rows_touched": 3058,
+   "exposed_model_residual_mean": -0.26826072962798597,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": -0.027299956669536662,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_C05_implied_high_all",
+  "family": "C",
+  "definition": "Implied team total, within-season-week top vs bottom tercile",
+  "source": "nflverse schedules (closing lines, kickoff, coaches, referee) + pbp trailing rates",
+  "years": "2019-2025",
+  "as_of_clock": "closing line stamped pregame (leakage-adjacent for LIVE use: acceptable as projection feature, flag before intra-week deployment); schedule flags; trailing rates shift-then-roll",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "expected game state drives team volume and script",
+  "missingness": "10888 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 11424,
+   "control": 10469
+  },
+  "n_effective": 1279,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": -0.3330179874174977,
+   "ci95": [
+    -0.5327087564959863,
+    -0.1310256040786662
+   ],
+   "p": 0.0019995558516544528
+  },
+  "posterior": {
+   "mean": -0.32971166769585447,
+   "ci95": [
+    -0.5250082527223333,
+    -0.1344150826693756
+   ]
+  },
+  "multiplicity_q": 0.006152479543552162,
+  "season_forward": {
+   "train_le2022": {
+    "effect": -0.3167876231901628,
+    "n_exposed": 6295,
+    "n_control": 5635
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": {
+   "gate": "rejected",
+   "adjustment_fp": -0.3167876231901628,
+   "mae_delta_mean": -0.012304062817754868,
+   "mae_delta_ci": [
+    -0.01575652835804072,
+    -0.008676127994529444
+   ],
+   "n_rows_touched": 3638,
+   "exposed_model_residual_mean": 0.06343873305314106,
+   "note": "delta over frozen outer MAE 5.105968; paired week-block bootstrap B=4000"
+  },
+  "calibration_effect": -0.012304062817754868,
+  "status": "rejected",
+  "status_reason": "battery survivor but adjustment gate failed"
+ },
+ {
+  "id": "fam_C06_primetime_all",
+  "family": "C",
+  "definition": "Primetime kickoff (feature-frame definition) vs day games",
+  "source": "nflverse schedules (closing lines, kickoff, coaches, referee) + pbp trailing rates",
+  "years": "2019-2025",
+  "as_of_clock": "closing line stamped pregame (leakage-adjacent for LIVE use: acceptable as projection feature, flag before intra-week deployment); schedule flags; trailing rates shift-then-roll",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "expected game state drives team volume and script",
+  "missingness": "0 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 7084,
+   "control": 25697
+  },
+  "n_effective": 794,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": -0.08491170469810821,
+   "ci95": [
+    -0.3286181784930821,
+    0.16414837092339543
+   ],
+   "p": 0.5059995558516545
+  },
+  "posterior": {
+   "mean": -0.08355781251150808,
+   "ci95": [
+    -0.3310516173624751,
+    0.163935992339459
+   ]
+  },
+  "multiplicity_q": 0.5622217287240605,
+  "season_forward": {
+   "train_le2022": {
+    "effect": -0.1870627311167574,
+    "n_exposed": 3709,
+    "n_control": 14189
+   },
+   "sign_agreement_2023_25": "1/3",
+   "magnitude_order_holds": false
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_C07_div_rematch_all",
+  "family": "C",
+  "definition": "Second divisional meeting vs first meeting (population: division games)",
+  "source": "nflverse schedules (closing lines, kickoff, coaches, referee) + pbp trailing rates",
+  "years": "2019-2025",
+  "as_of_clock": "closing line stamped pregame (leakage-adjacent for LIVE use: acceptable as projection feature, flag before intra-week deployment); schedule flags; trailing rates shift-then-roll",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "expected game state drives team volume and script",
+  "missingness": "0 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 6215,
+   "control": 5654
+  },
+  "n_effective": 672,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": 0.12860765716364614,
+   "ci95": [
+    -0.23837402747332354,
+    0.4759698882883981
+   ],
+   "p": 0.4846662225183211
+  },
+  "posterior": {
+   "mean": 0.12446484292641673,
+   "ci95": [
+    -0.22731454425065845,
+    0.47624423010349193
+   ]
+  },
+  "multiplicity_q": 0.5539042543066527,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.17172986706133997,
+    "n_exposed": 3495,
+    "n_control": 3109
+   },
+   "sign_agreement_2023_25": "3/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_C08_ref_pace_team",
+  "family": "C",
+  "definition": "Referee (crew chief) trailing combined plays/game, top vs bottom tercile -> team plays vs trailing",
+  "source": "nflverse schedules (closing lines, kickoff, coaches, referee) + pbp trailing rates",
+  "years": "2019-2025",
+  "as_of_clock": "closing line stamped pregame (leakage-adjacent for LIVE use: acceptable as projection feature, flag before intra-week deployment); schedule flags; trailing rates shift-then-roll",
+  "positions": [
+   "team"
+  ],
+  "component_node": "d_plays",
+  "mechanism": "expected game state drives team volume and script",
+  "missingness": "1407 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 1243,
+   "control": 1092
+  },
+  "n_effective": 1243,
+  "cohort": "team-games 2019-2025 REG with trailing volume",
+  "control": "matched trailing-volume quintile strata, (season,week) cluster bootstrap",
+  "prior": "normal(0, 2.5) on the d_plays effect",
+  "effect": {
+   "point": 0.1338426136579455,
+   "ci95": [
+    -0.4062519412829341,
+    0.6773798568595623
+   ],
+   "p": 0.6553328891849878
+  },
+  "posterior": {
+   "mean": 0.13219627099729767,
+   "ci95": [
+    -0.4112529762831424,
+    0.6756455182777378
+   ]
+  },
+  "multiplicity_q": 0.6721362965999875,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.645284620256644,
+    "n_exposed": 661,
+    "n_control": 588
+   },
+   "sign_agreement_2023_25": "1/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_C09_fourth_aggr_team",
+  "family": "C",
+  "definition": "Team trailing 4th-and-<=2 go rate (neutral situations), top vs bottom tercile -> team plays vs trailing",
+  "source": "nflverse schedules (closing lines, kickoff, coaches, referee) + pbp trailing rates",
+  "years": "2019-2025",
+  "as_of_clock": "closing line stamped pregame (leakage-adjacent for LIVE use: acceptable as projection feature, flag before intra-week deployment); schedule flags; trailing rates shift-then-roll",
+  "positions": [
+   "team"
+  ],
+  "component_node": "d_plays",
+  "mechanism": "expected game state drives team volume and script",
+  "missingness": "1425 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 1216,
+   "control": 1101
+  },
+  "n_effective": 1216,
+  "cohort": "team-games 2019-2025 REG with trailing volume",
+  "control": "matched trailing-volume quintile strata, (season,week) cluster bootstrap",
+  "prior": "normal(0, 2.5) on the d_plays effect",
+  "effect": {
+   "point": 0.6437199669647018,
+   "ci95": [
+    -0.21596074737179502,
+    1.4795049585758924
+   ],
+   "p": 0.1353328891849878
+  },
+  "posterior": {
+   "mean": 0.625164016483731,
+   "ci95": [
+    -0.2067705938744362,
+    1.4570986268418982
+   ]
+  },
+  "multiplicity_q": 0.186666054048259,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 0.6741141266623105,
+    "n_exposed": 645,
+    "n_control": 584
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": true
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_C10_new_hc_all",
+  "family": "C",
+  "definition": "Head coach differs from team's final game of prior season (2020+)",
+  "source": "nflverse schedules (closing lines, kickoff, coaches, referee) + pbp trailing rates",
+  "years": "2020-2025",
+  "as_of_clock": "closing line stamped pregame (leakage-adjacent for LIVE use: acceptable as projection feature, flag before intra-week deployment); schedule flags; trailing rates shift-then-roll",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "expected game state drives team volume and script",
+  "missingness": "3548 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 6290,
+   "control": 22943
+  },
+  "n_effective": 692,
+  "cohort": "played player-weeks 2019-2025 REG, >=3 prior played games",
+  "control": "matched strata position x role bin x trailing-baseline quintile, (season,week) cluster bootstrap",
+  "prior": "normal(0, 1.0) on the d_fp effect",
+  "effect": {
+   "point": -0.13267017293356984,
+   "ci95": [
+    -0.3412384627650238,
+    0.0691547099269273
+   ],
+   "p": 0.20999955585165447
+  },
+  "posterior": {
+   "mean": -0.1312117619425291,
+   "ci95": [
+    -0.33671060825695187,
+    0.07428708437189366
+   ]
+  },
+  "multiplicity_q": 0.2709671688408445,
+  "season_forward": {
+   "train_le2022": {
+    "effect": -0.26780654903678075,
+    "n_exposed": 3333,
+    "n_control": 11017
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": false
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "rejected",
+  "status_reason": "null at BH-FDR q>=0.05"
+ },
+ {
+  "id": "fam_D01_implied_high_passatt_team",
+  "family": "D",
+  "definition": "Implied team total within-week top vs bottom tercile -> team pass attempts vs trailing",
+  "source": "historical_lines.parquet + historical/lines_extra.parquet + fantasy/schedules.parquet (single snapshot, no book id)",
+  "years": "2019-2025",
+  "as_of_clock": "closing line stamped pregame (see C)",
+  "positions": [
+   "team"
+  ],
+  "component_node": "d_pass_att",
+  "mechanism": "market prices encode volume/scoring expectations",
+  "missingness": "1320 frame rows outside exposure/outcome/strata",
+  "n_raw": {
+   "exposed": 1275,
+   "control": 1147
+  },
+  "n_effective": 1275,
+  "cohort": "team-games 2019-2025 REG with trailing volume",
+  "control": "matched trailing-volume quintile strata, (season,week) cluster bootstrap",
+  "prior": "normal(0, 2.0) on the d_pass_att effect",
+  "effect": {
+   "point": 0.9980986301362021,
+   "ci95": [
+    0.29440526255439875,
+    1.706796149525825
+   ],
+   "p": 0.00866622251832112
+  },
+  "posterior": {
+   "mean": 0.9667021030777941,
+   "ci95": [
+    0.27145347143879517,
+    1.6619507347167932
+   ]
+  },
+  "multiplicity_q": 0.023109926715522987,
+  "season_forward": {
+   "train_le2022": {
+    "effect": 1.6349886817217423,
+    "n_exposed": 706,
+    "n_control": 626
+   },
+   "sign_agreement_2023_25": "2/3",
+   "magnitude_order_holds": false
+  },
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "research_only",
+  "status_reason": "q<0.05 but 2023-25 sign/order unstable"
+ },
+ {
+  "id": "fam_D90_line_movement_openclose",
+  "family": "D",
+  "definition": "Open->close spread/total movement as a factor",
+  "source": "ABSENT locally",
+  "years": "n/a",
+  "as_of_clock": "would be pregame if an open+close archive existed",
+  "positions": [
+   "team"
+  ],
+  "component_node": "d_pass_att",
+  "mechanism": "steam/News captured by line movement",
+  "missingness": "no open/close columns in any local lines source (verified: fantasy/schedules, historical_lines(base), lines_extra); single snapshot per game",
+  "n_raw": {
+   "exposed": 0,
+   "control": 0
+  },
+  "n_effective": 0,
+  "cohort": "n/a",
+  "control": "n/a",
+  "prior": "n/a",
+  "effect": null,
+  "posterior": null,
+  "multiplicity_q": null,
+  "season_forward": null,
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "proposed",
+  "status_reason": "acquisition needed: historical open/close odds archive"
+ },
+ {
+  "id": "fam_D91_crossbook_disagreement",
+  "family": "D",
+  "definition": "Cross-book spread/total disagreement as uncertainty factor",
+  "source": "ABSENT locally",
+  "years": "n/a",
+  "as_of_clock": "pregame if multi-book archive existed",
+  "positions": [
+   "team"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "book disagreement flags uncertain game states",
+  "missingness": "no book/sportsbook column anywhere; single-book snapshot",
+  "n_raw": {
+   "exposed": 0,
+   "control": 0
+  },
+  "n_effective": 0,
+  "cohort": "n/a",
+  "control": "n/a",
+  "prior": "n/a",
+  "effect": null,
+  "posterior": null,
+  "multiplicity_q": null,
+  "season_forward": null,
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "proposed",
+  "status_reason": "acquisition needed: multi-book odds archive"
+ },
+ {
+  "id": "fam_D92_prop_implied_player_volume",
+  "family": "D",
+  "definition": "Player-prop implied volume (attempts/receptions lines) as workload prior",
+  "source": "ABSENT locally",
+  "years": "n/a",
+  "as_of_clock": "pregame props close",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "opportunities",
+  "mechanism": "prop market aggregates sharp workload info",
+  "missingness": "no player-prop lines in either repo snapshot (price/edge/CLV stay out of shared snapshot by policy; volume-implied lines would be admissible)",
+  "n_raw": {
+   "exposed": 0,
+   "control": 0
+  },
+  "n_effective": 0,
+  "cohort": "n/a",
+  "control": "n/a",
+  "prior": "n/a",
+  "effect": null,
+  "posterior": null,
+  "multiplicity_q": null,
+  "season_forward": null,
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "proposed",
+  "status_reason": "acquisition needed: historical player-prop archive (volume markets only)"
+ },
+ {
+  "id": "fam_C90_ref_dpi_pass_volume",
+  "family": "C",
+  "definition": "Referee-crew trailing DPI rate -> team pass volume",
+  "source": "officials.parquet ready; pbp cache LACKS penalty columns",
+  "years": "n/a",
+  "as_of_clock": "crew announced pregame; trailing DPI shift-then-roll",
+  "positions": [
+   "team"
+  ],
+  "component_node": "d_pass_att",
+  "mechanism": "DPI-friendly crews extend drives / encourage passing",
+  "missingness": "40-col pbp subset has no penalty/penalty_type; needs penalty-level pbp re-pull",
+  "n_raw": {
+   "exposed": 0,
+   "control": 0
+  },
+  "n_effective": 0,
+  "cohort": "n/a",
+  "control": "n/a",
+  "prior": "n/a",
+  "effect": null,
+  "posterior": null,
+  "multiplicity_q": null,
+  "season_forward": null,
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "proposed",
+  "status_reason": "data acquisition: full pbp penalty columns"
+ },
+ {
+  "id": "fam_C91_playoffs_cohort",
+  "family": "C",
+  "definition": "Playoff-game context effects",
+  "source": "frames are REG-only by method contract",
+  "years": "n/a",
+  "as_of_clock": "schedule-derivable",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "win-or-go-home usage shifts",
+  "missingness": "analysis population excludes POST by construction",
+  "n_raw": {
+   "exposed": 0,
+   "control": 0
+  },
+  "n_effective": 0,
+  "cohort": "n/a",
+  "control": "n/a",
+  "prior": "n/a",
+  "effect": null,
+  "posterior": null,
+  "multiplicity_q": null,
+  "season_forward": null,
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "proposed",
+  "status_reason": "separate POST-season study needed"
+ },
+ {
+  "id": "fam_B90_wind15_observed",
+  "family": "B",
+  "definition": "Observed game wind >=15mph, outdoor QB d_fp",
+  "source": "feature_frame temp/wind (stadium observation)",
+  "years": "2019-2025",
+  "as_of_clock": "LEAKAGE_PROXY: observed during game, not a pregame forecast",
+  "positions": [
+   "QB"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "wind suppresses passing",
+  "missingness": "outdoor games with wind recorded only",
+  "n_raw": {
+   "exposed": 315,
+   "control": 2482
+  },
+  "n_effective": null,
+  "cohort": "outdoor QB player-weeks",
+  "control": "matched role/baseline strata",
+  "prior": "normal(0,1)",
+  "effect": {
+   "effect": -1.489107699113939,
+   "ci_lo": -2.5986345866143874,
+   "ci_hi": -0.3501365403786159,
+   "n_exposed": 315,
+   "n_control": 2482
+  },
+  "posterior": null,
+  "multiplicity_q": null,
+  "season_forward": null,
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "research_only",
+  "status_reason": "leakage_proxy (observed weather); pregame forecast feed required for production"
+ },
+ {
+  "id": "fam_B91_cold32_observed",
+  "family": "B",
+  "definition": "Observed game temp <=32F, pooled d_fp",
+  "source": "feature_frame temp/wind (stadium observation)",
+  "years": "2019-2025",
+  "as_of_clock": "LEAKAGE_PROXY: observed during game, not a pregame forecast",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "cold suppresses offense",
+  "missingness": "outdoor games with temp recorded only",
+  "n_raw": {
+   "exposed": 1229,
+   "control": 18517
+  },
+  "n_effective": null,
+  "cohort": "outdoor player-weeks",
+  "control": "matched position/role/baseline strata",
+  "prior": "normal(0,1)",
+  "effect": {
+   "effect": -0.2765810398257708,
+   "ci_lo": -0.6387107486459608,
+   "ci_hi": 0.1302730943966007,
+   "n_exposed": 1229,
+   "n_control": 18517
+  },
+  "posterior": null,
+  "multiplicity_q": null,
+  "season_forward": null,
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "research_only",
+  "status_reason": "leakage_proxy (observed weather)"
+ },
+ {
+  "id": "fam_A90_matchup_interactions",
+  "family": "A",
+  "definition": "Matchup interactions (e.g., deep-ball QB x explosive-allowed D; man-beater WR x man-heavy D)",
+  "source": "deferred",
+  "years": "n/a",
+  "as_of_clock": "pregame (both sides trailing)",
+  "positions": [
+   "QB",
+   "RB",
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "style-on-style interaction",
+  "missingness": "not fit in this wave by predeclaration",
+  "n_raw": {
+   "exposed": 0,
+   "control": 0
+  },
+  "n_effective": 0,
+  "cohort": "n/a",
+  "control": "n/a",
+  "prior": "n/a",
+  "effect": null,
+  "posterior": null,
+  "multiplicity_q": null,
+  "season_forward": null,
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "proposed",
+  "status_reason": "logged as hypotheses for the interaction wave; single-factor mains estimated here"
+ },
+ {
+  "id": "fam_A91_manzone_matchup_interaction",
+  "family": "A",
+  "definition": "Receiver-type x man/zone-share interaction",
+  "source": "pbp_participation coverage tags",
+  "years": "2019-2025",
+  "as_of_clock": "pregame (trailing man share)",
+  "positions": [
+   "WR",
+   "TE"
+  ],
+  "component_node": "d_fp",
+  "mechanism": "separator-vs-man folklore",
+  "missingness": "tag coverage 38-50% of plays by season",
+  "n_raw": {
+   "exposed": 0,
+   "control": 0
+  },
+  "n_effective": 0,
+  "cohort": "n/a",
+  "control": "n/a",
+  "prior": "n/a",
+  "effect": null,
+  "posterior": null,
+  "multiplicity_q": null,
+  "season_forward": null,
+  "ablation": null,
+  "calibration_effect": null,
+  "status": "proposed",
+  "status_reason": "interaction wave; industry evidence negative (methodology scan) -- low prior"
+ },
+ {
+  "id": "fam_E01_proe_playcall_v1",
+  "family": "E",
+  "definition": "Strictly-prior team PROE + opponent PROE-allowed + spread/total -> predicted team dropbacks/plays/pass attempts (volume node)",
+  "source": "pbp xpass/pass_oe + schedules lines; analysis/proe_playcall_proto.py",
+  "years": "2019-2025",
+  "as_of_clock": "all features shift-then-roll or pregame closing line",
+  "positions": [
+   "team",
+   "QB"
+  ],
+  "component_node": "team_pass_attempts -> QB attempts/pass yards",
+  "mechanism": "pass-rate-over-expected persists and prices team volume better than raw trailing attempts",
+  "missingness": "pass_oe/xpass nonnull by season {'2019': 0.783, '2020': 0.785, '2021': 0.7876, '2022': 0.7862, '2023': 0.7847, '2024': 0.7819, '2025': 0.7818}; attempts-convention gap pbp-vs-player-sum 0.19 att",
+  "n_raw": {
+   "exposed": 1632,
+   "control": 0
+  },
+  "n_effective": 1632,
+  "cohort": "team-games 2023-2025 season-forward; QB translation on outer QB rows",
+  "control": "baselines: trailing ewm4 attempts; current sim volume node clip(ewm4*(1+spread/75),15,55)",
+  "prior": "n/a (MAE evaluation, not NHST)",
+  "effect": null,
+  "posterior": null,
+  "multiplicity_q": null,
+  "season_forward": {
+   "pass_att": {
+    "B0_trailing_ewm4": {
+     "mae": 6.466696166463979,
+     "bias": 0.07348955708647072,
+     "n": 1632,
+     "per_season": {
+      "2023": {
+       "mae": 6.306802653516856,
+       "bias": 0.034231073171909106,
+       "n": 544
+      },
+      "2024": {
+       "mae": 6.579089375557159,
+       "bias": -0.19835773998753492,
+       "n": 544
+      },
+      "2025": {
+       "mae": 6.514196470317923,
+       "bias": 0.38459533807503804,
+       "n": 544
+      }
+     }
+    },
+    "B1_current_sim_node": {
+     "mae": 6.761257562524077,
+     "bias": 0.09088057058646475,
+     "n": 1632,
+     "per_season": {
+      "2023": {
+       "mae": 6.724857317986336,
+       "bias": 0.01967134125975646,
+       "n": 544
+      },
+      "2024": {
+       "mae": 6.76542483889048,
+       "bias": -0.15416957616587287,
+       "n": 544
+      },
+      "2025": {
+       "mae": 6.793490530695414,
+       "bias": 0.4071399466655108,
+       "n": 544
+      }
+     }
+    },
+    "ridge_proe": {
+     "mae": 6.0076342166737255,
+     "bias": 0.04516163391251354,
+     "n": 1632,
+     "per_season": {
+      "2023": {
+       "mae": 5.92830798151162,
+       "bias": -0.8363887703498808,
+       "n": 544
+      },
+      "2024": {
+       "mae": 6.0327973474706695,
+       "bias": 0.03145563540413289,
+       "n": 544
+      },
+      "2025": {
+       "mae": 6.061797321038888,
+       "bias": 0.9404180366832885,
+       "n": 544
+      }
+     }
+    }
+   },
+   "dropbacks": {
+    "B0_trailing": {
+     "mae": 6.9083123175956525,
+     "bias": 0.13365882569643653,
+     "n": 1632
+    },
+    "ridge_proe": {
+     "mae": 6.763614146850999,
+     "bias": -0.15418229720805982,
+     "n": 1632
+    }
+   },
+   "plays": {
+    "B0_trailing": {
+     "mae": 7.181283115075492,
+     "bias": 0.24694811529374022,
+     "n": 1632
+    },
+    "ridge_proe": {
+     "mae": 7.037012803823896,
+     "bias": 0.49442896564707656,
+     "n": 1632
+    }
+   }
+  },
+  "ablation": {
+   "n": 1560,
+   "fallback_rows": 0,
+   "cohort": "primary QB per team-week (argmax projection_mean), matching the sim's starter pathway",
+   "attempts": {
+    "before": {
+     "mae": 8.26094877394777,
+     "bias": 2.3028740658666313,
+     "n": 1560
+    },
+    "after": {
+     "mae": 7.453709198768101,
+     "bias": 2.2148268811879674,
+     "n": 1560
+    }
+   },
+   "pass_yards": {
+    "before": {
+     "mae": 70.82584117123467,
+     "bias": 16.690405899357188,
+     "n": 1560
+    },
+    "after": {
+     "mae": 68.4628312593198,
+     "bias": 16.459479423663602,
+     "n": 1560
+    }
+   },
+   "all_qb_rows_secondary": {
+    "n": 1759,
+    "attempts": {
+     "before": {
+      "mae": 10.834828480297077,
+      "bias": 5.543514973012042,
+      "n": 1759
+     },
+     "after": {
+      "mae": 10.125284808127269,
+      "bias": 5.47707305395322,
+      "n": 1759
+     }
+    },
+    "pass_yards": {
+     "before": {
+      "mae": 85.8845848467342,
+      "bias": 37.74228564227274,
+      "n": 1759
+     },
+     "after": {
+      "mae": 83.79875846625559,
+      "bias": 37.58461341014426,
+      "n": 1759
+     }
+    }
+   }
+  },
+  "calibration_effect": null,
+  "status": "research_only",
+  "status_reason": "PROE volume node beats both baselines on team pass attempts in every test season and shrinks the QB attempts bias without hurting MAE; promote to a full-simulation ablation (role-shock harness) before shadow."
+ }
+]

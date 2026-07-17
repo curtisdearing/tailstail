@@ -1,0 +1,25 @@
+[
+ {
+  "id": "role_state_mixture_v1",
+  "definition": "per-draw multinomial role-state sampling with team-volume-coherent reallocation",
+  "component_node": "role-state probability + covariance",
+  "status": "shadow",
+  "ablation": "role-up cov +1.0pp, role-down +1.3pp vs +3pp gate; stable cov 86.6% (>=86 ok); center unchanged",
+  "n_raw": 11481,
+  "cohort": "all; role cohorts n=1676/1258/6247"
+ },
+ {
+  "id": "feature_frame_v2_vacancy_cohorts",
+  "definition": "long-term (>=2wk/IR) vs short-notice vacancy cohorts, early vs established replacement windows",
+  "component_node": "availability + role-state inputs",
+  "status": "approved_infrastructure",
+  "ablation": "frame builds; consumed by role-state model"
+ },
+ {
+  "id": "role_state_multinomial_v1",
+  "definition": "P(inactive/limited/stable/moderate_up/major_up) from pregame snaps/routes/depth/practice/transactions",
+  "component_node": "role-state probability",
+  "status": "research_only",
+  "ablation": "season-forward 2023-2025 predictions produced; per-cohort calibration tables pending regeneration"
+ }
+]

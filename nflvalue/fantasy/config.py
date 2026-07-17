@@ -78,6 +78,12 @@ class SimulationConfig:
     efficiency_cv: float = 0.20
     implied_points_offense_share: float = 0.78
     model_center_weight: float = 1.0
+    # Scenario-mixture role-state engine (research flag; default OFF keeps the
+    # simulator bit-identical to the validated baseline).
+    role_scenario_mixture: bool = False
+    role_width_inflation: float = 1.15
+    role_width_budget: float = 0.975
+    capture_team_totals: bool = False
 
     def __post_init__(self) -> None:
         if self.simulations < 100:
@@ -86,6 +92,10 @@ class SimulationConfig:
             raise ValueError("Dirichlet concentrations must be positive")
         if not 0 <= self.model_center_weight <= 1:
             raise ValueError("model_center_weight must be in [0, 1]")
+        if self.role_width_inflation < 0:
+            raise ValueError("role_width_inflation cannot be negative")
+        if not 0.5 <= self.role_width_budget <= 1.5:
+            raise ValueError("role_width_budget must be in [0.5, 1.5]")
 
 
 @dataclass(frozen=True)
