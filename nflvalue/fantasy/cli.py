@@ -86,6 +86,10 @@ def build_parser() -> argparse.ArgumentParser:
     replay.add_argument("--output", default="reports/fantasy_monte_carlo_history.parquet")
     replay.add_argument("--report", default="reports/fantasy_monte_carlo_history.json")
     replay.add_argument("--markdown", default="reports/fantasy_monte_carlo_history.md")
+    replay.add_argument(
+        "--role-mixture", action="store_true",
+        help="sample per-draw role states from pregame p_state_* columns (research flag)",
+    )
 
     project = sub.add_parser("project", help="project one season/week snapshot")
     project.add_argument("--frame", default="historical/fantasy/feature_frame.parquet")
@@ -135,6 +139,7 @@ def main(argv: list[str] | None = None) -> int:
             random_seed=args.seed,
             scoring=_rules(args.scoring),
             bootstrap_iterations=args.bootstrap_iterations,
+            role_scenario_mixture=args.role_mixture,
         )
         output = Path(args.output)
         output.parent.mkdir(parents=True, exist_ok=True)

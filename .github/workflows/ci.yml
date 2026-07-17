@@ -49,3 +49,5 @@ jobs:
           tests/test_fantasy_season.py
           tests/test_projection_snapshot.py
           tests/test_product_boundary.py
+          tests/test_role_state.py
+          tests/test_chemistry_engine.py

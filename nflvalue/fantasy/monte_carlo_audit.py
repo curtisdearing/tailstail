@@ -19,6 +19,7 @@ import pandas as pd
 from ..reproducibility import CANONICAL_CSV_VERSION, canonical_csv_sha256
 
 from .config import ScoringRules, SimulationConfig
+from .role_state import STATE_PROB_COLUMNS
 from .simulation import simulate_week
 
 
@@ -54,6 +55,10 @@ SIMULATION_INPUT_COLUMNS = (
     "pre_yards_per_carry_ewm8",
     "pre_td_per_opportunity_ewm8",
     "pre_interception_rate_ewm8",
+    # Pregame role-state probabilities (season-forward model outputs built
+    # from strictly-prior evidence; see role_state.py).  Ignored by the
+    # simulator unless role_scenario_mixture is enabled.
+    *STATE_PROB_COLUMNS,
 )
 
 COMPONENT_POSITIONS = {
@@ -127,12 +132,35 @@ def _join_evaluation_frame(
     return joined.drop(columns="_merge")
 
 
+def _sample_crps(points: pd.DataFrame, slate: pd.DataFrame) -> pd.DataFrame:
+    """Per-player sample CRPS of the calibrated draw distribution vs actual.
+
+    Uses the standard estimator CRPS = E|X - y| - 0.5 E|X - X'| computed from
+    the simulation sample itself, so distribution shape (skew, bimodality)
+    matters, not just interval endpoints.
+    """
+
+    ids = [str(column) for column in points.columns]
+    actual = pd.to_numeric(
+        slate.set_index(slate["player_id"].astype(str))["fantasy_points"], errors="coerce"
+    ).reindex(ids)
+    draws = points.to_numpy(dtype=float)
+    n = draws.shape[0]
+    term_accuracy = np.abs(draws - actual.to_numpy()[None, :]).mean(axis=0)
+    sorted_draws = np.sort(draws, axis=0)
+    coefficients = (2.0 * np.arange(1, n + 1) - n - 1.0)
+    pair_sum = (coefficients[:, None] * sorted_draws).sum(axis=0)
+    crps = term_accuracy - pair_sum / float(n * n)
+    return pd.DataFrame({"player_id": ids, "mc_crps": crps})
+
+
 def _metrics(
     frame: pd.DataFrame,
     prediction: str,
     *,
     lower: str | None = None,
     upper: str | None = None,
+    crps: str | None = None,
 ) -> dict[str, float | int | None]:
     columns = ["fantasy_points", prediction]
     if lower and upper:
@@ -151,6 +179,11 @@ def _metrics(
     if lower and upper:
         result["coverage80"] = float(actual.ge(valid[lower]).mul(actual.le(valid[upper])).mean())
         result["mean_interval_width"] = float((valid[upper] - valid[lower]).mean())
+    if crps and crps in frame:
+        crps_values = pd.to_numeric(frame[crps], errors="coerce").dropna()
+        if not crps_values.empty:
+            result["crps_mean"] = float(crps_values.mean())
+            result["crps_n"] = int(len(crps_values))
     return result
 
 
@@ -244,6 +277,7 @@ def _method_report(frame: pd.DataFrame) -> dict[str, dict[str, float | int | Non
             "mc_calibrated_mean",
             lower="mc_p10",
             upper="mc_p90",
+            crps="mc_crps",
         ),
     }
 
@@ -334,6 +368,7 @@ def historical_monte_carlo_replay(
     scoring: ScoringRules | None = None,
     model_center_weight: float = 1.0,
     bootstrap_iterations: int = 20_000,
+    role_scenario_mixture: bool = False,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     """Replay every outer-test week through the correlated event simulator."""
 
@@ -354,8 +389,10 @@ def historical_monte_carlo_replay(
             simulations=simulations,
             random_seed=week_seed,
             model_center_weight=model_center_weight,
+            role_scenario_mixture=role_scenario_mixture,
         )
         result = simulate_week(safe_slate, config=config, scoring=rules)
+        crps_frame = _sample_crps(result.points, slate)
         keep = [
             "player_id",
             "mean",
@@ -388,6 +425,7 @@ def historical_monte_carlo_replay(
                 },
             }
         )
+        summary = summary.merge(crps_frame, on="player_id", how="left")
         summary.insert(0, "week", int(week))
         summary.insert(0, "season", int(season))
         outputs.append(summary)
@@ -429,8 +467,10 @@ def historical_monte_carlo_replay(
                     simulations=simulations,
                     random_seed=random_seed,
                     model_center_weight=model_center_weight,
+                    role_scenario_mixture=role_scenario_mixture,
                 )
             ),
+            "role_scenario_mixture": bool(role_scenario_mixture),
             "independent_sample_unit": "season-week block, not player draw",
             "simulation_input_columns": [
                 column for column in SIMULATION_INPUT_COLUMNS if column in joined

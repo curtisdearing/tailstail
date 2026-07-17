@@ -1,0 +1,1112 @@
+{
+  "by_position": {
+    "QB": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": -0.18621250106982515,
+        "coverage80": 0.8021603183627061,
+        "mae": 5.552834172807032,
+        "mean_interval_width": 19.07751478623504,
+        "n": 1759,
+        "rmse": 7.19092691553824,
+        "spearman": 0.5505072298501004
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": -0.1862125010698486,
+        "coverage80": 0.8078453666856168,
+        "mae": 5.55283417280706,
+        "mean_interval_width": 19.042092121247006,
+        "n": 1759,
+        "rmse": 7.190926915538266,
+        "spearman": 0.5505072298501004
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": -1.1300006240939982,
+        "mae": 6.068495050751829,
+        "n": 1759,
+        "rmse": 7.779598093240756,
+        "spearman": 0.46549944723799536
+      }
+    },
+    "RB": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": 0.1326290418970058,
+        "coverage80": 0.8243691899070386,
+        "mae": 5.1894872418930476,
+        "mean_interval_width": 17.42847984288359,
+        "n": 3012,
+        "rmse": 6.811444688275305,
+        "spearman": 0.6161198819587237
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": 0.1326290418970248,
+        "coverage80": 0.8256972111553785,
+        "mae": 5.189487241893028,
+        "mean_interval_width": 17.396908082831562,
+        "n": 3012,
+        "rmse": 6.811444688275299,
+        "spearman": 0.6161198820263665
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": 1.3765735320567314,
+        "mae": 5.416998284559362,
+        "n": 3012,
+        "rmse": 7.335121548714569,
+        "spearman": 0.5466534456654292
+      }
+    },
+    "TE": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": -0.020903121410732764,
+        "coverage80": 0.8053097345132744,
+        "mae": 4.258784025423065,
+        "mean_interval_width": 13.928392277695393,
+        "n": 1921,
+        "rmse": 5.706775109115427,
+        "spearman": 0.5418926078321814
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": -0.020903121410743204,
+        "coverage80": 0.8141592920353983,
+        "mae": 4.258784025423074,
+        "mean_interval_width": 13.904297836839437,
+        "n": 1921,
+        "rmse": 5.70677510911542,
+        "spearman": 0.5418926078321814
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": 0.25983071523997364,
+        "mae": 4.658707907080568,
+        "n": 1921,
+        "rmse": 6.137792187097772,
+        "spearman": 0.4332104049449439
+      }
+    },
+    "WR": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": -0.16687664310278827,
+        "coverage80": 0.8250156608895385,
+        "mae": 5.2291336544998765,
+        "mean_interval_width": 17.419283055885785,
+        "n": 4789,
+        "rmse": 6.871782306762396,
+        "spearman": 0.5644629670701428
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": -0.1668766431027995,
+        "coverage80": 0.8191689287951556,
+        "mae": 5.229133654499882,
+        "mean_interval_width": 17.363610525113423,
+        "n": 4789,
+        "rmse": 6.871782306762415,
+        "spearman": 0.5644629670701428
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": 0.4261967017948715,
+        "mae": 5.562577806184729,
+        "n": 4789,
+        "rmse": 7.355327862607888,
+        "spearman": 0.47508150933746374
+      }
+    }
+  },
+  "by_season": {
+    "2023": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": 0.02412473438329147,
+        "coverage80": 0.8304821150855366,
+        "mae": 5.021149144970264,
+        "mean_interval_width": 17.2891528906397,
+        "n": 3858,
+        "rmse": 6.65186014268629,
+        "spearman": 0.6227267626151518
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": 0.02412473438328661,
+        "coverage80": 0.8343701399688958,
+        "mae": 5.021149144970255,
+        "mean_interval_width": 17.233755078434104,
+        "n": 3858,
+        "rmse": 6.651860142686293,
+        "spearman": 0.6227267626151518
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": 0.41550301536072565,
+        "mae": 5.394585176293433,
+        "n": 3858,
+        "rmse": 7.165988836425103,
+        "spearman": 0.5393183011657953
+      }
+    },
+    "2024": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": 0.1969246832262174,
+        "coverage80": 0.8150774888363541,
+        "mae": 5.104527332559914,
+        "mean_interval_width": 16.96298705193221,
+        "n": 3807,
+        "rmse": 6.746293098796386,
+        "spearman": 0.6357392243504499
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": 0.19692468322619186,
+        "coverage80": 0.8156028368794326,
+        "mae": 5.104527332559931,
+        "mean_interval_width": 16.931224100992175,
+        "n": 3807,
+        "rmse": 6.746293098796405,
+        "spearman": 0.6357392243850162
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": 0.523494756462623,
+        "mae": 5.495818441714248,
+        "n": 3807,
+        "rmse": 7.275613016088043,
+        "spearman": 0.553776197098255
+      }
+    },
+    "2025": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": -0.4219501440068815,
+        "coverage80": 0.8084381551362684,
+        "mae": 5.193156999590191,
+        "mean_interval_width": 17.02035491536918,
+        "n": 3816,
+        "rmse": 6.780361642027948,
+        "spearman": 0.6131147709933685
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": -0.42195014400686626,
+        "coverage80": 0.804769392033543,
+        "mae": 5.193156999590193,
+        "mean_interval_width": 16.984805264943102,
+        "n": 3816,
+        "rmse": 6.7803616420279536,
+        "spearman": 0.6131147709933685
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": 0.28899476376579564,
+        "mae": 5.4623045631392815,
+        "n": 3816,
+        "rmse": 7.245660349638689,
+        "spearman": 0.5418800871044394
+      }
+    }
+  },
+  "component_accuracy": {
+    "attempts": {
+      "bias_actual_minus_simulated": -1.6294985787379193,
+      "mae": 7.519555429221149,
+      "n": 1759,
+      "positions": [
+        "QB"
+      ],
+      "spearman": 0.3789891403634805
+    },
+    "carries": {
+      "bias_actual_minus_simulated": 0.23474550209205025,
+      "mae": 1.8735783472803347,
+      "n": 9560,
+      "positions": [
+        "QB",
+        "RB",
+        "WR"
+      ],
+      "spearman": 0.8426003706262488
+    },
+    "completions": {
+      "bias_actual_minus_simulated": -1.4818402501421262,
+      "mae": 5.220977259806709,
+      "n": 1759,
+      "positions": [
+        "QB"
+      ],
+      "spearman": 0.42716714550736584
+    },
+    "fumbles_lost": {
+      "bias_actual_minus_simulated": 0.00837087361728072,
+      "mae": 0.09491925790436373,
+      "n": 11481,
+      "positions": [
+        "QB",
+        "RB",
+        "WR",
+        "TE"
+      ],
+      "spearman": 0.08113342846158578
+    },
+    "passing_interceptions": {
+      "bias_actual_minus_simulated": -0.023978965321205224,
+      "mae": 0.6427009664582148,
+      "n": 1759,
+      "positions": [
+        "QB"
+      ],
+      "spearman": 0.19343901417069845
+    },
+    "passing_tds": {
+      "bias_actual_minus_simulated": -0.10352302444570778,
+      "mae": 0.8640938032973281,
+      "n": 1759,
+      "positions": [
+        "QB"
+      ],
+      "spearman": 0.2521179576070854
+    },
+    "passing_yards": {
+      "bias_actual_minus_simulated": -21.54088415084725,
+      "mae": 64.06292019878462,
+      "n": 1759,
+      "positions": [
+        "QB"
+      ],
+      "spearman": 0.4424274412412862
+    },
+    "receiving_tds": {
+      "bias_actual_minus_simulated": 0.024406912157992185,
+      "mae": 0.2898311047109648,
+      "n": 9722,
+      "positions": [
+        "RB",
+        "WR",
+        "TE"
+      ],
+      "spearman": 0.23706794183754556
+    },
+    "receiving_yards": {
+      "bias_actual_minus_simulated": 0.7806278391566696,
+      "mae": 21.133884534053205,
+      "n": 9722,
+      "positions": [
+        "RB",
+        "WR",
+        "TE"
+      ],
+      "spearman": 0.5430942991919039
+    },
+    "receptions": {
+      "bias_actual_minus_simulated": 0.09243499279983543,
+      "mae": 1.6158390248919976,
+      "n": 9722,
+      "positions": [
+        "RB",
+        "WR",
+        "TE"
+      ],
+      "spearman": 0.5226741056518531
+    },
+    "rushing_tds": {
+      "bias_actual_minus_simulated": 0.04857008368200837,
+      "mae": 0.18023556485355646,
+      "n": 9560,
+      "positions": [
+        "QB",
+        "RB",
+        "WR"
+      ],
+      "spearman": 0.37308161975850757
+    },
+    "rushing_yards": {
+      "bias_actual_minus_simulated": 1.044462895851031,
+      "mae": 10.897315986634277,
+      "n": 9560,
+      "positions": [
+        "QB",
+        "RB",
+        "WR"
+      ],
+      "spearman": 0.768229369526711
+    },
+    "targets": {
+      "bias_actual_minus_simulated": 0.08942655832133306,
+      "mae": 2.1059970170746762,
+      "n": 9722,
+      "positions": [
+        "RB",
+        "WR",
+        "TE"
+      ],
+      "spearman": 0.594207249852602
+    }
+  },
+  "interpretation": {
+    "calibrated_center": "model_center_weight=1 preserves the validated ensemble mean; Monte Carlo value is its joint distribution, intervals, tails, and alternate scoring\u2014not a second point model",
+    "raw_event_center": "diagnostic only unless its week-block bootstrap beats the direct ensemble out of sample",
+    "sample_size": "n is the complete outer-test player-week count; uncertainty resamples complete season-weeks"
+  },
+  "metadata": {
+    "canonical_csv_version": 1,
+    "independent_sample_unit": "season-week block, not player draw",
+    "input_rows": 11481,
+    "model_center_weight": 1.0,
+    "outer_predictions_canonical_csv_sha256": "ee0052a95e20f35b6477e6b3c014a1696fe9924593ae75a3b6d29a79f7a9499e",
+    "random_seed": 6102026,
+    "replay_outputs_canonical_csv_sha256": "dff2793107fef3ada228f2a819d64c6b98c1dc770c851466f528fdb68f152bdc",
+    "replayed_rows": 11481,
+    "residual_fallback_players": 264,
+    "runtime_versions": {
+      "numpy": "2.2.6",
+      "pandas": "2.3.3"
+    },
+    "scoring": {
+      "fumble_lost": -2.0,
+      "interception": -2.0,
+      "passing_300_bonus": 0.0,
+      "passing_td": 4.0,
+      "passing_yard": 0.04,
+      "receiving_100_bonus": 0.0,
+      "receiving_td": 6.0,
+      "receiving_yard": 0.1,
+      "reception": 1.0,
+      "rushing_100_bonus": 0.0,
+      "rushing_td": 6.0,
+      "rushing_yard": 0.1,
+      "two_point": 2.0
+    },
+    "season_weeks": 54,
+    "seasons": [
+      2023,
+      2024,
+      2025
+    ],
+    "simulation_config": {
+      "carry_share_concentration": 32.0,
+      "efficiency_cv": 0.2,
+      "implied_points_offense_share": 0.78,
+      "model_center_weight": 1.0,
+      "random_seed": 6102026,
+      "simulations": 1000,
+      "target_share_concentration": 36.0,
+      "team_volume_cv": 0.12
+    },
+    "simulation_input_columns": [
+      "player_id",
+      "player_name",
+      "position",
+      "team",
+      "game_id",
+      "opponent_team",
+      "projection_mean",
+      "projection_lower80",
+      "projection_upper80",
+      "injury_questionable",
+      "injury_doubtful",
+      "injury_out",
+      "practice_dnp",
+      "practice_limited",
+      "status_inactive",
+      "team_spread",
+      "wind",
+      "implied_team_points",
+      "pre_team_pass_attempts_ewm4",
+      "pre_team_rush_attempts_ewm4",
+      "pre_target_share_calc_ewm4",
+      "pre_carry_share_ewm4",
+      "pre_catch_rate_ewm8",
+      "pre_yards_per_target_ewm8",
+      "pre_yards_per_carry_ewm8",
+      "pre_td_per_opportunity_ewm8",
+      "pre_interception_rate_ewm8"
+    ],
+    "simulation_inputs_canonical_csv_sha256": "43ce071074b545b4fa59de75a02817fe270294a699459d3c9c8df5e92c6b1ffe",
+    "simulations_per_week": 1000,
+    "total_player_draws": 11481000,
+    "week_runs": [
+      {
+        "games": 16,
+        "players": 242,
+        "season": 2023,
+        "seed": 6304327,
+        "week": 1
+      },
+      {
+        "games": 16,
+        "players": 253,
+        "season": 2023,
+        "seed": 6304328,
+        "week": 2
+      },
+      {
+        "games": 16,
+        "players": 239,
+        "season": 2023,
+        "seed": 6304329,
+        "week": 3
+      },
+      {
+        "games": 16,
+        "players": 230,
+        "season": 2023,
+        "seed": 6304330,
+        "week": 4
+      },
+      {
+        "games": 14,
+        "players": 200,
+        "season": 2023,
+        "seed": 6304331,
+        "week": 5
+      },
+      {
+        "games": 15,
+        "players": 209,
+        "season": 2023,
+        "seed": 6304332,
+        "week": 6
+      },
+      {
+        "games": 13,
+        "players": 180,
+        "season": 2023,
+        "seed": 6304333,
+        "week": 7
+      },
+      {
+        "games": 16,
+        "players": 224,
+        "season": 2023,
+        "seed": 6304334,
+        "week": 8
+      },
+      {
+        "games": 14,
+        "players": 187,
+        "season": 2023,
+        "seed": 6304335,
+        "week": 9
+      },
+      {
+        "games": 14,
+        "players": 197,
+        "season": 2023,
+        "seed": 6304336,
+        "week": 10
+      },
+      {
+        "games": 14,
+        "players": 196,
+        "season": 2023,
+        "seed": 6304337,
+        "week": 11
+      },
+      {
+        "games": 16,
+        "players": 218,
+        "season": 2023,
+        "seed": 6304338,
+        "week": 12
+      },
+      {
+        "games": 13,
+        "players": 178,
+        "season": 2023,
+        "seed": 6304339,
+        "week": 13
+      },
+      {
+        "games": 15,
+        "players": 207,
+        "season": 2023,
+        "seed": 6304340,
+        "week": 14
+      },
+      {
+        "games": 16,
+        "players": 217,
+        "season": 2023,
+        "seed": 6304341,
+        "week": 15
+      },
+      {
+        "games": 16,
+        "players": 230,
+        "season": 2023,
+        "seed": 6304342,
+        "week": 16
+      },
+      {
+        "games": 16,
+        "players": 233,
+        "season": 2023,
+        "seed": 6304343,
+        "week": 17
+      },
+      {
+        "games": 16,
+        "players": 218,
+        "season": 2023,
+        "seed": 6304344,
+        "week": 18
+      },
+      {
+        "games": 16,
+        "players": 238,
+        "season": 2024,
+        "seed": 6304427,
+        "week": 1
+      },
+      {
+        "games": 16,
+        "players": 237,
+        "season": 2024,
+        "seed": 6304428,
+        "week": 2
+      },
+      {
+        "games": 16,
+        "players": 226,
+        "season": 2024,
+        "seed": 6304429,
+        "week": 3
+      },
+      {
+        "games": 16,
+        "players": 223,
+        "season": 2024,
+        "seed": 6304430,
+        "week": 4
+      },
+      {
+        "games": 14,
+        "players": 192,
+        "season": 2024,
+        "seed": 6304431,
+        "week": 5
+      },
+      {
+        "games": 14,
+        "players": 191,
+        "season": 2024,
+        "seed": 6304432,
+        "week": 6
+      },
+      {
+        "games": 15,
+        "players": 218,
+        "season": 2024,
+        "seed": 6304433,
+        "week": 7
+      },
+      {
+        "games": 16,
+        "players": 229,
+        "season": 2024,
+        "seed": 6304434,
+        "week": 8
+      },
+      {
+        "games": 15,
+        "players": 212,
+        "season": 2024,
+        "seed": 6304435,
+        "week": 9
+      },
+      {
+        "games": 14,
+        "players": 200,
+        "season": 2024,
+        "seed": 6304436,
+        "week": 10
+      },
+      {
+        "games": 14,
+        "players": 209,
+        "season": 2024,
+        "seed": 6304437,
+        "week": 11
+      },
+      {
+        "games": 13,
+        "players": 192,
+        "season": 2024,
+        "seed": 6304438,
+        "week": 12
+      },
+      {
+        "games": 16,
+        "players": 218,
+        "season": 2024,
+        "seed": 6304439,
+        "week": 13
+      },
+      {
+        "games": 13,
+        "players": 171,
+        "season": 2024,
+        "seed": 6304440,
+        "week": 14
+      },
+      {
+        "games": 16,
+        "players": 215,
+        "season": 2024,
+        "seed": 6304441,
+        "week": 15
+      },
+      {
+        "games": 16,
+        "players": 218,
+        "season": 2024,
+        "seed": 6304442,
+        "week": 16
+      },
+      {
+        "games": 16,
+        "players": 217,
+        "season": 2024,
+        "seed": 6304443,
+        "week": 17
+      },
+      {
+        "games": 16,
+        "players": 201,
+        "season": 2024,
+        "seed": 6304444,
+        "week": 18
+      },
+      {
+        "games": 16,
+        "players": 251,
+        "season": 2025,
+        "seed": 6304527,
+        "week": 1
+      },
+      {
+        "games": 16,
+        "players": 249,
+        "season": 2025,
+        "seed": 6304528,
+        "week": 2
+      },
+      {
+        "games": 16,
+        "players": 240,
+        "season": 2025,
+        "seed": 6304529,
+        "week": 3
+      },
+      {
+        "games": 16,
+        "players": 223,
+        "season": 2025,
+        "seed": 6304530,
+        "week": 4
+      },
+      {
+        "games": 14,
+        "players": 187,
+        "season": 2025,
+        "seed": 6304531,
+        "week": 5
+      },
+      {
+        "games": 15,
+        "players": 204,
+        "season": 2025,
+        "seed": 6304532,
+        "week": 6
+      },
+      {
+        "games": 15,
+        "players": 213,
+        "season": 2025,
+        "seed": 6304533,
+        "week": 7
+      },
+      {
+        "games": 13,
+        "players": 177,
+        "season": 2025,
+        "seed": 6304534,
+        "week": 8
+      },
+      {
+        "games": 14,
+        "players": 203,
+        "season": 2025,
+        "seed": 6304535,
+        "week": 9
+      },
+      {
+        "games": 14,
+        "players": 192,
+        "season": 2025,
+        "seed": 6304536,
+        "week": 10
+      },
+      {
+        "games": 15,
+        "players": 206,
+        "season": 2025,
+        "seed": 6304537,
+        "week": 11
+      },
+      {
+        "games": 14,
+        "players": 191,
+        "season": 2025,
+        "seed": 6304538,
+        "week": 12
+      },
+      {
+        "games": 16,
+        "players": 224,
+        "season": 2025,
+        "seed": 6304539,
+        "week": 13
+      },
+      {
+        "games": 14,
+        "players": 197,
+        "season": 2025,
+        "seed": 6304540,
+        "week": 14
+      },
+      {
+        "games": 16,
+        "players": 221,
+        "season": 2025,
+        "seed": 6304541,
+        "week": 15
+      },
+      {
+        "games": 16,
+        "players": 218,
+        "season": 2025,
+        "seed": 6304542,
+        "week": 16
+      },
+      {
+        "games": 16,
+        "players": 210,
+        "season": 2025,
+        "seed": 6304543,
+        "week": 17
+      },
+      {
+        "games": 16,
+        "players": 210,
+        "season": 2025,
+        "seed": 6304544,
+        "week": 18
+      }
+    ]
+  },
+  "methods": {
+    "calibrated_monte_carlo": {
+      "bias_actual_minus_prediction": -0.06684054134982241,
+      "coverage80": 0.8180472084313213,
+      "mae": 5.1059677786592665,
+      "mean_interval_width": 17.09165733959086,
+      "n": 11481,
+      "rmse": 6.726104483755077,
+      "spearman": 0.6231920820463476
+    },
+    "direct_ensemble": {
+      "bias_actual_minus_prediction": -0.06684054134982749,
+      "coverage80": 0.8183085097116976,
+      "mae": 5.105967778659271,
+      "mean_interval_width": 17.05069367965324,
+      "n": 11481,
+      "rmse": 6.726104483755087,
+      "spearman": 0.6231920820512893
+    },
+    "raw_event_simulator": {
+      "bias_actual_minus_prediction": 0.4092639308113546,
+      "mae": 5.450661495574053,
+      "n": 11481,
+      "rmse": 7.228968594219467,
+      "spearman": 0.5453485769640493
+    }
+  },
+  "paired_comparisons": {
+    "calibrated_mc_vs_direct": {
+      "candidate": "mc_calibrated_mean",
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "mae_delta_candidate_minus_reference": 0.0,
+      "n": 11481,
+      "probability_candidate_better": 0.0,
+      "probability_tie": 1.0,
+      "reference": "projection_mean",
+      "week_tie_rate": 1.0,
+      "week_win_rate": 0.0,
+      "weeks": 54
+    },
+    "raw_event_vs_direct": {
+      "candidate": "mc_raw_event_mean",
+      "ci95": [
+        0.2860693310684338,
+        0.4040706048996741
+      ],
+      "mae_delta_candidate_minus_reference": 0.3446937169147834,
+      "n": 11481,
+      "probability_candidate_better": 0.0,
+      "probability_tie": 0.0,
+      "reference": "projection_mean",
+      "week_tie_rate": 0.0,
+      "week_win_rate": 0.018518518518518517,
+      "weeks": 54
+    }
+  },
+  "regimes": {
+    "injury_questionable": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": -0.06477182468376327,
+        "coverage80": 0.9063829787234042,
+        "mae": 5.180999021831339,
+        "mean_interval_width": 20.171946825515896,
+        "n": 470,
+        "rmse": 6.840667753855851,
+        "spearman": 0.5144623216306944
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": -0.0647718246837575,
+        "coverage80": 0.8425531914893617,
+        "mae": 5.180999021831332,
+        "mean_interval_width": 19.386698596854075,
+        "n": 470,
+        "rmse": 6.840667753855835,
+        "spearman": 0.5144623216306944
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": 2.748145544523963,
+        "mae": 5.727458591673767,
+        "n": 470,
+        "rmse": 7.760091616317345,
+        "spearman": 0.4241588015450349
+      }
+    },
+    "no_touchdown": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": -2.8468973325728584,
+        "coverage80": 0.8656157126243701,
+        "mae": 4.194733730061281,
+        "mean_interval_width": 16.864751706334467,
+        "n": 7739,
+        "rmse": 5.286502882525471,
+        "spearman": 0.5848353763962045
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": -2.8468973325728633,
+        "coverage80": 0.8661325752681225,
+        "mae": 4.194733730061286,
+        "mean_interval_width": 16.82847957769087,
+        "n": 7739,
+        "rmse": 5.286502882525484,
+        "spearman": 0.5848353764113455
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": -2.3200730705770223,
+        "mae": 4.355939449324649,
+        "n": 7739,
+        "rmse": 5.61843491494847,
+        "spearman": 0.47240762081201826
+      }
+    },
+    "practice_dnp": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": -0.7860588096234433,
+        "coverage80": 0.9281437125748503,
+        "mae": 5.158020459801931,
+        "mean_interval_width": 20.449524946335792,
+        "n": 167,
+        "rmse": 6.96287439833858,
+        "spearman": 0.5029407938269755
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": -0.7860588096234815,
+        "coverage80": 0.8323353293413174,
+        "mae": 5.158020459801936,
+        "mean_interval_width": 18.988421796150597,
+        "n": 167,
+        "rmse": 6.962874398338575,
+        "spearman": 0.5029407938269755
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": 2.504321612505763,
+        "mae": 5.408123370607304,
+        "n": 167,
+        "rmse": 7.47859300073276,
+        "spearman": 0.47565786516982467
+      }
+    },
+    "qb_changed": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": -0.5816714646776555,
+        "coverage80": 0.8454237288135593,
+        "mae": 4.623386149570849,
+        "mean_interval_width": 17.17984249899652,
+        "n": 1475,
+        "rmse": 6.260975715548227,
+        "spearman": 0.6118290673740661
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": -0.5816714646776653,
+        "coverage80": 0.8345762711864407,
+        "mae": 4.623386149570871,
+        "mean_interval_width": 17.142731393848912,
+        "n": 1475,
+        "rmse": 6.2609757155482715,
+        "spearman": 0.6118290673740661
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": -0.6241875447827668,
+        "mae": 5.368498827598695,
+        "n": 1475,
+        "rmse": 7.1534815923366155,
+        "spearman": 0.41206665985674495
+      }
+    },
+    "role_decrease_5_plus": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": -4.500293128778615,
+        "coverage80": 0.7098569157392687,
+        "mae": 5.885660398691799,
+        "mean_interval_width": 18.120571657561193,
+        "n": 1258,
+        "rmse": 7.302426608074659,
+        "spearman": 0.7834612155731633
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": -4.500293128778618,
+        "coverage80": 0.7027027027027027,
+        "mae": 5.885660398691809,
+        "mean_interval_width": 18.05690317112198,
+        "n": 1258,
+        "rmse": 7.302426608074659,
+        "spearman": 0.7834612155731633
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": -5.6165726512775445,
+        "mae": 6.889163453991707,
+        "n": 1258,
+        "rmse": 8.374989427403023,
+        "spearman": 0.689287482703293
+      }
+    },
+    "role_increase_5_plus": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": 5.279468787365528,
+        "coverage80": 0.7213603818615751,
+        "mae": 7.301047642910167,
+        "mean_interval_width": 18.027563747116712,
+        "n": 1676,
+        "rmse": 9.515453202245187,
+        "spearman": 0.34282984551798845
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": 5.279468787365543,
+        "coverage80": 0.7171837708830548,
+        "mae": 7.30104764291017,
+        "mean_interval_width": 17.988539379294416,
+        "n": 1676,
+        "rmse": 9.51545320224521,
+        "spearman": 0.34282984551798845
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": 6.305446288530839,
+        "mae": 8.254552256781546,
+        "n": 1676,
+        "rmse": 10.563664058377581,
+        "spearman": 0.2821562785070632
+      }
+    },
+    "scored_touchdown": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": 5.68272105867024,
+        "coverage80": 0.719668626402993,
+        "mae": 6.990532263453443,
+        "mean_interval_width": 17.56093117598082,
+        "n": 3742,
+        "rmse": 9.000315675481387,
+        "spearman": 0.3401450982519001
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": 5.682721058670235,
+        "coverage80": 0.7194013896312133,
+        "mae": 6.990532263453442,
+        "mean_interval_width": 17.51026474728733,
+        "n": 3742,
+        "rmse": 9.000315675481392,
+        "spearman": 0.3401450982519001
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": 6.053929631972403,
+        "mae": 7.714705834410008,
+        "n": 3742,
+        "rmse": 9.749376749800705,
+        "spearman": 0.27282189517877364
+      }
+    },
+    "stable_role_abs_lt_3": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": -0.6111205211909229,
+        "coverage80": 0.8769009124379702,
+        "mae": 4.253235582823066,
+        "mean_interval_width": 16.654332106446507,
+        "n": 6247,
+        "rmse": 5.488407565046422,
+        "spearman": 0.6634489182707793
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": -0.6111205211909312,
+        "coverage80": 0.8810629101968945,
+        "mae": 4.25323558282307,
+        "mean_interval_width": 16.617194199391538,
+        "n": 6247,
+        "rmse": 5.488407565046432,
+        "spearman": 0.6634489182789436
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": 0.1153548270545322,
+        "mae": 4.217752629052946,
+        "n": 6247,
+        "rmse": 5.584427972239605,
+        "spearman": 0.6367533816731312
+      }
+    },
+    "team_changed": {
+      "calibrated_monte_carlo": {
+        "bias_actual_minus_prediction": -1.1101768306773576,
+        "coverage80": 0.8690476190476191,
+        "mae": 4.0847892373345775,
+        "mean_interval_width": 17.500086526028177,
+        "n": 168,
+        "rmse": 5.6648594246073865,
+        "spearman": 0.7087850799009131
+      },
+      "direct_ensemble": {
+        "bias_actual_minus_prediction": -1.110176830677335,
+        "coverage80": 0.8630952380952381,
+        "mae": 4.084789237334592,
+        "mean_interval_width": 17.504147959935125,
+        "n": 168,
+        "rmse": 5.664859424607392,
+        "spearman": 0.7087850799009131
+      },
+      "raw_event_simulator": {
+        "bias_actual_minus_prediction": -1.4639875451413806,
+        "mae": 4.717469220095022,
+        "n": 168,
+        "rmse": 6.276950438873438,
+        "spearman": 0.5592009200016443
+      }
+    }
+  },
+  "release_gate": {
+    "active_degenerate_intervals": 0,
+    "failures": [],
+    "max_calibrated_center_drift": 3.0152547125794626e-12,
+    "pass": true,
+    "warnings": [
+      "raw event simulator is less accurate than the direct ensemble and is distribution-only",
+      "264 player-weeks required residual fallback because event tails were unstable",
+      "role_decrease_5_plus coverage is heterogeneous at 71.0%",
+      "scored_touchdown coverage is heterogeneous at 72.0%",
+      "injury_questionable coverage is heterogeneous at 90.6%",
+      "practice_dnp coverage is heterogeneous at 92.8%"
+    ]
+  }
+}

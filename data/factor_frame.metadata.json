@@ -1,0 +1,23 @@
+{
+  "schema_version": 2,
+  "rows": 116554,
+  "seasons": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "source_sha256": {
+    "historical/historical_pbp.parquet": "b5e4ed9316ea1c9701167f660e526aa1cd932d7a3e9fe2f1509c63b14ea559a4",
+    "historical_lines.parquet": "fa82f7b7548c057c61b90e56cfee2c3dde3ee80320a7beb5cb271e7410d81bbb",
+    "historical/rosters_weekly.parquet": "d44cfc35acd69da112a4cfd2af178e90d7f45bd9bcbe1930cb8801b95be7fbca",
+    "historical/injuries.parquet": "2dfd56ef1d8b14f6adf304cc47af1c93b9daff80debf59e603ce50e75e4e9e89",
+    "historical/players_meta.parquet": "941c29d0070f6a00af5ef49445c08b35e64c74036bcebbbdc2467792d3b363bf"
+  },
+  "frame_canonical_csv_sha256": "08ce11b4e5fff5d4595197986818979b2e29cb6c9969c1840e7b1da88773ba2c",
+  "canonical_csv_version": 1,
+  "weather_warning": "temp/wind are historical observed proxies, not archived forecast snapshots"
+}

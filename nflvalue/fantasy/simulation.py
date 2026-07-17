@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 
 from .config import ScoringRules, SimulationConfig
+from .role_state import ACTIVE_STATES, STATE_PROB_COLUMNS, state_multiplier_table
 from .scoring import score_components
 
 
@@ -65,14 +66,21 @@ def _draw_shares(
     base: np.ndarray,
     available: np.ndarray,
     concentration: float,
+    multiplier: np.ndarray | None = None,
 ) -> np.ndarray:
-    """Draw player shares plus an unmodeled-roster bucket, then gate availability."""
+    """Draw player shares plus an unmodeled-roster bucket, then gate availability.
+
+    ``multiplier`` optionally rescales each (draw, player) share before the
+    joint normalization; because every draw is renormalized across the team
+    (including the unmodeled bucket), team volume is conserved exactly.
+    """
 
     total = float(np.clip(base.sum(), 0.05, 0.94))
     normalized = base * (total / base.sum())
     alpha = np.r_[np.maximum(normalized * concentration, 0.15), max((1 - total) * concentration, 0.8)]
     draws = rng.gamma(shape=alpha, scale=1.0, size=(len(available), len(alpha)))
-    draws[:, :-1] *= available
+    gate = available if multiplier is None else available * multiplier
+    draws[:, :-1] *= gate
     denominator = draws.sum(axis=1, keepdims=True)
     denominator[denominator == 0] = 1.0
     return draws / denominator
@@ -111,6 +119,95 @@ def _assign_touchdowns(
         probabilities = np.r_[weights, other]
         probabilities /= probabilities.sum()
         output[index] = rng.multinomial(total, probabilities)[:-1]
+    return output
+
+
+def _sample_role_states(
+    rng: np.random.Generator,
+    active_probs: np.ndarray,
+    simulations: int,
+) -> np.ndarray:
+    """Sample one active role state per (draw, player) from pregame probabilities."""
+
+    cumulative = np.cumsum(active_probs, axis=1)
+    uniforms = rng.random((simulations, active_probs.shape[0]))
+    state_index = (uniforms[:, :, None] >= cumulative[None, :, :]).sum(axis=2)
+    return np.clip(state_index, 0, active_probs.shape[1] - 1)
+
+
+def _role_mixture_inputs(
+    players: pd.DataFrame,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Active-state probabilities plus per-player state multiplier rows.
+
+    Missing or degenerate probability rows fall back to certain-``stable``,
+    which reproduces baseline behaviour for that player.  ``up_mass`` and
+    ``down_mass`` are the pregame probabilities of role-increase and
+    role-decrease states; the directional interval-width law keys on them.
+    (Multiplier-variance width laws were tested and rejected: ratio-scale
+    variance is dominated by fringe players whose conformal widths already
+    price their noise, so it fails to separate genuine role-shock candidates.
+    Interval misses in the role cohorts are almost purely one-sided, so the
+    tail stretch is directional.  See reports/role_shock_engine.md.)
+    """
+
+    table = state_multiplier_table()
+    ones = np.ones(len(ACTIVE_STATES))
+    zeros = np.zeros(len(ACTIVE_STATES))
+    probs = np.column_stack([
+        _numeric(players, f"p_state_{state}", np.nan) for state in ACTIVE_STATES
+    ])
+    probs = np.where(np.isfinite(probs) & (probs >= 0.0), probs, 0.0)
+    row_sum = probs.sum(axis=1, keepdims=True)
+    has_probs = row_sum[:, 0] > 1e-9
+    stable_row = np.zeros(len(ACTIVE_STATES))
+    stable_row[ACTIVE_STATES.index("stable")] = 1.0
+    probs = np.where(has_probs[:, None], probs / np.where(row_sum <= 1e-9, 1.0, row_sum), stable_row)
+    positions = players["position"].astype(str).to_numpy()
+    target_rows = np.stack([table.get(pos, {"target": ones})["target"] for pos in positions])
+    carry_rows = np.stack([table.get(pos, {"carry": ones})["carry"] for pos in positions])
+    opportunity_rows = np.stack([
+        table.get(pos, {"opportunity": ones})["opportunity"] for pos in positions
+    ])
+    within_var_rows = np.stack([
+        table.get(pos, {"opportunity_var": zeros})["opportunity_var"] for pos in positions
+    ])
+    del opportunity_rows, within_var_rows  # width law keys on shock masses directly
+    up_mass = (
+        probs[:, ACTIVE_STATES.index("moderate_increase")]
+        + probs[:, ACTIVE_STATES.index("major_increase")]
+    )
+    down_mass = probs[:, ACTIVE_STATES.index("limited_decrease")]
+    return probs, target_rows, carry_rows, up_mass, down_mass, has_probs
+
+
+def _directional_tail_stretch(
+    values: np.ndarray,
+    available: np.ndarray,
+    stretch_up: float,
+    stretch_down: float,
+    position: str,
+) -> np.ndarray:
+    """Stretch the active tails asymmetrically, preserving the exact mean.
+
+    Draws above the conditional mean scale by ``stretch_up``; draws below it
+    by ``stretch_down``.  The inactive zero mass is untouched and an additive
+    recentering restores the conditional (hence unconditional) mean exactly,
+    so the validated ensemble center never moves.
+    """
+
+    if not available.any() or (stretch_up == 1.0 and stretch_down == 1.0):
+        return values
+    active = values[available]
+    center = float(active.mean())
+    stretched = center + (active - center) * np.where(
+        active > center, stretch_up, stretch_down
+    )
+    floor = -6.0 if position == "QB" else -3.0
+    stretched = np.maximum(stretched, min(floor, float(active.min())))
+    stretched -= float(stretched.mean()) - center
+    output = values.copy()
+    output[available] = stretched
     return output
 
 
@@ -227,7 +324,62 @@ def simulate_week(
     )
     components = {name: np.zeros((n, p), dtype=float) for name in component_names}
     availability_prob = _availability(players)
+
+    # Scenario-mixture role engine: per-draw role states sampled from pregame
+    # probabilities.  Flag OFF (default) adds no random draws and leaves the
+    # availability heuristic untouched, keeping the baseline bit-identical.
+    role_mixture = bool(cfg.role_scenario_mixture) and all(
+        column in players.columns for column in STATE_PROB_COLUMNS
+    )
+    stretch_up = np.ones(p)
+    stretch_down = np.ones(p)
+    if role_mixture:
+        (active_state_probs, target_mult_rows, carry_mult_rows,
+         up_mass, down_mass, has_probs) = _role_mixture_inputs(players)
+        # Modeled inactive risk: the report-flag heuristic misses healthy
+        # scratches and committee benchings the classifier sees (depth chart,
+        # snap trend, missed-week streak).  Taking the minimum only ever adds
+        # zero mass, so report-listed absences keep their hard gate.
+        inactive_raw = _numeric(players, "p_state_inactive", np.nan)
+        # The 0.5 floor keeps the pinned-center hurdle solvable: the direct
+        # ensemble still projects points for surprise scratches, and forcing
+        # its mean through a >50% zero mass would demand absurd conditional
+        # tails (and collapsed intervals) rather than admit the center is
+        # what is wrong on those rows.
+        model_available = np.clip(1.0 - inactive_raw, 0.50, 0.995)
+        usable = has_probs & np.isfinite(model_available)
+        availability_prob = np.where(
+            usable, np.minimum(availability_prob, model_available), availability_prob
+        )
+        # Interval misses in role-shock cohorts are almost purely one-sided
+        # (realized role-up outcomes overshoot the upper bound, role-down the
+        # lower), and per-position mass scales differ by 5x, so each tail
+        # stretches with the player's shock mass RELATIVE to same-position
+        # slate peers: (mass / position reference) ** gamma.
+        gamma = float(cfg.role_width_inflation)
+        budget = float(cfg.role_width_budget)
+        positions_all = players["position"].astype(str).to_numpy()
+        up_reference = np.full(p, np.nan)
+        down_reference = np.full(p, np.nan)
+        for position_value in np.unique(positions_all):
+            pos_mask = positions_all == position_value
+            ref_mask = pos_mask & has_probs
+            if ref_mask.any():
+                up_reference[pos_mask] = up_mass[ref_mask].mean()
+                down_reference[pos_mask] = down_mass[ref_mask].mean()
+        with np.errstate(divide="ignore", invalid="ignore"):
+            up_ratio = up_mass / np.maximum(up_reference, 0.02)
+            down_ratio = down_mass / np.maximum(down_reference, 0.02)
+        stretch_up = np.where(
+            has_probs & np.isfinite(up_ratio),
+            np.clip(up_ratio ** gamma, 0.8, 2.2) * budget, 1.0,
+        )
+        stretch_down = np.where(
+            has_probs & np.isfinite(down_ratio),
+            np.clip(down_ratio ** gamma, 0.8, 2.2) * budget, 1.0,
+        )
     available_all = rng.random((n, p)) < availability_prob
+    team_totals: dict[str, dict[str, np.ndarray]] = {}
 
     if "game_id" in players:
         game_values = players["game_id"].astype("object")
@@ -257,6 +409,14 @@ def simulate_week(
                     choose = (qb_choice < 0) & available[:, candidate]
                     qb_choice[choose] = candidate
 
+            target_multiplier = None
+            carry_multiplier = None
+            if role_mixture:
+                state_index = _sample_role_states(rng, active_state_probs[idx], n)
+                local = np.arange(len(idx))[None, :]
+                target_multiplier = target_mult_rows[idx][local, state_index]
+                carry_multiplier = carry_mult_rows[idx][local, state_index]
+
             spread = _first_numeric(team_frame, "team_spread", 0.0)
             wind = _first_numeric(team_frame, "wind", 5.0)
             pass_mean = _first_numeric(team_frame, "pre_team_pass_attempts_ewm4", 34.0)
@@ -267,7 +427,10 @@ def simulate_week(
             team_carries = rng.poisson(rush_lambda)
 
             target_base = _share_prior(team_frame, "pre_target_share_calc_ewm4", "target")
-            target_prob = _draw_shares(rng, target_base, available, cfg.target_share_concentration)
+            target_prob = _draw_shares(
+                rng, target_base, available, cfg.target_share_concentration,
+                multiplier=target_multiplier,
+            )
             target_counts_all = _row_multinomial(rng, team_pass_attempts, target_prob)
             targets = target_counts_all[:, :-1]
             other_targets = target_counts_all[:, -1]
@@ -300,7 +463,10 @@ def simulate_week(
             carry_base = _share_prior(team_frame, "pre_carry_share_ewm4", "carry")
             carry_eligible = np.isin(positions, ["QB", "RB", "WR"])
             carry_base = np.where(carry_eligible, carry_base, 0.0005)
-            carry_prob = _draw_shares(rng, carry_base, available, cfg.carry_share_concentration)
+            carry_prob = _draw_shares(
+                rng, carry_base, available, cfg.carry_share_concentration,
+                multiplier=carry_multiplier,
+            )
             carry_counts_all = _row_multinomial(rng, team_carries, carry_prob)
             carries = carry_counts_all[:, :-1]
             components["carries"][:, idx] = carries
@@ -346,6 +512,15 @@ def simulate_week(
             components["fumbles_lost"][:, idx] = rng.binomial(
                 touches.astype(int), np.clip(0.008 + (positions == "QB") * 0.004, 0, 0.03)
             )
+            if cfg.capture_team_totals:
+                team_totals[str(team)] = {
+                    "team_pass_attempts": team_pass_attempts.copy(),
+                    "team_carries": team_carries.copy(),
+                    "player_targets": targets.sum(axis=1),
+                    "other_targets": other_targets.copy(),
+                    "player_carries": carries.sum(axis=1),
+                    "other_carries": carry_counts_all[:, -1].copy(),
+                }
 
     raw_points = score_components(components, rules)
     calibrated = np.zeros_like(raw_points)
@@ -373,6 +548,14 @@ def simulate_week(
             target_interval_width,
             rng.standard_normal(n),
         )
+        if role_mixture:
+            calibrated[:, index] = _directional_tail_stretch(
+                calibrated[:, index],
+                available_all[:, index],
+                float(stretch_up[index]),
+                float(stretch_down[index]),
+                str(row["position"]),
+            )
 
     ids = players["player_id"].astype(str).tolist()
     point_frame = pd.DataFrame(calibrated, columns=ids)
@@ -426,5 +609,7 @@ def simulate_week(
             "games": int(players[game_key].nunique(dropna=False)),
             "scoring": rules.to_dict(),
             "calibration": "hurdle-preserving center and interval scale",
+            "role_scenario_mixture": bool(role_mixture),
+            **({"team_totals": team_totals} if cfg.capture_team_totals else {}),
         },
     )
