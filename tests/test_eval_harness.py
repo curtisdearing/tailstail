@@ -19,9 +19,14 @@ def test_registry_written_with_schema(tmp_path):
     assert r.returncode == 0, r.stderr
     reg = json.load(open(os.path.join(ROOT, out)))
     for key in ["schema_version", "generated", "git_head", "holdout_policy",
-                "accept_gates", "inputs", "metrics"]:
+                "accept_gates", "release_thresholds", "protocol", "inputs", "metrics"]:
         assert key in reg, key
+    assert reg["schema_version"] == 2
     assert reg["accept_gates"]["ranker_log_loss"] < 0
+    assert reg["accept_gates"]["sim_undercoverage_penalty_pp"] < 0
+    assert reg["release_thresholds"]["sanity_top10_overlap_min"] == 0.50
+    assert reg["protocol"]["schema_version"] == 1
+    assert "undercoverage_penalty_pp" in reg["metrics"]["simulation_calibration"]
     assert isinstance(reg["inputs"], dict) and reg["inputs"]
     os.remove(os.path.join(ROOT, out))
 

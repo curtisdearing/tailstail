@@ -1,23 +1,134 @@
 {
- "schema_version": 1,
- "generated": "2026-07-16 15:08 UTC",
+ "schema_version": 2,
+ "generated": "2026-07-16 14:56 UTC",
  "git_head": "e97c997",
- "holdout_policy": "tune on 2020-2024 walk-forward; 2025 evaluated once per lever at accept time",
+ "holdout_policy": "tune on 2020-2024 walk-forward; 2025 is a locked regression checkpoint; 2026 prospective predictions are final",
  "accept_gates": {
   "fantasy_mae_points": -0.05,
   "fantasy_rank_spearman": 0.01,
   "sim_coverage_error_pp": -2.0,
+  "sim_undercoverage_penalty_pp": -1.0,
   "ranker_log_loss": -0.002
  },
+ "release_thresholds": {
+  "nominal_interval_coverage": 0.8,
+  "sanity_top10_overlap_min": 0.5,
+  "minimum_probability_of_improvement": 0.9
+ },
+ "protocol": {
+  "schema_version": 1,
+  "protocol_id": "nfl-accuracy-2026-v1",
+  "status": "preseason_preregistered",
+  "truth_windows": {
+   "development": "2020-2024 expanding walk-forward",
+   "locked_regression_benchmark": "2025; inspect only at an accept/reject checkpoint",
+   "prospective_final_judge": "2026 regular season; no relabeling or hindsight exclusions"
+  },
+  "synthetic_lines": {
+   "purpose": "historical ranking trend and regression testing only",
+   "construction": "floor(strictly-prior player trailing mean) + 0.5; anytime TD is fixed at 0.5",
+   "required_columns": [
+    "line_source",
+    "season",
+    "week",
+    "player_id",
+    "market"
+   ],
+   "forbidden_claims": [
+    "profit",
+    "ROI",
+    "market edge",
+    "closing-line value"
+   ],
+   "real_market_judge": "forward same-side consensus closing-line value"
+  },
+  "matched_control": {
+   "minimum_exposed_n": 100,
+   "minimum_control_n": 100,
+   "match_keys": [
+    "position_or_market",
+    "depth_role",
+    "season_phase"
+   ],
+   "game_script_strata": [
+    "favored",
+    "neutral",
+    "underdog"
+   ],
+   "cluster_unit": "team-season",
+   "multiple_testing": "Benjamini-Hochberg q < 0.05",
+   "season_forward_replication_required": true,
+   "fallback": "research_only when a required key or stratum is unavailable"
+  },
+  "narrative_factors": {
+   "examples": [
+    "birthday",
+    "revenge",
+    "homecoming",
+    "primetime",
+    "stadium"
+   ],
+   "minimum_exposed_n": 100,
+   "minimum_control_n": 100,
+   "maximum_live_effect": 0.03,
+   "policy": "shadow only until matched-control, multiplicity, and season-forward gates all pass"
+  },
+  "acceptance": {
+   "one_lever_per_track_per_checkpoint": true,
+   "parallel_tracks": [
+    "tailstail_fantasy",
+    "fablesfable_props"
+   ],
+   "shared_core_changes": "serialize both tracks and rerun both suites",
+   "paired_resampling_unit": "season-week",
+   "minimum_probability_of_improvement": 0.9,
+   "stop_after_consecutive_rejections": 3,
+   "sanity_top_n": 10,
+   "sanity_min_overlap": 0.5,
+   "expected_delta_required_before_run": true,
+   "ensemble_challenger_after_single_lever_plateau": true
+  },
+  "calibration": {
+   "bins": 10,
+   "metrics": [
+    "brier",
+    "ece",
+    "overconfidence_ece"
+   ],
+   "overconfidence_definition": "sum bin_weight * max(mean_prediction - observed_rate, 0)"
+  },
+  "forward_clv": {
+   "minimum_resolved": 150,
+   "minimum_mean_probability_clv": 0.0,
+   "minimum_beat_close_rate": 0.52,
+   "comparison": "entry versus same-side cross-book consensus close",
+   "unresolved_policy": "exclude and report exact unresolved n"
+  },
+  "operations": {
+   "freeze_date": "2026-09-05",
+   "week_1_target": "2026-09-10",
+   "bye_week_checkpoint": "after Week 8: data/schema audit, calibration review, no lever promotion without the same gates",
+   "public_baselines": "external until source, timestamp, scoring, coverage, and redistribution rights are pinned",
+   "compute_budget": "record rows, simulations, runtime, seed, and package versions for every distribution audit",
+   "known_risks": [
+    "NFL rule changes",
+    "roster and free-agency churn",
+    "data-vendor schema drift",
+    "human lever-selection bias",
+    "simulation compute growth"
+   ]
+  }
+ },
  "inputs": {
-  "historical/historical_pbp.parquet": "b5e4ed9316ea1c9701167f660e526aa1cd932d7a3e9fe2f1509c63b14ea559a4",
-  "historical_lines.parquet": "fa82f7b7548c057c61b90e56cfee2c3dde3ee80320a7beb5cb271e7410d81bbb",
-  "historical/rosters_weekly.parquet": "d44cfc35acd69da112a4cfd2af178e90d7f45bd9bcbe1930cb8801b95be7fbca",
-  "historical/injuries.parquet": "2dfd56ef1d8b14f6adf304cc47af1c93b9daff80debf59e603ce50e75e4e9e89",
-  "historical/players_meta.parquet": "941c29d0070f6a00af5ef49445c08b35e64c74036bcebbbdc2467792d3b363bf",
-  "historical/fantasy/feature_frame.parquet": "f26d2bd1fc3f3bd9a899b96243d0b409354258bbfb3669485f42264c4aa82c70",
-  "data/factor_frame.parquet": "963163ab9774e08137c5ea8cb2e6ffe3f510181d4e4220f602042a93c8c53f75",
-  "config.json": "49060b2d58282f0945efc3cc1db3a316490e8b4b037c9113b97c5362b6fc68ff"
+  "historical/historical_pbp.parquet": null,
+  "historical_lines.parquet": null,
+  "historical/rosters_weekly.parquet": null,
+  "historical/injuries.parquet": null,
+  "historical/players_meta.parquet": null,
+  "historical/fantasy/feature_frame.parquet": null,
+  "data/factor_frame.parquet": null,
+  "config.json": "49060b2d58282f0945efc3cc1db3a316490e8b4b037c9113b97c5362b6fc68ff",
+  "analysis/accuracy_protocol.json": "733e370c2dac3c7355827174f1e36def9bb1a38e6e317ec02b8980a56bd1ce42"
  },
  "metrics": {
   "fantasy_model_card": "not built yet (run: python -m nflvalue.fantasy.cli train)",
@@ -42,6 +153,29 @@
     "accuracy": 0.5836,
     "outer_n": 281,
     "selective_lift_pp": -0.28
+   }
+  },
+  "simulation_calibration": {
+   "n": 11481,
+   "nominal_coverage": 0.8,
+   "observed_coverage": 0.8224022297709259,
+   "absolute_coverage_error_pp": 2.2402,
+   "undercoverage_penalty_pp": 0.0,
+   "mean_interval_width": 17.23588321165533,
+   "release_gate": {
+    "active_degenerate_intervals": 0,
+    "failures": [],
+    "max_calibrated_center_drift": 2.6563196087181495e-12,
+    "pass": true,
+    "warnings": [
+     "raw event simulator is less accurate than the direct ensemble and is distribution-only",
+     "263 player-weeks required residual fallback because event tails were unstable",
+     "role_decrease_5_plus coverage is heterogeneous at 71.6%",
+     "stable_role_abs_lt_3 coverage is heterogeneous at 88.3%",
+     "team_changed coverage is heterogeneous at 89.9%",
+     "injury_questionable coverage is heterogeneous at 90.9%",
+     "practice_dnp coverage is heterogeneous at 92.2%"
+    ]
    }
   },
   "baselines_required": [
