@@ -12,10 +12,10 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import pipeline_weekly as pw  # noqa: E402
-from nflvalue import config as cfgmod  # noqa: E402
-from nflvalue import db as dbmod  # noqa: E402
-from tests.test_report_phase2 import SEASON, WEEK, synthetic_inputs  # noqa: E402
+import pipeline_weekly as pw
+from nflvalue import config as cfgmod
+from nflvalue import db as dbmod
+from tests.test_report_phase2 import SEASON, WEEK, synthetic_inputs
 
 GAME_ID = f"{SEASON}_09_AAA_BBB"
 FRESH_TS = None  # filled per-test with stamp_now
@@ -27,8 +27,8 @@ def env(tmp_path, monkeypatch):
     real_connect = dbmod.connect
     db_path = str(tmp_path / "pipe.db")
     monkeypatch.setattr(dbmod, "connect", lambda p=None: real_connect(db_path))
-    from nflvalue import report as rptmod
     from nflvalue import document as docmod
+    from nflvalue import report as rptmod
     monkeypatch.setattr(rptmod, "REPORTS_DIR", str(tmp_path / "reports"))
     monkeypatch.setattr(rptmod, "WEEKLY_PROPS_JSON", str(tmp_path / "weekly_props.json"))
     monkeypatch.setattr(docmod, "DROPS_DIR", str(tmp_path / "drops"))

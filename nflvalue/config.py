@@ -6,6 +6,8 @@ import json
 import os
 from typing import Dict
 
+from .failures import ConfigError
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(ROOT, "data")
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -82,8 +84,13 @@ def load_config() -> Dict:
             if "prop_markets" in file_cfg and "prop_markets_internal" not in file_cfg:
                 cfg.pop("prop_markets_internal", None)
             cfg.update(file_cfg)
-        except Exception as exc:  # noqa: BLE001
-            print(f"[config] could not parse config.json ({exc}); using defaults")
+        except (OSError, json.JSONDecodeError) as exc:
+            # Silently reverting to DEFAULT_CONFIG meant a typo'd config.json
+            # quietly changed the market list, thresholds, and API settings.
+            raise ConfigError(
+                f"{CONFIG_PATH} exists but is not valid JSON: {exc}. Refusing to "
+                "fall back to defaults, which would silently change markets and "
+                "thresholds.") from exc
     # env var overrides the file, handy for scheduled runs
     if os.environ.get("ODDS_API_KEY"):
         cfg["odds_api_key"] = os.environ["ODDS_API_KEY"]
@@ -91,13 +98,20 @@ def load_config() -> Dict:
 
 
 def load_json(path: str, default):
-    if os.path.exists(path):
-        try:
-            with open(path) as f:
-                return json.load(f)
-        except Exception:  # noqa: BLE001
-            return default
-    return default
+    """Absent file -> ``default``. Present-but-corrupt file -> raise.
+
+    Those two cases used to be indistinguishable, so a truncated
+    ``ratings_current.json`` silently reset the model to its priors.
+    """
+    if not os.path.exists(path):
+        return default
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ConfigError(
+            f"{path} exists but is not valid JSON: {exc}. An absent file falls "
+            "back to defaults; a corrupt one must not.") from exc
 
 
 def save_json(path: str, obj) -> None:

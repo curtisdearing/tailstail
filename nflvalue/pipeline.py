@@ -3,15 +3,16 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from . import config, dashboard, learn, model, oddsmath
+from .failures import SourceFetchError
 from .sources import demo, live
 
 try:  # Monte Carlo needs numpy; the rest of the app runs fine without it.
     from . import montecarlo as _mc
     _HAVE_MC = True
-except Exception:  # noqa: BLE001
+except Exception:
     _HAVE_MC = False
 
 import os as _os
@@ -63,7 +64,7 @@ def _all_games_view(games: List[Dict], cfg: Dict) -> List[Dict]:
         rev = " • revenge spot" if (ctx.get("revenge_home") or ctx.get("revenge_away")) else ""
         try:
             kickoff = datetime.fromisoformat(g["commence_time"].replace("Z", "+00:00")).strftime("%a %m/%d %H:%M")
-        except Exception:  # noqa: BLE001
+        except Exception:
             kickoff = g.get("commence_time", "")
 
         rows.append({
@@ -92,7 +93,7 @@ def _market_lines(game: Dict):
     return home_point, total_point
 
 
-def attach_montecarlo(games: List[Dict], n: int = 8000):
+def attach_montecarlo(games: List[Dict], n: int = 8000, seed: Optional[int] = None):
     """Run the drive-based Monte Carlo for each game using historical ratings.
 
     Returns a dashboard section, or None if numpy / ratings aren't available.
@@ -114,7 +115,11 @@ def attach_montecarlo(games: List[Dict], n: int = 8000):
             continue
         home_point, total_point = _market_lines(g)
         spread_line = (-home_point) if home_point is not None else None
-        r = _mc.simulate(h, a, priors, spread_line=spread_line, total_line=total_point, n=n)
+        game_seed = _mc.derive_seed(_mc.DEFAULT_SEED if seed is None else seed,
+                                    g.get("id") or g.get("game_id")
+                                    or (g["home_team"], g["away_team"], g.get("commence_time")))
+        r = _mc.simulate(h, a, priors, spread_line=spread_line, total_line=total_point,
+                         n=n, seed=game_seed)
         g["mc"] = r  # available to the model/dashboard
         sims.append({
             "home_team": g["home_team"], "away_team": g["away_team"],
@@ -134,8 +139,17 @@ def attach_montecarlo(games: List[Dict], n: int = 8000):
     return {"seasons": priors.get("seasons", []), "n_sims": n, "games": sims}
 
 
-def run(cfg: Dict = None, mode: str = None, games: List[Dict] = None) -> Dict:
-    """Build the current slate, find value, log predictions, render dashboard."""
+def run(cfg: Optional[Dict] = None, mode: Optional[str] = None,
+        games: Optional[List[Dict]] = None,
+        allow_demo_fallback: bool = False) -> Dict:
+    """Build the current slate, find value, log predictions, render dashboard.
+
+    ``allow_demo_fallback`` must be requested explicitly. A live run whose odds
+    fetch fails used to substitute SYNTHETIC games and carry on, distinguished
+    from real output only by one stdout line -- the dashboard, the logged
+    predictions, and the value bets were all fabricated but indistinguishable.
+    Failing closed is the only honest default.
+    """
     cfg = cfg or config.load_config()
     if mode is None:
         mode = "live" if cfg.get("odds_api_key") else "demo"
@@ -144,9 +158,16 @@ def run(cfg: Dict = None, mode: str = None, games: List[Dict] = None) -> Dict:
         if mode == "live":
             try:
                 games = live.build_live_slate(cfg)
-            except Exception as exc:  # noqa: BLE001
-                print(f"[run] live fetch failed ({exc}); falling back to demo")
-                mode = "demo"
+            except SourceFetchError as exc:
+                if not allow_demo_fallback:
+                    raise SourceFetchError(
+                        exc.source, exc.url, exc.attempts,
+                        detail=("live slate unavailable and demo fallback not "
+                                "requested; refusing to publish synthetic games "
+                                "as live output (pass allow_demo_fallback=True "
+                                "or mode='demo' to opt in deliberately)")) from exc
+                print(f"[run] live fetch failed ({exc}); falling back to demo AS REQUESTED")
+                mode = "demo_fallback"
                 games = demo.generate_slate(datetime.now(timezone.utc))
         else:
             games = demo.generate_slate(datetime.now(timezone.utc))

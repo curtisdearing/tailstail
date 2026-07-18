@@ -17,11 +17,11 @@ Needs numpy (for the simulator).
 from __future__ import annotations
 
 import argparse
-import json
 import os
 from collections import defaultdict
 
-from nflvalue import config, montecarlo as mc
+from nflvalue import config
+from nflvalue import montecarlo as mc
 
 ABBR_OFF = None  # filled from ratings if needed
 
@@ -31,7 +31,7 @@ def _conf(edge_pts):
     return "high" if e >= 3 else ("med" if e >= 1.5 else "low")
 
 
-def _project_game(g, priors, sims, ratings=None):
+def _project_game(g, priors, sims, ratings=None, seed=mc.DEFAULT_SEED):
     """Simulate one game from its pre-game ratings; return a board row."""
     if "off_home" in g:                       # historical game (ratings embedded)
         home = {"off": g["off_home"], "def": g["def_home"]}
@@ -41,7 +41,9 @@ def _project_game(g, priors, sims, ratings=None):
         away = ratings.get(g["away"]) or {"off": 0, "def": 0}
 
     sp, tot = g["spread_line"], g["total_line"]
-    r = mc.simulate(home, away, priors, spread_line=sp, total_line=tot, n=sims)
+    game_seed = mc.derive_seed(seed, g.get("game_id") or (g.get("season"), g.get("week"),
+                                                          g.get("home"), g.get("away")))
+    r = mc.simulate(home, away, priors, spread_line=sp, total_line=tot, n=sims, seed=game_seed)
     home_point = -sp                          # market home spread (e.g. -6.5)
 
     ats_edge = r["margin_mean"] - sp          # >0 => model likes home vs the line
@@ -133,7 +135,7 @@ def _summary(rec):
     }
 
 
-def build_historical(season=None, sims=5000, through=None):
+def build_historical(season=None, sims=5000, through=None, seed=mc.DEFAULT_SEED):
     priors = config.load_json(os.path.join(config.DATA_DIR, "league_priors.json"), None)
     games = config.load_json(os.path.join(config.DATA_DIR, "backtest_games.json"), None)
     if not priors or not games:
@@ -154,7 +156,7 @@ def build_historical(season=None, sims=5000, through=None):
         for g in weeks[wk]:
             gg = dict(g)
             gg["_played"] = reveal       # hide results for "upcoming" weeks
-            rows.append(_project_game(gg, priors, sims))
+            rows.append(_project_game(gg, priors, sims, seed=seed))
             _apply(rec, rows[-1])
         out_weeks.append({"week": wk, "label": _week_label(wk),
                           "games": rows, "record_to_date": _summary(rec)})
@@ -165,7 +167,7 @@ def build_historical(season=None, sims=5000, through=None):
     }
 
 
-def build_live(cfg, sims=8000):
+def build_live(cfg, sims=8000, seed=mc.DEFAULT_SEED):
     """Project the current live slate (in season) on real odds + current ratings."""
     from nflvalue import pipeline
     from nflvalue.sources import live as livesrc
@@ -181,7 +183,7 @@ def build_live(cfg, sims=8000):
             continue
         gg = {"home": g["home_team"], "away": g["away_team"],
               "spread_line": -hp, "total_line": tp, "home_score": None, "away_score": None}
-        rows.append(_project_game(gg, priors, sims, ratings))
+        rows.append(_project_game(gg, priors, sims, ratings, seed=seed))
     if not rows:
         return None
     return {"mode": "live", "season": "current", "seasons_available": [],
@@ -201,17 +203,19 @@ def main():
     ap.add_argument("--season", type=int, default=None)
     ap.add_argument("--through", type=int, default=None, help="reveal results only through this week")
     ap.add_argument("--sims", type=int, default=5000)
+    ap.add_argument("--seed", type=int, default=mc.DEFAULT_SEED,
+                    help="base Monte Carlo seed; per-game streams are derived from it")
     ap.add_argument("--live", action="store_true")
     args = ap.parse_args()
     cfg = config.load_config()
 
     if args.live and cfg.get("odds_api_key"):
-        data = build_live(cfg, sims=args.sims)
+        data = build_live(cfg, sims=args.sims, seed=args.seed)
         if not data:
             print("No live games (offseason?). Falling back to historical.")
-            data = build_historical(args.season, args.sims, args.through)
+            data = build_historical(args.season, args.sims, args.through, seed=args.seed)
     else:
-        data = build_historical(args.season, args.sims, args.through)
+        data = build_historical(args.season, args.sims, args.through, seed=args.seed)
     if not data:
         return
     config.save_json(os.path.join(config.DATA_DIR, "weekly.json"), data)
@@ -221,7 +225,7 @@ def main():
     print(f"  Season-to-date: SU {sr['su']} ({sr['su_pct']*100:.0f}%) | "
           f"ATS {sr['ats']} ({sr['ats_pct']*100:.0f}%) | totals {sr['totals']} | "
           f"avg margin error {sr['avg_margin_err']} pts")
-    print(f"  Saved: data/weekly.json")
+    print("  Saved: data/weekly.json")
 
 
 if __name__ == "__main__":

@@ -71,6 +71,7 @@ NUMERIC_FEATURES = [
 from .advanced_features import FEATURES as _ADV_FEATURES  # noqa: E402
 from .chemistry import FEATURES as _CHEM_FEATURES  # noqa: E402
 from .ftn_features import FEATURES as _FTN_FEATURES  # noqa: E402
+
 NUMERIC_FEATURES = NUMERIC_FEATURES + _ADV_FEATURES + _CHEM_FEATURES + _FTN_FEATURES
 
 

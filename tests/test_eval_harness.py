@@ -14,10 +14,11 @@ def run(*args):
 
 
 def test_registry_written_with_schema(tmp_path):
-    out = f"data/accuracy_registry_test.json"
+    out = "data/accuracy_registry_test.json"
     r = run("--output", out)
     assert r.returncode == 0, r.stderr
-    reg = json.load(open(os.path.join(ROOT, out)))
+    with open(os.path.join(ROOT, out)) as handle:
+        reg = json.load(handle)
     for key in ["schema_version", "generated", "git_head", "holdout_policy",
                 "accept_gates", "release_thresholds", "protocol", "inputs", "metrics"]:
         assert key in reg, key

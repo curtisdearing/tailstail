@@ -11,7 +11,6 @@ import pandas as pd
 
 from analysis.nested_factor_selection import nested_season_forward
 
-
 COMMON = [
     "birthday_window_5", "revenge", "primetime", "short_rest", "post_bye",
     "big_favorite", "big_underdog", "high_total", "division_rematch",

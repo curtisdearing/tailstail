@@ -79,7 +79,11 @@ def ensure_dependencies() -> None:
     installing requirements when core imports are missing (evaluation catch —
     without this, every scheduled run in a new sandbox would die on import)."""
     try:
-        import pandas, numpy, scipy, sklearn, pyarrow  # noqa: F401
+        import numpy  # noqa: F401 - availability probe
+        import pandas  # noqa: F401 - availability probe
+        import pyarrow  # noqa: F401
+        import scipy  # noqa: F401 - availability probe
+        import sklearn  # noqa: F401 - availability probe
     except ImportError:
         import subprocess
         root = str(Path(__file__).resolve().parents[1])
@@ -126,8 +130,9 @@ def last_completed_week(slate, now: dt.datetime):
 
 
 def job_wed() -> int:
-    from nflvalue import config as cfgmod, ingest
     import pipeline_weekly as pw
+    from nflvalue import config as cfgmod
+    from nflvalue import ingest
     r = ingest.refresh()
     print(f"[auto] ingest: season {r['season']} stale={r['stale']} errors={r['errors'] or 'none'}")
     slate = load_slate()
@@ -154,8 +159,9 @@ def job_wed() -> int:
 
 
 def job_t90() -> int:
-    from nflvalue import config as cfgmod, db as dbmod
     import pipeline_weekly as pw
+    from nflvalue import config as cfgmod
+    from nflvalue import db as dbmod
     slate = load_slate()
     now = now_et()
     soon = slate[(slate["kickoff"] > now)
@@ -175,8 +181,8 @@ def job_t90() -> int:
     # would starve forever. Resnap exactly the games that have entry lines.
     if cfg.get("odds_api_key"):
         try:
-            from nflvalue.sources import oddsapi_props as oap
             import pipeline_weekly as pwmod
+            from nflvalue.sources import oddsapi_props as oap
             have_lines = set(dbmod.query_df(
                 conn, "SELECT DISTINCT game_id FROM lines")["game_id"].tolist())
             targets = [g.game_id for g in soon.itertuples(index=False)
@@ -186,7 +192,7 @@ def job_t90() -> int:
                 res = oap.resnap_lines(cfg, emap, conn=conn)
                 print(f"[auto] closing resnap: {len(res['pulled'])} game(s), "
                       f"{res['rows_written']} rows, {res['budget_remaining']:.0f} credits left")
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             print(f"[auto] closing resnap failed (CLV close may be stale): {exc}")
     conn.close()
     from nflvalue.notify import resolve_webhook
@@ -203,7 +209,7 @@ def job_t90() -> int:
             res = pw.run_t90(int(g.season), int(g.week), g.game_id, mode="live",
                              inputs=inputs, discord=True, discord_dry_run=not post_live)
             print(f"[auto] t90 {g.game_id}: {len(res['voided'])} voided")
-        except Exception as exc:  # noqa: BLE001 -- one bad game must not skip the rest
+        except Exception as exc:
             print(f"[auto] t90 {g.game_id} FAILED: {exc}")
             failures.append(g.game_id)
     if failures:
@@ -216,8 +222,8 @@ def job_t90() -> int:
 
 def job_tuesday() -> int:
     import subprocess
+
     import pipeline_weekly as pw
-    from nflvalue import killcheck
     slate = load_slate()
     lw = last_completed_week(slate, now_et())
     if lw is None:
@@ -256,7 +262,7 @@ def job_deploy() -> int:
         slate = load_slate()
         status = schedule_status(slate, now_et())
         detail = "Deployment completed without running the betting model."
-    except Exception as exc:  # noqa: BLE001 - surface a readable status page
+    except Exception as exc:
         status = "degraded"
         detail = f"Deployment completed, but schedule status could not be read: {exc}"
     write_pipeline_heartbeat(status, detail, "deploy")

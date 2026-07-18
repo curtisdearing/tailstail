@@ -14,7 +14,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue.features import load_pbp  # noqa: E402
+from nflvalue.features import load_pbp
 
 FAST_SEASONS = [2019, 2020]
 

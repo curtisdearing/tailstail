@@ -19,10 +19,10 @@ Needs numpy (for the simulator). Reads data/backtest_games.json from build_ratin
 from __future__ import annotations
 
 import argparse
-import json
 import os
 
-from nflvalue import config, montecarlo as mc
+from nflvalue import config
+from nflvalue import montecarlo as mc
 
 DEC_110 = 1.9091  # decimal odds for a -110 bet
 
@@ -34,7 +34,7 @@ def american_to_decimal(a):
     return 1 + a / 100 if a > 0 else 1 + 100 / abs(a)
 
 
-def run(sims=6000, threshold=0.03):
+def run(sims=6000, threshold=0.03, seed=mc.DEFAULT_SEED):
     priors = config.load_json(os.path.join(config.DATA_DIR, "league_priors.json"), None)
     games = config.load_json(os.path.join(config.DATA_DIR, "backtest_games.json"), None)
     if not priors or not games:
@@ -50,13 +50,15 @@ def run(sims=6000, threshold=0.03):
     equity, bank = [100.0], 100.0
     by_season = {}
     # running sums to compare model vs market as margin predictors
-    cc = {k: 0.0 for k in ("n", "xm", "xk", "y", "xmxm", "xkxk", "yy", "xmy", "xky")}
+    cc = dict.fromkeys(("n", "xm", "xk", "y", "xmxm", "xkxk", "yy", "xmy", "xky"), 0.0)
 
     for g in games:
         home = {"off": g["off_home"], "def": g["def_home"]}
         away = {"off": g["off_away"], "def": g["def_away"]}
         sp, tot = g["spread_line"], g["total_line"]
-        r = mc.simulate(home, away, priors, spread_line=sp, total_line=tot, n=sims)
+        r = mc.simulate(home, away, priors, spread_line=sp, total_line=tot, n=sims,
+                        seed=mc.derive_seed(seed, g.get("game_id") or
+                                            (g["season"], g.get("week"), g.get("home"), g.get("away"))))
 
         margin = g["home_score"] - g["away_score"]
         total_pts = g["home_score"] + g["away_score"]
@@ -168,7 +170,7 @@ def run(sims=6000, threshold=0.03):
         print(f"  {name.upper():7} bets {m['bets']:4}  win {m['win_rate']*100:4.1f}%  "
               f"ROI {m['roi']*100:+5.1f}%  ({m['units']:+.1f}u)")
     print(f"  Combined bankroll: 100u -> {report['final_bankroll']}u")
-    print(f"\n  Saved: data/backtest.json")
+    print("\n  Saved: data/backtest.json")
 
 
 def _book(m, season_acc, won, push, dec):
@@ -195,6 +197,7 @@ def _pl(won, push, dec):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--sims", type=int, default=6000)
+    ap.add_argument("--seed", type=int, default=mc.DEFAULT_SEED)
     ap.add_argument("--threshold", type=float, default=0.03)
     args = ap.parse_args()
-    run(sims=args.sims, threshold=args.threshold)
+    run(sims=args.sims, threshold=args.threshold, seed=args.seed)

@@ -389,7 +389,7 @@ def simulate_week(
     fallback_game = ["_".join(sorted((str(team), str(opp)))) for team, opp in zip(players["team"], opponent)]
     players["_simulation_game"] = game_values.where(game_values.notna(), fallback_game)
     game_key = "_simulation_game"
-    for game_value, game in players.groupby(game_key, dropna=False, sort=True):
+    for _game_value, game in players.groupby(game_key, dropna=False, sort=True):
         # One pace draw per game creates the required cross-team correlation.
         sigma = np.sqrt(np.log1p(cfg.team_volume_cv**2))
         pace = rng.lognormal(mean=-0.5 * sigma**2, sigma=sigma, size=n)

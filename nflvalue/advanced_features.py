@@ -251,7 +251,9 @@ def contract_year_lookup(path: Optional[str] = None) -> Dict[Tuple[str, int], in
     out: Dict[Tuple[str, int], int] = {}
     for season in range(2019, 2033):
         known = con[con["year_signed"] <= season]
-        latest = known.sort_values("year_signed").groupby("gsis_id").tail(1)
+        # Stable tie-break: equal ``year_signed`` used to resolve arbitrarily.
+        latest = (known.sort_values(["year_signed", "years", "gsis_id"], kind="mergesort")
+                  .groupby("gsis_id").tail(1))
         for r in latest.itertuples(index=False):
             end = int(r.year_signed) + int(r.years) - 1
             out[(r.gsis_id, season)] = int(season == end)
@@ -294,8 +296,7 @@ class AdvancedPack:
                  schedules: Optional[pd.DataFrame] = None,
                  injuries: Optional[pd.DataFrame] = None,
                  players_meta: Optional[pd.DataFrame] = None):
-        from .context_features import (OUT_STATUSES, load_injury_history,
-                                       load_players_meta)
+        from .context_features import OUT_STATUSES, load_injury_history, load_players_meta
         pbp = pbp if pbp is not None else load_pbp_ext()
         if schedules is None:
             from .ingest import load_all_schedules

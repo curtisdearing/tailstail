@@ -12,10 +12,12 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue import context_study, db as dbmod, prop_learning as pl  # noqa: E402
-from nflvalue.candidates import apply_reallocation  # noqa: E402
-from nflvalue.composite import score_candidate  # noqa: E402
-from nflvalue.sources import espn_news  # noqa: E402
+from nflvalue import context_study
+from nflvalue import db as dbmod
+from nflvalue import prop_learning as pl
+from nflvalue.candidates import apply_reallocation
+from nflvalue.composite import score_candidate
+from nflvalue.sources import espn_news
 
 FIXTURES = Path(__file__).parent / "fixtures"
 

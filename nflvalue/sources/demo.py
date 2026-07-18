@@ -154,7 +154,7 @@ def _make_props(home, away, ctx, rng):
     props = []
     for team in (home, away):
         roster = STARS.get(team, GENERIC_STARS)
-        for (name, pos, ptype, mean) in roster:
+        for (name, _pos, ptype, mean) in roster:
             pctx = {
                 "weather_sev": ctx["weather_sev"],
                 "opp_def_rating": round(rng.uniform(-0.6, 0.6), 3),

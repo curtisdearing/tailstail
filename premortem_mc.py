@@ -10,7 +10,10 @@ Parts:
   C. Time-to-detect: bets needed to prove a small edge vs break-even (analytic + sim check)
   D. NFL sample realism: convert (C) into SEASONS given realistic bets/season
 """
-import numpy as np, json, math
+import json
+import math
+
+import numpy as np
 
 RNG = np.random.default_rng(20260701)
 DEC = 1.9091            # -110 decimal odds

@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
-import json
 import os
 from typing import Dict, List, Optional
 
@@ -196,7 +195,7 @@ def load_manual_notes(conn, season: int, week: int) -> List[Dict]:
         df = dbmod.query_df(conn, "SELECT * FROM manual_notes WHERE season=? AND week=?",
                             (season, week))
         return df.to_dict("records")
-    except Exception:  # noqa: BLE001 -- table may not exist in an old DB
+    except Exception:
         return []
 
 

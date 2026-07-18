@@ -13,8 +13,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue import db as dbmod  # noqa: E402
-from nflvalue.sources import oddsapi_props as oap  # noqa: E402
+from nflvalue import db as dbmod
+from nflvalue.sources import oddsapi_props as oap
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -93,7 +93,7 @@ def test_budget_trusts_api_reported_usage(conn):
 # --------------------------------------------------------------------------- #
 def test_rotation_prefers_least_recently_pulled(conn, payload):
     cfg = _cfg(max_prop_games_per_run=1)
-    fetch = lambda url, params=None: json.loads(json.dumps(payload))  # noqa: E731
+    fetch = lambda url, params=None: json.loads(json.dumps(payload))
     event_map = {"2023_10_A_B": "e1", "2023_10_C_D": "e2"}
 
     r1 = oap.pull_week_props(cfg, event_map, conn=conn, fetch=fetch, ts="2023-11-08T10:00:00Z")
@@ -112,7 +112,7 @@ def test_parse_and_idempotent_upsert(conn, payload):
         r["game_id"] = "2023_10_CLE_BAL"
     assert {r["market"] for r in rows} == {"receiving_yards", "receptions",
                                            "anytime_td", "passing_yards"}
-    td = [r for r in rows if r["market"] == "anytime_td"][0]
+    td = next(r for r in rows if r["market"] == "anytime_td")
     assert td["side"] == "over" and td["point"] == 0.5   # Yes -> over @ 0.5
 
     n1 = dbmod.upsert(conn, "lines", rows, ["ts", "game_id", "book", "market", "player_name", "side"])

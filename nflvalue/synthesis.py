@@ -232,9 +232,7 @@ class RuleBasedMockLLM:
         for feed_key, ts_key in (("injuries", "injuries_updated"), ("roster", "roster_updated"),
                                  ("lines", "lines_updated"), ("news", "news_updated")):
             ts = parse_ts((freshness or {}).get(ts_key))
-            if ts is None or as_of_dt is None:
-                stale.append(feed_key)
-            elif (as_of_dt - ts).total_seconds() / 3600.0 > staleness_hours:
+            if ts is None or as_of_dt is None or (as_of_dt - ts).total_seconds() / 3600.0 > staleness_hours:
                 stale.append(feed_key)
         return stale
 

@@ -39,9 +39,11 @@ from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 
-from nflvalue import config, db as dbmod
+from nflvalue import config
+from nflvalue import db as dbmod
 from nflvalue.features import build_opp_pos_def, build_player_week, build_team_week, load_pbp
-from nflvalue.projection import DEFAULT_SD_FRACTION, MARKETS, MIN_GAMES_ELIGIBLE, p_over as p_over_fn
+from nflvalue.projection import DEFAULT_SD_FRACTION, MARKETS, MIN_GAMES_ELIGIBLE
+from nflvalue.projection import p_over as p_over_fn
 from nflvalue.sources import rosters as rostersmod
 
 ACTUAL_COL = {

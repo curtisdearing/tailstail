@@ -17,8 +17,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from nflvalue import config, pipeline  # noqa: E402
-from nflvalue.sources import live  # noqa: E402
+from nflvalue import config, pipeline
+from nflvalue.sources import live
 
 
 def main():

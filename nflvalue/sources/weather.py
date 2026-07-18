@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Dict, Optional
 
 from .. import factors as factmod
+from ..failures import Attempt, SourceFetchError, SourceUnavailable
 from ._http import get_json
 
 BASE = "https://api.open-meteo.com/v1/forecast"
@@ -34,13 +35,21 @@ def forecast_for_game(home_team: str, commence_iso: str) -> Optional[Dict]:
         idx = times.index(target) if target in times else min(
             range(len(times)), key=lambda i: abs(int(times[i][11:13]) - dt.hour)) if times else None
         if idx is None:
-            return {"dome": False}
+            raise SourceUnavailable(
+                "weather", BASE, [Attempt(1, "no hourly rows for kickoff hour")],
+                detail=f"{home_team} {commence_iso}")
         return {
             "dome": False,
             "temp_f": hours["temperature_2m"][idx],
             "precip_mm": hours["precipitation"][idx],
             "wind_mph": hours["wind_speed_10m"][idx],
         }
-    except Exception as exc:  # noqa: BLE001
-        print(f"[weather] lookup failed for {home_team}: {exc}")
-        return {"dome": False}
+    except SourceFetchError:
+        # Previously returned {"dome": False}, which is byte-identical to a real
+        # reading from a calm outdoor stadium -- the model could not tell a DNS
+        # failure from good weather. Callers now decide explicitly.
+        raise
+    except (KeyError, IndexError, TypeError, ValueError) as exc:
+        raise SourceUnavailable(
+            "weather", BASE, [Attempt(1, f"unexpected payload: {type(exc).__name__}: {exc}")],
+            detail=f"{home_team} {commence_iso}") from exc

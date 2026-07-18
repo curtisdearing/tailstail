@@ -9,10 +9,10 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue import clv as clvmod  # noqa: E402
-from nflvalue import db as dbmod  # noqa: E402
-from nflvalue import killcheck  # noqa: E402
-from nflvalue.oddsmath import devig_multiplicative  # noqa: E402
+from nflvalue import clv as clvmod
+from nflvalue import db as dbmod
+from nflvalue import killcheck
+from nflvalue.oddsmath import devig_multiplicative
 
 
 @pytest.fixture()

@@ -8,8 +8,8 @@ frame solely as labels and simulation-audit fields; they are never returned by
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 import json
+from collections.abc import Iterable
 
 import numpy as np
 import pandas as pd

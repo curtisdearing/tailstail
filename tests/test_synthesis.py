@@ -12,7 +12,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue import synthesis as syn  # noqa: E402
+from nflvalue import synthesis as syn
 
 AS_OF = "2023-11-08T12:00:00Z"
 FRESH = {"injuries_updated": "2023-11-08T06:00:00Z", "roster_updated": "2023-11-08T07:00:00Z",

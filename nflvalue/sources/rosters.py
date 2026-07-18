@@ -78,7 +78,7 @@ def fetch_rosters_weekly(seasons: List[int], cache_path: str = CACHE_PATH,
 
         try:
             pulled = nfl.load_rosters_weekly(seasons=missing).to_pandas()
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             if have_seasons:
                 print(f"[rosters] live fetch failed ({exc}); using cached seasons {sorted(have_seasons)} only "
                       f"(missing {missing})")

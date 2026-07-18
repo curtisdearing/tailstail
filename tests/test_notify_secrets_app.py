@@ -12,7 +12,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue import notify  # noqa: E402
+from nflvalue import notify
 
 ROOT = Path(__file__).resolve().parents[1]
 

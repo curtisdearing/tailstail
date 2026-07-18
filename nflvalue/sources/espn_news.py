@@ -13,12 +13,12 @@ category id or the player's normalized full name appears; no fuzzy guessing.
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import pandas as pd
 
-from ._http import get_json
 from ..freshness import stamp_now
+from ._http import get_json
 from .availability import normalize_name
 
 SITE = "https://site.api.espn.com/apis/site/v2/sports/football/nfl"
@@ -78,7 +78,7 @@ def news_by_player(items: List[Dict], players: pd.DataFrame) -> Dict[str, List[D
             key = f"{words[i-1][0]}|{w}"
             for pid in keys.get(key, []):
                 matched.add(pid)
-        for w in set(words):
+        for w in sorted(set(words)):
             if len(w) >= 7 and len(lastname_pool.get(w, [])) == 1:
                 matched.add(lastname_pool[w][0])
         for pid in matched:

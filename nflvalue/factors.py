@@ -13,7 +13,6 @@ from __future__ import annotations
 
 from typing import Dict, Optional
 
-
 # --------------------------------------------------------------------------- #
 # NFL stadiums: (lat, lon, is_dome). Weather is ignored for domes / fixed roofs.
 # --------------------------------------------------------------------------- #
@@ -155,7 +154,7 @@ def prop_features(ctx: Dict, prop_type: str, side: str) -> Dict[str, float]:
         "p_usage_trend": round(sign * usage, 4),
         "p_opp_defense": round(-sign * opp_def, 4),
     }
-    if prop_type.startswith("pass") or prop_type.startswith("recept") or prop_type.startswith("rec"):
+    if prop_type.startswith(("pass", "recept", "rec")):
         # Wind/rain suppress passing & receiving.
         feats["p_weather_pass"] = round(-sign * sev, 4)
     elif prop_type.startswith("rush"):

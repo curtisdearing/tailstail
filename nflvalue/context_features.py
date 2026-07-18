@@ -91,7 +91,7 @@ def load_injury_history(seasons: List[int], refresh: bool = False) -> pd.DataFra
                 cached = keep
             cached = cached.drop_duplicates(subset=["season", "week", "team", "gsis_id"])
             cached.to_parquet(INJURIES, index=False)
-        except Exception as exc:  # noqa: BLE001 -- fail loud in log, serve cache
+        except Exception as exc:
             print(f"[context_features] injury history fetch failed for {missing}: {exc}")
     return cached[cached["season"].isin(seasons)].reset_index(drop=True) if len(cached) else cached
 

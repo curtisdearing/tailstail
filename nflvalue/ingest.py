@@ -79,6 +79,7 @@ def refresh(season: Optional[int] = None, force: bool = False) -> Dict:
     """
     season = season or current_season()
     errors: List[str] = []
+    degraded: List[str] = []
     stale = False
     pbp_rows = sched_rows = 0
 
@@ -100,10 +101,14 @@ def refresh(season: Optional[int] = None, force: bool = False) -> Dict:
                 pbp[cols].to_parquet(_season_pbp_path(s), index=False)
                 if s == season:
                     pbp_rows = int(len(pbp))
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             msg = f"pbp {s}: {exc}"
             errors.append(msg)
-            if s == season and not os.path.exists(_season_pbp_path(s)):
+            if s == season:
+                # Serving a cached season file after a failed refresh is exactly
+                # the case the freshness gate exists to catch; it used to be
+                # marked stale ONLY when the file was missing entirely.
+                degraded.append(f"pbp_{s}")
                 stale = True
             print(f"[ingest] {msg}")
 
@@ -114,17 +119,20 @@ def refresh(season: Optional[int] = None, force: bool = False) -> Dict:
         keep = [c for c in SCHED_COLS if c in extra.columns]
         extra[keep].to_parquet(LINES_EXTRA, index=False)
         sched_rows = int(len(extra))
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         errors.append(f"schedules: {exc}")
-        stale = stale or not os.path.exists(LINES_EXTRA)
+        degraded.append("schedules")
+        stale = True
         print(f"[ingest] schedules refresh failed: {exc}")
 
     # -- rosters (extends the shared cache in place) -------------------------- #
     try:
         from .sources import rosters as rostersmod
         rostersmod.fetch_rosters_weekly([season], force_refresh=force)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         errors.append(f"rosters {season}: {exc}")
+        degraded.append("rosters")
+        stale = True   # a failed roster pull silently served last week's depth chart
         print(f"[ingest] roster refresh failed: {exc}")
 
     # -- injury reports + player DOBs (context features) ---------------------- #
@@ -133,8 +141,10 @@ def refresh(season: Optional[int] = None, force: bool = False) -> Dict:
         if force or not os.path.exists(cf.PLAYERS_META):
             cf.load_players_meta(refresh=True)
         cf.load_injury_history([season], refresh=True)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         errors.append(f"context data {season}: {exc}")
+        degraded.append("context")
+        stale = True   # injuries/DOBs feed availability; absence is not neutrality
         print(f"[ingest] context data refresh failed: {exc}")
 
     # -- NGS weekly tracking metrics + contracts (advanced features) ---------- #
@@ -156,12 +166,14 @@ def refresh(season: Optional[int] = None, force: bool = False) -> Dict:
         from . import ftn_features
         if season >= ftn_features.FTN_SEASON_MIN:
             ftn_features.refresh(season)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         errors.append(f"ngs/contracts {season}: {exc}")
+        degraded.append("ngs_contracts")
+        stale = True
         print(f"[ingest] NGS/contracts refresh failed: {exc}")
 
     return {"season": season, "pbp_rows": pbp_rows, "sched_rows": sched_rows,
-            "stale": stale, "errors": errors}
+            "stale": stale, "errors": errors, "degraded_sources": sorted(set(degraded))}
 
 
 # --------------------------------------------------------------------------- #

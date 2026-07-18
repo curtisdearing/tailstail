@@ -14,7 +14,6 @@ from analysis.build_factor_frame import (
 from analysis.nested_factor_selection import nested_season_forward
 from nflvalue.reproducibility import canonical_csv_sha256
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 

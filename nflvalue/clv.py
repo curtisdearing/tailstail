@@ -50,7 +50,7 @@ def snapshot_prob(conn, game_id: str, market: str, player_id: str, side: str,
     snap = df[df["ts"] == ts]
 
     probs, points, prob_kind = [], [], "devig"
-    for book, grp in snap.groupby("book"):
+    for _book, grp in snap.groupby("book"):
         over = grp[grp["side"] == "over"]
         under = grp[grp["side"] == "under"]
         if not over.empty and not under.empty:

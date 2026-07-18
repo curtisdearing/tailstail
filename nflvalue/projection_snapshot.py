@@ -12,7 +12,6 @@ import pandas as pd
 
 from .reproducibility import CANONICAL_CSV_VERSION, canonical_csv_sha256
 
-
 SCHEMA_VERSION = 1
 COMPONENT_NAMES = (
     "completions", "attempts", "passing_yards", "passing_tds",

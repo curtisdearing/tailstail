@@ -12,6 +12,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install ruff==0.15.22
+      # Curated ruleset (ruff.toml). Behaviour-changing lints are disabled there
+      # on purpose -- see the header in ruff.toml for why.
+      - run: ruff check .
+
   unit:
     runs-on: ubuntu-latest
     steps:
@@ -51,3 +64,5 @@ jobs:
           tests/test_product_boundary.py
           tests/test_role_state.py
           tests/test_chemistry_engine.py
+          tests/test_decision_ledger.py
+          tests/test_phase_b_hardening.py

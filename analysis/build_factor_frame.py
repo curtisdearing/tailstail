@@ -18,7 +18,6 @@ from nflvalue.features import build_player_week
 from nflvalue.reproducibility import CANONICAL_CSV_VERSION, canonical_csv_sha256
 from nflvalue.sources import rosters as roster_source
 
-
 ROOT = Path(__file__).resolve().parents[1]
 OUT_STATUSES = {"Out", "Doubtful"}
 WEST_TEAMS = {"ARI", "DEN", "LAC", "LAR", "LV", "SEA", "SF"}

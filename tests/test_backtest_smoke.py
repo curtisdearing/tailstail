@@ -25,7 +25,8 @@ def test_backtest_runs_end_to_end_and_writes_report(backtest_report_fast):
 
     out_path = report["_test_output_path"]
     assert os.path.exists(out_path)
-    on_disk = json.load(open(out_path))
+    with open(out_path) as handle:
+        on_disk = json.load(handle)
     assert set(on_disk["markets"]) == EXPECTED_MARKETS
 
     # every market with a non-trivial sample must produce FINITE overall MAE/RMSE

@@ -6,11 +6,9 @@ import datetime as dt
 import sys
 from pathlib import Path
 
-import pytest
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue import ingest  # noqa: E402
+from nflvalue import ingest
 
 
 def test_current_season_league_year():
@@ -48,8 +46,8 @@ def test_refresh_degrades_loudly_not_silently(monkeypatch):
 
 
 def test_build_week_inputs_full_history():
+
     from nflvalue.candidates import build_week_inputs, games_for_week
-    import pandas as pd
     # schedules path only (feature build is exercised elsewhere; keep fast)
     sched = ingest.load_all_schedules()
     slate = games_for_week(2025, 14, sched)

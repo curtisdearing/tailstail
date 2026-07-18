@@ -38,6 +38,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
+from . import contracts
 from .sources import rosters as rostersmod
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -252,6 +253,38 @@ def _rolling_shifted(s: pd.Series, window: int = ROLL_WINDOW, how: str = "mean")
     raise ValueError(how)
 
 
+def _rolling_shifted_grouped(frame: pd.DataFrame, keys, column: str,
+                             window: int = ROLL_WINDOW, how: str = "mean") -> pd.Series:
+    """Vectorized equivalent of ``groupby(keys)[column].transform(_rolling_shifted)``.
+
+    ``transform`` with a Python callable falls into pandas' ``_transform_general``
+    path, which rebuilds a Series per group -- ~46k Series constructions and
+    ~5.9s of a 9.5s feature build, measured with cProfile (see
+    docs/PERFORMANCE.md). ``groupby(...).shift`` and ``groupby(...).rolling`` use
+    the Cython group paths instead.
+
+    Numerically identical by construction: same shift(1), same window, same
+    min_periods, same aggregation -- only the dispatch changes. The Phase B
+    neutrality hashes assert that byte-for-byte.
+    """
+    grouped = frame.groupby(keys, sort=False)[column]
+    shifted = grouped.shift(1)
+    by = frame[keys] if isinstance(keys, str) else [frame[k] for k in keys]
+    rolled = shifted.groupby(by, sort=False)
+    if how == "mean":
+        out = rolled.rolling(window, min_periods=1).mean()
+    elif how == "ewm":
+        out = rolled.ewm(span=EWM_SPAN, min_periods=1).mean()
+    elif how == "count":
+        out = rolled.rolling(window, min_periods=1).count()
+    else:
+        raise ValueError(how)
+    # groupby-rolling prepends the group key(s) to the index; drop back to the
+    # frame's own index so the result aligns with the original row order.
+    levels = 1 if isinstance(keys, str) else len(keys)
+    return out.reset_index(level=list(range(levels)), drop=True).reindex(frame.index)
+
+
 def _league_role_prior_mean(df: pd.DataFrame, rate_col: str) -> pd.Series:
     """Expanding, PRIOR-weeks-only league average of a per-week rate, by role.
 
@@ -280,6 +313,8 @@ def _league_role_prior_mean(df: pd.DataFrame, rate_col: str) -> pd.Series:
 def build_player_week(pbp: Optional[pd.DataFrame] = None, rosters: Optional[pd.DataFrame] = None) -> pd.DataFrame:
     if pbp is None:
         pbp = load_pbp()
+    contracts.check_frame(pbp, "build_player_week(pbp)", allow_empty=False,
+                          columns=("season", "week", "game_id", "posteam", "defteam"))
     team_week = _team_week(pbp)
     pw = _combine_player_week(pbp)
     pw = pw.merge(team_week, on=["season", "week", "team"], how="left")
@@ -299,16 +334,16 @@ def build_player_week(pbp: Optional[pd.DataFrame] = None, rosters: Optional[pd.D
     pw["_rush_td_rate"] = _safe_ratio(pw["rush_tds"], pw["carries"])
     pw["_rec_td_rate"] = _safe_ratio(pw["rec_tds"], pw["targets"])
 
-    g = pw.groupby("player_id")
-    pw["roll_games"] = g["targets"].transform(lambda s: _rolling_shifted(s, how="count"))
-    pw["roll_targets"] = g["targets"].transform(_rolling_shifted)
-    pw["roll_target_share"] = g["_target_share"].transform(_rolling_shifted)
-    pw["roll_air_yards"] = g["air_yards_sum"].transform(_rolling_shifted)
-    pw["roll_adot"] = g["_adot"].transform(_rolling_shifted)
-    pw["roll_carries"] = g["carries"].transform(_rolling_shifted)
-    pw["roll_carry_share"] = g["_carry_share"].transform(_rolling_shifted)
-    pw["roll_pass_attempts"] = g["pass_attempts"].transform(_rolling_shifted)
-    pw["roll_completions"] = g["completions"].transform(_rolling_shifted)
+    pw["roll_games"] = _rolling_shifted_grouped(pw, "player_id", "targets", how="count")
+    for _out, _src in (("roll_targets", "targets"),
+                       ("roll_target_share", "_target_share"),
+                       ("roll_air_yards", "air_yards_sum"),
+                       ("roll_adot", "_adot"),
+                       ("roll_carries", "carries"),
+                       ("roll_carry_share", "_carry_share"),
+                       ("roll_pass_attempts", "pass_attempts"),
+                       ("roll_completions", "completions")):
+        pw[_out] = _rolling_shifted_grouped(pw, "player_id", _src)
 
     # Cold start (a player's very first row has no own history -> NaN above):
     # fall back to the role's PRIOR-weeks-only league average rather than
@@ -335,7 +370,7 @@ def build_player_week(pbp: Optional[pd.DataFrame] = None, rosters: Optional[pd.D
         "roll_rec_td_rate": "_rec_td_rate",
     }
     for out_col, raw_col in raw_eff.items():
-        pw[f"_raw_{out_col}"] = g[raw_col].transform(_rolling_shifted)
+        pw[f"_raw_{out_col}"] = _rolling_shifted_grouped(pw, "player_id", raw_col)
 
     # ---- shrink each rolling efficiency toward its role's prior league mean -- #
     for out_col, raw_col in raw_eff.items():
@@ -359,7 +394,8 @@ def build_player_week(pbp: Optional[pd.DataFrame] = None, rosters: Optional[pd.D
         "roll_ypt", "roll_catch_rate", "roll_ypc", "roll_ypa",
         "roll_pass_td_rate", "roll_rush_td_rate", "roll_rec_td_rate",
     ]
-    return pw[keep].reset_index(drop=True)
+    return contracts.check_frame(
+        pw[keep].reset_index(drop=True), "player_week", **contracts.PLAYER_WEEK)
 
 
 # --------------------------------------------------------------------------- #
@@ -430,10 +466,9 @@ def build_opp_pos_def(pbp: Optional[pd.DataFrame] = None, rosters: Optional[pd.D
     )
     opp["_epa_pp"] = _safe_ratio(opp["epa_allowed_sum"], opp["plays_faced"])
 
-    g = opp.groupby(["defteam", "role"])
-    opp["roll_games"] = g["plays_faced"].transform(lambda s: _rolling_shifted(s, how="count"))
-    opp["_roll_ypp"] = g["_ypp"].transform(_rolling_shifted)
-    opp["_roll_epa_pp"] = g["_epa_pp"].transform(_rolling_shifted)
+    opp["roll_games"] = _rolling_shifted_grouped(opp, ["defteam", "role"], "plays_faced", how="count")
+    opp["_roll_ypp"] = _rolling_shifted_grouped(opp, ["defteam", "role"], "_ypp")
+    opp["_roll_epa_pp"] = _rolling_shifted_grouped(opp, ["defteam", "role"], "_epa_pp")
 
     # league-average (prior-weeks-only) per role, to express each defense as a factor
     def _league_prior(df, col):
@@ -473,7 +508,8 @@ def build_opp_pos_def(pbp: Optional[pd.DataFrame] = None, rosters: Optional[pd.D
         "roll_ypt_allowed_factor", "roll_ypc_allowed_factor", "roll_ypa_allowed_factor",
         "roll_epa_allowed_factor",
     ]
-    return opp[keep].reset_index(drop=True)
+    return contracts.check_frame(
+        opp[keep].reset_index(drop=True), "opp_pos_def", **contracts.OPP_POS_DEF)
 
 
 def build_team_week(pbp: Optional[pd.DataFrame] = None) -> pd.DataFrame:
@@ -487,9 +523,8 @@ def build_team_week(pbp: Optional[pd.DataFrame] = None) -> pd.DataFrame:
     if pbp is None:
         pbp = load_pbp()
     tw = _team_week(pbp).sort_values(["team", "season", "week"]).reset_index(drop=True)
-    g = tw.groupby("team")
-    tw["roll_team_pass_att"] = g["team_pass_att"].transform(_rolling_shifted)
-    tw["roll_team_rush_att"] = g["team_rush_att"].transform(_rolling_shifted)
+    tw["roll_team_pass_att"] = _rolling_shifted_grouped(tw, "team", "team_pass_att")
+    tw["roll_team_rush_att"] = _rolling_shifted_grouped(tw, "team", "team_rush_att")
 
     # Cold start (a team's first game in the dataset): fall back to the
     # PRIOR-weeks-only cross-team league average for that same (season, week)
@@ -506,7 +541,9 @@ def build_team_week(pbp: Optional[pd.DataFrame] = None) -> pd.DataFrame:
     tw["roll_team_pass_att"] = tw["roll_team_pass_att"].fillna(tw["lp_pass"])
     tw["roll_team_rush_att"] = tw["roll_team_rush_att"].fillna(tw["lp_rush"])
     tw = tw.drop(columns=["lp_pass", "lp_rush"])
-    return tw[["season", "week", "team", "roll_team_pass_att", "roll_team_rush_att"]]
+    return contracts.check_frame(
+        tw[["season", "week", "team", "roll_team_pass_att", "roll_team_rush_att"]],
+        "team_week", **contracts.TEAM_WEEK)
 
 
 if __name__ == "__main__":

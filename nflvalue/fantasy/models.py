@@ -137,13 +137,13 @@ class FantasyEnsemble:
 
 def _make_estimator(name: str, config: ModelConfig):
     from sklearn.compose import TransformedTargetRegressor
+    from sklearn.decomposition import PCA
     from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
+    from sklearn.feature_selection import VarianceThreshold
     from sklearn.impute import SimpleImputer
     from sklearn.linear_model import BayesianRidge
     from sklearn.neural_network import MLPRegressor
-    from sklearn.decomposition import PCA
     from sklearn.pipeline import make_pipeline
-    from sklearn.feature_selection import VarianceThreshold
     from sklearn.preprocessing import StandardScaler
 
     seed = config.random_seed

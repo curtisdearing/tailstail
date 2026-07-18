@@ -1,0 +1,70 @@
+# Curated lint for tailstail. Authored in Phase B — no ruleset previously
+# existed and CI ran no linter at all.
+#
+# Selection principle: a rule earns its place only if a violation is a DEFECT.
+# Two categories are deliberately excluded:
+#
+#   1. Behaviour-changing lints. This repo's promotion story rests on numeric
+#      neutrality, so a lint whose fix can move a number is a model change
+#      wearing a style change's clothes (RUF046 rewrites int() casts in the
+#      projection math; B905 adds strict= and turns a silent truncation into a
+#      raise; SIM108 can reorder short-circuit evaluation).
+#   2. Pure churn. The PTH (pathlib) family alone flagged ~270 sites across
+#      ~40 files with no defect behind any of them. A diff that large is a
+#      place for a real bug to hide during review.
+#
+# Everything selected below is either autofixable-and-inert (import order,
+# unused imports, stale noqa) or a genuine bug shape that was fixed by hand in
+# the Phase B commit.
+
+target-version = "py311"
+line-length = 110
+extend-exclude = ["historical", "data", "reports", "drops", "site"]
+
+[lint]
+select = [
+    "F",      # pyflakes: undefined names, unused imports/variables, f-string bugs
+    "I",      # import sorting — deterministic, no runtime effect
+    "B",      # bugbear: real bug shapes (mutable defaults, loop-variable capture)
+    "C4",     # comprehension correctness
+    "PIE",    # misc defect lints
+    "RUF",    # ruff-specific (minus the numeric-rewrite rules ignored below)
+    "SIM",    # simplify (minus the evaluation-order rules ignored below)
+    "TRY",    # tryceratops: except-handling smells — exactly Phase B.1's subject
+    "E4",     # import placement/shadowing
+    "E7",     # comparison and statement defects
+    "E9",     # syntax / IO errors
+    "W6",     # deprecated constructs
+]
+
+ignore = [
+    # --- can change behaviour if "fixed": OFF, on purpose --------------------
+    "RUF046",  # unnecessary int() cast — rewrites casts inside projection math
+    "B905",    # zip(strict=) — converts silent truncation into a raise
+    "SIM108",  # if/else -> ternary — can reorder short-circuit evaluation
+    "SIM105",  # contextlib.suppress — hides the exception type B.1 wants visible
+    "B008",    # call in default arg — moves evaluation time
+    "C408",    # dict() -> {} — touches config-dict construction
+    "RUF005",  # concat -> unpacking — changes aliasing semantics
+
+    # --- style-only, no defect ----------------------------------------------
+    "E701", "E702", "E731",  # compound statements / lambda assignment in analysis code
+    "E741",                  # ambiguous name `l`, pervasive in existing math
+    "RUF001", "RUF002", "RUF003",  # ambiguous unicode (× and — in docstrings, deliberate)
+    "RUF012",                # ClassVar annotation — no runtime effect
+    "TRY003",                # long message outside exception class — we WANT detail
+    "TRY300", "TRY301",      # except/else restructuring that obscures the raise site
+    "TRY400",                # logging.exception over logging.error
+    "TRY004",                # ValueError -> TypeError changes what callers catch
+    "SIM102", "SIM117",      # nested if / with — often clearer as written
+]
+
+[lint.per-file-ignores]
+# Tests assert, shadow fixtures, and construct fake secrets.
+"tests/**" = ["S101", "S105", "S106", "F811", "B011"]
+# One-shot research scripts: resource lifetime is the process, and they are
+# allowed to be scrappy in ways library code is not.
+"analysis/**" = ["SIM115", "F841"]
+
+[lint.isort]
+known-first-party = ["nflvalue", "analysis", "scripts"]
