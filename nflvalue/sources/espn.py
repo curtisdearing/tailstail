@@ -19,7 +19,7 @@ def fetch_injuries() -> Dict[str, List[Dict]]:
     out: Dict[str, List[Dict]] = {}
     try:
         data = get_json(f"{SITE}/injuries")
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"[espn] injuries fetch failed: {exc}")
         return out
     for team in data.get("injuries", []):
@@ -43,7 +43,7 @@ def fetch_power() -> Dict[str, float]:
     out: Dict[str, float] = {}
     try:
         data = get_json("https://site.api.espn.com/apis/v2/sports/football/nfl/standings")
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"[espn] standings fetch failed: {exc}")
         return out
     try:
@@ -56,6 +56,6 @@ def fetch_power() -> Dict[str, float]:
                         winpct = float(st.get("value", 0.5))
                 if team:
                     out[team] = (winpct - 0.5) * 12.0  # ~ points scale
-    except Exception:  # noqa: BLE001
+    except Exception:
         return out
     return out

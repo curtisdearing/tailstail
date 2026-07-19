@@ -49,7 +49,6 @@ def _history() -> tuple[pd.DataFrame, pd.DataFrame]:
             )
             is_qb = position == "QB"
             is_receiver = position in {"RB", "WR", "TE"}
-            is_rusher = position in {"QB", "RB", "WR"}
             feature_rows.append(
                 {
                     "season": 2025,

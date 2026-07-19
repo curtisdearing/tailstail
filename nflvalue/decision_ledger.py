@@ -33,7 +33,7 @@ import hashlib
 import sqlite3
 import subprocess
 from datetime import datetime, timedelta, timezone
-from typing import Callable, Dict, List, Optional, Sequence
+from typing import Callable, Dict, Optional, Sequence
 
 import numpy as np
 import pandas as pd

@@ -11,7 +11,6 @@ from typing import Iterable
 
 import pandas as pd
 
-
 DATA_FILES = {
     "stats": "player_stats.parquet",
     "rosters": "weekly_rosters.parquet",

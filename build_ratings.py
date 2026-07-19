@@ -127,9 +127,9 @@ def build():
 
     # ---- Walk-forward rolling ratings ------------------------------------- #
     teams = sorted(set(sched["home_team"]) | set(sched["away_team"]))
-    off = {t: 0.0 for t in teams}
-    deff = {t: 0.0 for t in teams}
-    games_played = {t: 0 for t in teams}
+    off = dict.fromkeys(teams, 0.0)
+    deff = dict.fromkeys(teams, 0.0)
+    games_played = dict.fromkeys(teams, 0)
     backtest = []
     cur_season = None
 
@@ -146,7 +146,7 @@ def build():
                     deff[t] = (1 - EPA_PRIOR_W) * base_def + EPA_PRIOR_W * epa_def_pts(cur_season, t)
                 else:
                     off[t], deff[t] = base_off, base_def
-            games_played = {t: 0 for t in teams}
+            games_played = dict.fromkeys(teams, 0)
             cur_season = season
 
         ready = (season > priors["seasons"][0]) or (games_played[h] >= 3 and games_played[a] >= 3)

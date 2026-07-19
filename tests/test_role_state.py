@@ -27,7 +27,6 @@ import pytest
 from nflvalue.fantasy import role_state as rs
 from nflvalue.fantasy import simulation as sim
 
-
 # ---------------------------------------------------------------------------
 # As-of safety -- pregame features never read the current or a future week
 # ---------------------------------------------------------------------------
@@ -192,7 +191,7 @@ def test_role_mixture_inputs_fall_back_to_stable_when_probs_missing():
     (zero shock mass), so enabling the flag with missing probabilities is a
     no-op rather than an uncontrolled perturbation."""
     players = pd.DataFrame({"player_id": ["a", "b"], "position": ["RB", "WR"]})
-    probs, target_rows, carry_rows, up_mass, down_mass, has_probs = sim._role_mixture_inputs(players)
+    probs, _target_rows, _carry_rows, up_mass, down_mass, has_probs = sim._role_mixture_inputs(players)
     assert np.allclose(up_mass, 0.0)
     assert np.allclose(down_mass, 0.0)
     assert not has_probs.any()
@@ -203,7 +202,7 @@ def test_role_mixture_inputs_fall_back_to_stable_when_probs_missing():
         p_state_inactive=0.0, p_state_limited_decrease=0.0, p_state_stable=0.5,
         p_state_moderate_increase=0.5, p_state_major_increase=0.0,
     )
-    _, _, _, up2, down2, has2 = sim._role_mixture_inputs(with_probs)
+    _, _, _, up2, _down2, has2 = sim._role_mixture_inputs(with_probs)
     assert has2.all()
     assert np.allclose(up2, 0.5)  # moderate + major increase mass
 

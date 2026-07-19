@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue.freshness import Feed, cap_confidence, gate  # noqa: E402
+from nflvalue.freshness import Feed, cap_confidence, gate
 
 AS_OF = "2023-11-08T12:00:00Z"
 

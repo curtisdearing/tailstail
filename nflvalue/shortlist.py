@@ -94,7 +94,7 @@ def shortlist_week(candidates_df: pd.DataFrame, weights: Optional[Dict] = None,
     out = []
     if candidates_df is None or candidates_df.empty:
         return out
-    for game_id, grp in candidates_df.groupby("game_id", sort=True):
+    for _game_id, grp in candidates_df.groupby("game_id", sort=True):
         cands = grp.to_dict("records")
         out.append(rank_game(cands, weights=weights, params=params,
                              top_n=top_n, max_per_player=max_per_player))
@@ -142,8 +142,8 @@ def build_context_panel(game_shortlist: Dict,
         # fact tables, no news needed
         from .advanced_features import panel_items as adv_panel_items
         from .chemistry import panel_items as chem_panel_items
-        from .ftn_features import panel_items as ftn_panel_items
         from .context_features import panel_items
+        from .ftn_features import panel_items as ftn_panel_items
         items.extend(panel_items(lean))
         items.extend(adv_panel_items(lean))
         items.extend(chem_panel_items(lean))

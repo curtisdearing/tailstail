@@ -26,7 +26,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -230,7 +230,7 @@ def augment_with_real_lines(frame: pd.DataFrame, conn=None) -> pd.DataFrame:
                  AND l.game_id=o.game_id AND l.player_id=o.player_id AND l.market=o.market
             WHERE l.line_source='odds_api' AND l.line IS NOT NULL
         """)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"[ml] real-line lookup unavailable ({exc}); synthetic labels only")
         return frame
     if real.empty:

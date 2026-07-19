@@ -23,7 +23,6 @@ from scipy.stats import fisher_exact
 
 from nflvalue.reproducibility import CANONICAL_CSV_VERSION, canonical_csv_sha256
 
-
 RNG_SEED = 20260714
 DEFAULT_DRAWS = 20_000
 PROMOTION_MIN_EXPOSED = 100

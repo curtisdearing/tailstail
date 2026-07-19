@@ -28,7 +28,6 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
-import json
 import os
 from typing import Dict, List, Optional
 
@@ -36,7 +35,7 @@ import numpy as np
 import pandas as pd
 
 from nflvalue import config as cfgmod
-from nflvalue.candidates import ACTUAL_COL, WeekInputs, enumerate_candidates, games_for_week
+from nflvalue.candidates import ACTUAL_COL, WeekInputs, enumerate_candidates
 from nflvalue.projection import MARKETS
 from nflvalue.shortlist import shortlist_week
 

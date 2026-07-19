@@ -10,7 +10,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue import chemistry as ch  # noqa: E402
+from nflvalue import chemistry as ch
 
 
 def _pbp():

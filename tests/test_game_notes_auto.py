@@ -13,7 +13,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue import game_notes as gn  # noqa: E402
+from nflvalue import game_notes as gn
 
 ET = ZoneInfo("America/New_York")
 

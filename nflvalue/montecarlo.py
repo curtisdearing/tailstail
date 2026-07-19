@@ -15,6 +15,7 @@ isn't installed, the rest of the app still works — MC features just switch off
 
 from __future__ import annotations
 
+import hashlib
 from typing import Dict, Optional
 
 import numpy as np
@@ -56,13 +57,36 @@ def _sim_team(rng, n, target_ppd, drives, priors):
     return (off * mask).sum(axis=1), (given * mask).sum(axis=1)
 
 
+DEFAULT_SEED = 6102026
+
+
+def derive_seed(base: int, *parts: object) -> int:
+    """Deterministic per-game seed from a base seed and identifying parts.
+
+    Python's built-in ``hash()`` is salted by ``PYTHONHASHSEED``, so seeding
+    from it produces a different stream in every process while LOOKING seeded.
+    SHA-256 of the joined parts is stable across processes and machines.
+
+    Distinct games get distinct streams, so two games on a slate do not share
+    random numbers, and re-running one game reproduces it exactly.
+    """
+    payload = "|".join([str(base)] + [str(part) for part in parts])
+    return int(hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16], 16)
+
+
 def simulate(home: Dict, away: Dict, priors: Dict,
              spread_line: Optional[float] = None, total_line: Optional[float] = None,
-             n: int = 20000, seed: Optional[int] = None) -> Dict:
+             n: int = 20000, seed: int = DEFAULT_SEED) -> Dict:
     """Simulate a matchup `n` times.
 
     spread_line: home favored by this many (nflfastR convention; home covers if
                  final margin > spread_line). total_line: points for over/under.
+
+    ``seed`` defaults to ``DEFAULT_SEED`` rather than ``None``. It used to
+    default to None -- OS entropy -- so `margin_mean` and `p_home_cover` moved
+    between runs and a near-zero edge could flip the published `ats_pick.side`
+    for the same inputs. Callers projecting a slate should pass
+    ``derive_seed(base, game_id)`` so each game gets its own stable stream.
     """
     rng = np.random.default_rng(seed)
     exp_home, exp_away = expected_points(home, away, priors)

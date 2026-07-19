@@ -32,10 +32,7 @@ never crashes with no dispersion info.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
 from typing import Dict, Optional
-
-import numpy as np
 
 try:
     from scipy import stats as _stats
@@ -182,7 +179,7 @@ def _poisson_sf(x, mean, sd=None):
         return float(_stats.poisson.sf(math.floor(x), mean))
     # manual survival via CDF sum for small means
     k = int(math.floor(x))
-    cdf = sum(math.exp(-mean) * mean ** i / math.factorial(i) for i in range(0, max(k + 1, 1)))
+    cdf = sum(math.exp(-mean) * mean ** i / math.factorial(i) for i in range(max(k + 1, 1)))
     return max(0.0, 1.0 - cdf)
 
 

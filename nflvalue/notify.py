@@ -23,10 +23,11 @@ from __future__ import annotations
 
 import json
 import os
-import urllib.request
 from typing import Dict, List, Optional
 
 from . import config as cfgmod
+from .failures import ConfigError, SourceFetchError
+from .sources import _http
 
 FOOTER = ("Leans, not locks — model-ranked research on free data; variance is variance. "
           "Not financial advice. Gambling problem? 1-800-GAMBLER")
@@ -44,8 +45,13 @@ def resolve_webhook() -> Optional[str]:
         try:
             with open(CONFIG_LOCAL) as f:
                 return (json.load(f).get("discord_webhook") or "").strip() or None
-        except Exception:  # noqa: BLE001
-            return None
+        except (OSError, json.JSONDecodeError) as exc:
+            # A corrupt config.local.json used to read as "no webhook configured",
+            # so a typo silently disabled every notification for the season.
+            raise ConfigError(
+                f"{CONFIG_LOCAL} exists but could not be read as JSON: {exc}. "
+                "Fix the file or unset it; refusing to treat it as 'no webhook'."
+            ) from exc
     return None
 
 
@@ -132,11 +138,19 @@ def post_weekly(report_payload: Dict, cfg: Optional[Dict] = None,
         return {"status": "dry_run", "n_messages": len(messages), "messages": messages}
 
     posted = 0
-    for body in messages:
-        req = urllib.request.Request(
-            webhook, data=json.dumps(body).encode("utf-8"),
-            headers={"Content-Type": "application/json", "User-Agent": "nfl-value/1.0"})
-        with urllib.request.urlopen(req, timeout=15) as resp:  # noqa: S310 - user-configured webhook
-            resp.read()
+    for index, body in enumerate(messages):
+        try:
+            _http.request_bytes(
+                webhook, data=json.dumps(body).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                timeout=15, attempts=4, source="discord")
+        except SourceFetchError as exc:
+            # Partial sends are the norm on a 429 storm: report how far we got
+            # instead of raising a bare urlopen error from inside the loop and
+            # losing the count entirely.
+            raise SourceFetchError(
+                "discord", "webhook", exc.attempts,
+                detail=(f"failed on message {index + 1} of {len(messages)}; "
+                        f"{posted} already posted and NOT retractable")) from exc
         posted += 1
     return {"status": "posted", "n_messages": posted}

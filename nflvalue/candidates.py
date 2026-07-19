@@ -41,7 +41,7 @@ from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 
-from . import projection
+from . import contracts, projection
 from .features import build_opp_pos_def, build_player_week, build_team_week, load_pbp
 from .projection import MARKETS, MIN_GAMES_ELIGIBLE, game_script_multipliers
 
@@ -120,11 +120,13 @@ def build_week_inputs(pbp: Optional[pd.DataFrame] = None,
             pbp = ingest.load_all_pbp()
         else:
             pbp = load_pbp()
+    schedules = schedules if schedules is not None else load_schedules()
+    contracts.check_frame(schedules, "schedules", columns=("season", "week", "game_id"))
     return WeekInputs(
         pw=build_player_week(pbp),
         opd=build_opp_pos_def(pbp),
         tw=build_team_week(pbp),
-        schedules=schedules if schedules is not None else load_schedules(),
+        schedules=schedules,
     )
 
 
@@ -313,7 +315,9 @@ def enumerate_candidates(
     df = pd.DataFrame(out)
     if not df.empty:
         df = df.sort_values(["game_id", "player_id", "market"], kind="mergesort").reset_index(drop=True)
-    return df
+    # A duplicate (game, player, market) means the same prop was enumerated twice
+    # and would be double-counted downstream in screening and staking.
+    return contracts.check_frame(df, "candidates", **contracts.CANDIDATES)
 
 
 _FAMILY_MARKETS = {  # usage family -> the markets whose volume scales with it

@@ -8,7 +8,7 @@ server, no external libraries, works offline by double-clicking the file.
 from __future__ import annotations
 
 import json
-from typing import Dict
+from typing import Dict, Optional
 
 from . import config
 
@@ -465,7 +465,7 @@ setInterval(()=>{secs--;cd.textContent=Math.max(secs,0);if(secs<=0)location.relo
 """
 
 
-def write_dashboard(data: Dict, path: str = None) -> str:
+def write_dashboard(data: Dict, path: Optional[str] = None) -> str:
     path = path or config.DASHBOARD_PATH
     payload = dict(data)
     payload.setdefault("factor_audit", config.load_json(

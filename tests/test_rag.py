@@ -9,8 +9,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue import db as dbmod  # noqa: E402
-from nflvalue.rag import nl2sql, vectorstore  # noqa: E402
+from nflvalue import db as dbmod
+from nflvalue.rag import nl2sql, vectorstore
 
 
 @pytest.fixture()

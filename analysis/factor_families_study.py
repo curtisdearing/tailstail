@@ -319,7 +319,7 @@ def load_game_meta():
             site = TEAM_SITE.get(g.home_team, (np.nan, np.nan, np.nan))
         altitude_site = (g.home_team in ALTITUDE_SITES and not intl) or ("azteca" in stad)
         hour = int(str(g.gametime)[:2]) if pd.notna(g.gametime) else np.nan
-        for team, opp, home, rest, coach, opp_coach in (
+        for team, opp, home, rest, coach, _opp_coach in (
                 (g.home_team, g.away_team, 1, g.home_rest, g.home_coach, g.away_coach),
                 (g.away_team, g.home_team, 0, g.away_rest, g.away_coach, g.home_coach)):
             tlat, tlon, ttz = TEAM_SITE.get(team, (np.nan, np.nan, np.nan))

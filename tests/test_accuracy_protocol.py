@@ -2,7 +2,6 @@
 import json
 from pathlib import Path
 
-
 PROTOCOL = Path(__file__).parents[1] / "analysis" / "accuracy_protocol.json"
 
 

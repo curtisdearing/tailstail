@@ -17,11 +17,9 @@ import numpy as np
 import pandas as pd
 
 from ..reproducibility import CANONICAL_CSV_VERSION, canonical_csv_sha256
-
 from .config import ScoringRules, SimulationConfig
 from .role_state import STATE_PROB_COLUMNS
 from .simulation import simulate_week
-
 
 KEY_COLUMNS = ("season", "week", "player_id")
 

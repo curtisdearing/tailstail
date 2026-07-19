@@ -12,8 +12,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue import ml_ranker as mlr  # noqa: E402
-from nflvalue.shortlist import rank_game  # noqa: E402
+from nflvalue import ml_ranker as mlr
+from nflvalue.shortlist import rank_game
 
 RNG = np.random.default_rng(11)
 

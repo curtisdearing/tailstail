@@ -8,16 +8,16 @@ import json
 import sys
 from pathlib import Path
 
-import pandas as pd
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import pipeline_weekly as pw  # noqa: E402
-from nflvalue import config as cfgmod, db as dbmod  # noqa: E402
-from nflvalue.composite import score_candidate  # noqa: E402
-from nflvalue.document import render_drop  # noqa: E402
-from tests.test_report_phase2 import SEASON, WEEK, synthetic_inputs  # noqa: E402
+import pipeline_weekly as pw
+from nflvalue import config as cfgmod
+from nflvalue import db as dbmod
+from nflvalue.composite import score_candidate
+from nflvalue.document import render_drop
+from tests.test_report_phase2 import SEASON, WEEK, synthetic_inputs
 
 GAME_ID = f"{SEASON}_09_AAA_BBB"
 FIXTURES = Path(__file__).parent / "fixtures"

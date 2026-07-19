@@ -11,8 +11,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue.composite import score_candidate  # noqa: E402
-from nflvalue.shortlist import build_context_panel, rank_game  # noqa: E402
+from nflvalue.composite import score_candidate
+from nflvalue.shortlist import build_context_panel, rank_game
 
 
 def _cand(pid="P1", name="Alpha One", market="receiving_yards", mean=78.0, sd=25.0,

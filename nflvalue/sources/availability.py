@@ -33,8 +33,9 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 import pandas as pd
 
-from ._http import get_json
+from ..failures import ConfigError
 from ..freshness import stamp_now
+from ._http import get_json
 
 SITE = "https://site.api.espn.com/apis/site/v2/sports/football/nfl"
 CORE = "https://sports.core.api.espn.com/v2/sports/football/leagues/nfl"
@@ -42,11 +43,28 @@ CORE = "https://sports.core.api.espn.com/v2/sports/football/leagues/nfl"
 # Reuse the existing app's team map (build_ratings.ABBR: abbr -> display name),
 # inverted -- ESPN reports "Arizona Cardinals", nflverse uses "ARI".
 try:  # pragma: no cover - trivial import plumbing
-    import sys as _sys, os as _os
+    import os as _os
+    import sys as _sys
     _sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))))
     from build_ratings import ABBR as _ABBR
-except Exception:  # noqa: BLE001 -- keep this module importable standalone
+except ImportError as _exc:  # keep the module importable standalone
+    # An empty map is NOT a safe default: every display-name lookup then
+    # resolves to "", so every team silently reports zero inactives.
     _ABBR = {}
+    _ABBR_IMPORT_ERROR = _exc
+else:
+    _ABBR_IMPORT_ERROR = None
+
+
+def require_team_map() -> None:
+    """Raise if the team map failed to import. Called by every resolver below."""
+    if _ABBR_IMPORT_ERROR is not None or not DISPLAY_TO_ABBR:
+        raise ConfigError(
+            "team abbreviation map is empty (build_ratings import failed: "
+            f"{_ABBR_IMPORT_ERROR}); every team name would resolve to '' and "
+            "every team would report zero inactives")
+
+
 DISPLAY_TO_ABBR: Dict[str, str] = {}
 for _ab, _disp in _ABBR.items():
     # keep the canonical (modern) abbr for a display name: first writer wins,
@@ -244,7 +262,7 @@ def resolve_statuses(
     statuses: Dict[str, Dict] = {}
     matched_keys: Set[str] = set()
     for p in players.itertuples(index=False):
-        pid = getattr(p, "player_id")
+        pid = p.player_id
         pname = normalize_name(getattr(p, "player_name", ""))
         pteam = getattr(p, "team", "") or ""
 

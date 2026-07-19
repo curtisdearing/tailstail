@@ -69,7 +69,7 @@ def fetch_event_props(cfg: Dict, event_id: str) -> List[Dict]:
             "markets": ",".join(prop_markets_external(cfg)),
             "oddsFormat": "decimal",
         })
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"[oddsapi] props fetch failed for {event_id}: {exc}")
         return []
 

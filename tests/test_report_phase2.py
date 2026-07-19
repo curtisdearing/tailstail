@@ -12,9 +12,9 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue import db as dbmod  # noqa: E402
-from nflvalue import report as rpt  # noqa: E402
-from nflvalue.candidates import WeekInputs, enumerate_candidates  # noqa: E402
+from nflvalue import db as dbmod
+from nflvalue import report as rpt
+from nflvalue.candidates import WeekInputs, enumerate_candidates
 
 SEASON, WEEK = 2023, 9
 
@@ -41,7 +41,6 @@ def synthetic_inputs():
     """Two teams (AAA @ BBB in week 9), weeks 1-9, four skill players."""
     rows = []
     for wk in range(1, 10):
-        opp = ("BBB", "AAA")
         # AAA: a WR with steady 8-target/68-yard games, an RB, a cold-start WR, a scrub
         rows.append(_pw_row(wk, "WR_A", "Alpha Wideout", "AAA", "BBB", "WR",
                             targets=8.0, receptions=5.0, rec_yards=68.0,
@@ -66,7 +65,7 @@ def synthetic_inputs():
 
     opd_rows = []
     for wk in range(1, 10):
-        for defteam, other in (("AAA", "BBB"), ("BBB", "AAA")):
+        for defteam, _other in (("AAA", "BBB"), ("BBB", "AAA")):
             for role, col in (("QB", "roll_ypa_allowed_factor"), ("WR", "roll_ypt_allowed_factor"),
                               ("TE", "roll_ypt_allowed_factor"), ("RB", "roll_ypc_allowed_factor")):
                 r = dict(season=SEASON, week=wk, defteam=defteam, role=role,

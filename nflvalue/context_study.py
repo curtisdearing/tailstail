@@ -84,7 +84,7 @@ def _binom_p(hits: int, n: int, p0: float) -> Optional[float]:
     try:
         from scipy import stats
         return float(stats.binomtest(hits, n, p0, alternative="two-sided").pvalue)
-    except Exception:  # noqa: BLE001 - scipy always present per requirements
+    except Exception:
         return None
 
 

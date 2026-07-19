@@ -31,7 +31,6 @@ Every injectable seam (feeds, fetchers, inputs) exists so tests run offline.
 from __future__ import annotations
 
 import argparse
-import datetime as dt
 from typing import Callable, Dict, List, Optional
 
 import pandas as pd
@@ -70,7 +69,7 @@ def build_event_map(cfg: Dict, slate: pd.DataFrame,
     names to abbrs on the same slate. Unmatched games simply aren't pulled."""
     try:
         events = (list_events_fn or oapmod.list_events)(cfg)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"[pipeline] odds events listing failed ({exc}); continuing no_market")
         return {}
     by_pair = {}
@@ -112,7 +111,7 @@ def _apply_forecast_weather(adv, slate: pd.DataFrame) -> None:
                 adv.weather[g.game_id] = (70.0, 0.0)
             elif fc.get("temp_f") is not None:
                 adv.weather[g.game_id] = (float(fc["temp_f"]), float(fc.get("wind_mph") or 0.0))
-    except Exception as exc:  # noqa: BLE001 -- forecast is enhancement, not load-bearing
+    except Exception as exc:
         print(f"[pipeline] forecast weather unavailable ({exc}); schedule values kept")
 
 
@@ -130,26 +129,26 @@ def _feature_packs(inputs: candmod.WeekInputs):
         from nflvalue.sources import rosters as rostersmod
         pack = ContextPack(rostersmod.fetch_rosters_weekly(list(key)), list(key),
                            opd=inputs.opd)
-    except Exception as exc:  # noqa: BLE001 -- degrade to neutral stamps, loudly
+    except Exception as exc:
         print(f"[pipeline] context features unavailable ({exc}); using neutral values")
         pack = None
     try:
         from nflvalue.advanced_features import AdvancedPack, load_pbp_ext
         _pbp_ext = load_pbp_ext()
         adv = AdvancedPack(pbp=_pbp_ext, schedules=inputs.schedules)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"[pipeline] advanced features unavailable ({exc}); using neutral values")
         adv = None
     try:
         from nflvalue.chemistry import ChemistryPack
         chem = ChemistryPack(pbp=_pbp_ext, pw=inputs.pw, schedules=inputs.schedules)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"[pipeline] chemistry features unavailable ({exc}); using neutral values")
         chem = None
     try:
         from nflvalue.ftn_features import FTNPack
         ftn = FTNPack(pbp=_pbp_ext)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"[pipeline] FTN features unavailable ({exc}); using neutral values")
         ftn = None
     _PACK_CACHE[key] = (pack, adv, chem, ftn)
@@ -174,7 +173,7 @@ def _maybe_stamp_ml(cfg: Dict, cands: pd.DataFrame,
         print(f"[pipeline] ml_ranker enabled but no model at {path} — "
               "run `python3 ml_test.py --stage fit` after grading; using composite ranking")
         return cands
-    pack, adv, chem, ftn = _feature_packs(inputs)
+    pack, adv, _chem, _ftn = _feature_packs(inputs)
     feats = mlrmod.build_features(cands, inputs.pw, pack=pack, adv=adv)
     try:
         p = model.predict_p_over(feats)
@@ -266,7 +265,7 @@ def gather_live_feeds(cfg: Dict, season: int, week: int, players: pd.DataFrame,
         try:
             res = avmod.fetch_team_injuries()
             injury_rows, inj_ts = res["rows"], res["fetched_at"]
-        except Exception as exc:  # noqa: BLE001 -- fail LOUD via the gate, not a crash
+        except Exception as exc:
             print(f"[pipeline] injuries fetch FAILED: {exc}")
             injury_rows, inj_ts = [], None
     feeds.append(Feed("injuries", inj_ts, n_records=len(injury_rows), load_bearing=True))
@@ -284,7 +283,7 @@ def gather_live_feeds(cfg: Dict, season: int, week: int, players: pd.DataFrame,
                     res = avmod.fetch_event_rosters(eid)
                     inactive_rows.extend(res["rows"])
                     ina_ts = res["fetched_at"]
-                except Exception as exc:  # noqa: BLE001
+                except Exception as exc:
                     print(f"[pipeline] event roster fetch FAILED for {eid}: {exc}")
         feeds.append(Feed("inactives", ina_ts, n_records=len(inactive_rows or []),
                           load_bearing=True))
@@ -298,7 +297,7 @@ def gather_live_feeds(cfg: Dict, season: int, week: int, players: pd.DataFrame,
             from nflvalue.sources import espn_news
             res = espn_news.fetch_news()
             news_items, news_ts = res["items"], res["fetched_at"]
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             print(f"[pipeline] news fetch failed (context panel runs without it): {exc}")
             news_items, news_ts = [], None
     feeds.append(Feed("news", news_ts, n_records=len(news_items or []), load_bearing=False))
@@ -312,7 +311,7 @@ def gather_live_feeds(cfg: Dict, season: int, week: int, players: pd.DataFrame,
             res = slpmod.fetch_projections(season, week)
             sleeper_df = slpmod.attach_gsis(res["df"], slpmod.fetch_player_map())
             slp_ts = res["fetched_at"]
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             print(f"[pipeline] sleeper fetch failed (cross-check unavailable): {exc}")
             sleeper_df, slp_ts = None, None
     feeds.append(Feed("fantasy", slp_ts, n_records=0 if sleeper_df is None else len(sleeper_df),
@@ -427,7 +426,7 @@ def run_week(season: int, week: int, mode: str = "historical", clock: str = "wed
     # classifier was trained on raw deterministic beliefs and subsumes
     # calibration; double-correcting would shift its features off-distribution.
     ml_on = bool((cfg.get("ml_ranker") or {}).get("enabled"))
-    learn_cfg = {**{"enabled": True}, **(cfg.get("learning") or {})}
+    learn_cfg = {"enabled": True, **(cfg.get("learning") or {})}
     if learn_cfg.get("enabled") and not ml_on:
         from nflvalue import context_study, prop_learning
         adjustments = prop_learning.load_adjustments(conn, season, week)

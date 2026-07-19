@@ -33,11 +33,22 @@ reproduced baseline MAE 5.105968; see FOUNDATION.md).
 The as-of pair machinery lives in nflvalue/fantasy/chemistry_engine.py (pure, tested);
 this driver keeps the study-specific batteries and the variant gate.
 """
+import hashlib
 import sys
 
+
+def _stable_hash(value: object) -> int:
+    """Process-stable substitute for ``hash()``, which PYTHONHASHSEED salts.
+
+    Seeding an RNG from ``hash(str)`` looks reproducible and is not: the salt
+    changes per interpreter, so the "seeded" bootstrap drew a different stream
+    on every run.
+    """
+    return int(hashlib.sha256(str(value).encode("utf-8")).hexdigest()[:8], 16)
+
 def step1(arg1=None, arg2=None):
-    import sys, os
-    import pandas as pd, numpy as np
+    import numpy as np
+    import pandas as pd
 
     REPO = "/sessions/dreamy-compassionate-goodall/repos/tailstail"
     OUT = "/tmp/exp_chemistry"
@@ -147,7 +158,8 @@ def stepDPI(arg1=None, arg2=None):
     pd.concat(rows, ignore_index=True).to_parquet(f"{OUT}/game_dpi.parquet", index=False)
 
 def step2(arg1=None, arg2=None):
-    import pandas as pd, numpy as np
+    import numpy as np
+    import pandas as pd
     OUT = "/tmp/exp_chemistry"
     SEASONS = list(range(2016, 2026))
 
@@ -205,7 +217,7 @@ def step2(arg1=None, arg2=None):
 
 
 def step3(arg1=None, arg2=None):
-    import pandas as pd, numpy as np
+    import pandas as pd
     OUT = "/tmp/exp_chemistry"
     p = pd.read_parquet(f"{OUT}/pair_week.parquet")
     p["t"] = p.season * 100 + p.week
@@ -255,7 +267,10 @@ def step3(arg1=None, arg2=None):
 
 
 def step4(arg1=None, arg2=None):
-    import pandas as pd, numpy as np, json
+    import json
+
+    import numpy as np
+    import pandas as pd
     OUT = "/tmp/exp_chemistry"
     p = pd.read_parquet(f"{OUT}/pair_asof.parquet")
     INNER_T = 202300  # constants fit strictly on t < 202300 (<=2022)
@@ -303,7 +318,7 @@ def step4(arg1=None, arg2=None):
     # receiver-level tau2 (vs position mean)
     p_tpr = rsnap.targets / rsnap.routes
     sig2_bin = (p_tpr.clip(.02,.5) * (1-p_tpr.clip(.02,.5)))
-    tau2_r_vol, nfit = mom_tau2(p_tpr - rsnap.mu_tpr, rsnap.routes, float(np.average(sig2_bin, weights=rsnap.routes)), 200)
+    tau2_r_vol, _nfit = mom_tau2(p_tpr - rsnap.mu_tpr, rsnap.routes, float(np.average(sig2_bin, weights=rsnap.routes)), 200)
     consts["tau2_rec_vol"] = tau2_r_vol
     tau2_r_epa, _ = mom_tau2(rsnap.epa_sum/rsnap.targets - rsnap.mu_epa, rsnap.targets, consts["sig2_epa"], 50)
     consts["tau2_rec_epa"] = tau2_r_epa
@@ -338,14 +353,14 @@ def step4(arg1=None, arg2=None):
     dev_vol = sn.targets/sn.routes - (sn.mu_tpr + sn.eff_vol)
     sig2_vol = float(np.average((sn.targets/sn.routes).clip(.02,.5)*(1-(sn.targets/sn.routes).clip(.02,.5)), weights=sn.routes))
     consts["sig2_vol"] = sig2_vol
-    tau2_pair_vol, nv = mom_tau2(dev_vol, sn.routes, sig2_vol, 150)
+    tau2_pair_vol, _nv = mom_tau2(dev_vol, sn.routes, sig2_vol, 150)
     consts["tau2_pair_vol"] = tau2_pair_vol
     # efficiency pair devs
     dev_epa = sn.epa_sum/np.maximum(sn.targets,1) - (sn.mu_epa + sn.eff_epa_r + sn.eff_epa_q)
-    tau2_pair_epa, ne = mom_tau2(dev_epa, sn.targets, consts["sig2_epa"], 60)
+    tau2_pair_epa, _ne = mom_tau2(dev_epa, sn.targets, consts["sig2_epa"], 60)
     consts["tau2_pair_epa"] = tau2_pair_epa
     dev_cpoe = np.where(sn.cpoe_n>0, sn.cpoe_sum/np.maximum(sn.cpoe_n,1) - (mu_cpoe_league + sn.eff_cpoe_r + sn.eff_cpoe_q), np.nan)
-    tau2_pair_cpoe, nc = mom_tau2(pd.Series(dev_cpoe), sn.cpoe_n, consts["sig2_cpoe"], 60)
+    tau2_pair_cpoe, _nc = mom_tau2(pd.Series(dev_cpoe), sn.cpoe_n, consts["sig2_cpoe"], 60)
     consts["tau2_pair_cpoe"] = tau2_pair_cpoe
 
     # chi2 variance tests (H0 tau2_pair=0)
@@ -367,7 +382,10 @@ def step4(arg1=None, arg2=None):
 
 
 def step4b(arg1=None, arg2=None):
-    import pandas as pd, numpy as np, json
+    import json
+
+    import numpy as np
+    import pandas as pd
     from scipy import stats
     OUT="/tmp/exp_chemistry"
     p = pd.read_parquet(f"{OUT}/pair_asof.parquet")
@@ -407,9 +425,9 @@ def step4b(arg1=None, arg2=None):
     tau2_r_expl = max(0.0, float(np.average(((rsnap.explosive/np.maximum(rsnap.targets,1)) - rsnap.rec_pos.map(lambda x: MU[x]["expl"]))[rsnap.targets>=50]**2, weights=rsnap.targets[rsnap.targets>=50]) - np.average(sig2_expl/rsnap.targets[rsnap.targets>=50], weights=rsnap.targets[rsnap.targets>=50])))
     rsnap["b_expl"] = rec_base("explosive","targets","expl",tau2_r_expl,sig2_expl)
     # air share & rz share (denominators = team totals in receiver games)
-    for nm, num, den, mu_key, s2 in [("airshr","air_sum","tq_air","airshare",None),("rzshr","rz_tgt","tq_rz","rzshare",None)]:
+    for nm, num, den, mu_key, _s2 in [("airshr","air_sum","tq_air","airshare",None),("rzshr","rz_tgt","tq_rz","rzshare",None)]:
         rate = rsnap[num]/np.maximum(rsnap[den],1)
-        mu = rsnap.rec_pos.map(lambda x: MU[x][mu_key])
+        mu = rsnap.rec_pos.map(lambda x, key=mu_key: MU[x][key])
         sig2 = float((rate*(1-rate)).clip(0.01,0.25).mean()) if nm=="rzshr" else None
         rsnap[f"b_{nm}"] = rate  # store raw; shrink at pair stage via tq denominators
     sn = snap.merge(rsnap[["rec_id","b_yds","b_succ","b_expl"]], on="rec_id")
@@ -499,7 +517,8 @@ def step4b(arg1=None, arg2=None):
 
 
 def step5(arg1=None, arg2=None):
-    import pandas as pd, numpy as np
+    import numpy as np
+    import pandas as pd
     REPO = "/sessions/dreamy-compassionate-goodall/repos/tailstail"
     OUT = "/tmp/exp_chemistry"
 
@@ -582,7 +601,7 @@ def step5(arg1=None, arg2=None):
 
 
 def step5b(arg1=None, arg2=None):
-    import pandas as pd, numpy as np
+    import pandas as pd
     OUT="/tmp/exp_chemistry"
     d = pd.read_parquet(f"{OUT}/cond_panel.parquet")
     d = d.sort_values(["season","week"]).reset_index(drop=True)
@@ -652,7 +671,8 @@ def step5b(arg1=None, arg2=None):
 
 
 def step5c(arg1=None, arg2=None):
-    import pandas as pd, numpy as np
+    import numpy as np
+    import pandas as pd
     OUT="/tmp/exp_chemistry"
     d = pd.read_parquet(f"{OUT}/cond_panel.parquet")
     prim = (d[["team","gnum","primary_qb"]].drop_duplicates(["team","gnum"])
@@ -687,7 +707,11 @@ def step5c(arg1=None, arg2=None):
 
 
 def step6(arg1=None, arg2=None):
-    import pandas as pd, numpy as np, json, sys, os
+    import json
+    import os
+
+    import numpy as np
+    import pandas as pd
     OUT="/tmp/exp_chemistry"
     d = pd.read_parquet(f"{OUT}/cond_panel.parquet")
     d["block"] = d.season*100 + d.week
@@ -778,7 +802,7 @@ def step6(arg1=None, arg2=None):
         se_iid = float(np.sqrt(s1*s1/n1 + s0*s0/n0))
         if pos.startswith("PLAYER:"):
             # iid bootstrap over this player's games
-            rg = np.random.default_rng(6102026 + hash(tid)%10000)
+            rg = np.random.default_rng(6102026 + _stable_hash(tid) % 10000)
             y1, y0 = y[f.values], y[~f.values]
             bs = np.array([rg.choice(y1,len(y1)).mean() - rg.choice(y0,len(y0)).mean() for _ in range(B)])
         else:
@@ -829,7 +853,10 @@ def step6(arg1=None, arg2=None):
 
 
 def step6b(arg1=None, arg2=None):
-    import pandas as pd, numpy as np, json
+    import json
+
+    import numpy as np
+    import pandas as pd
     from scipy import stats
     OUT="/tmp/exp_chemistry"
     d = pd.read_parquet(f"{OUT}/cond_panel.parquet")
@@ -838,7 +865,7 @@ def step6b(arg1=None, arg2=None):
     # ---- C51: per-player home-vs-away residual deviation variance (beyond league home effect)
     lg_home = d.r_adj[d.is_home].mean() - d.r_adj[~d.is_home].mean()
     rows=[]
-    for pidv, g in d.groupby("player_id"):
+    for _pidv, g in d.groupby("player_id"):
         h, a = g.r_adj[g.is_home], g.r_adj[~g.is_home]
         if len(h) >= 15 and len(a) >= 15:
             dev = (h.mean()-a.mean()) - lg_home
@@ -900,7 +927,10 @@ def step6b(arg1=None, arg2=None):
 
 
 def step7(arg1=None, arg2=None):
-    import pandas as pd, numpy as np, json
+    import json
+
+    import numpy as np
+    import pandas as pd
     OUT="/tmp/exp_chemistry"
     pw = pd.read_parquet(f"{OUT}/pair_week.parquet")
     pw["t"] = (pw.season*100 + pw.week).astype("int64")
@@ -984,7 +1014,10 @@ def step7(arg1=None, arg2=None):
 
 
 def step7b(arg1=None, arg2=None):
-    import pandas as pd, numpy as np, json
+    import json
+
+    import numpy as np
+    import pandas as pd
     OUT="/tmp/exp_chemistry"
     REPO="/sessions/dreamy-compassionate-goodall/repos/tailstail"
     CAP = 1.5

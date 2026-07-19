@@ -103,7 +103,7 @@ class RuleBasedNL2SQL:
     """Canned patterns for the questions this warehouse actually gets asked.
     Anything unrecognized falls back to 'recent leans' -- visibly, in the SQL."""
 
-    def generate_sql(self, question: str, schema_doc: str) -> str:  # noqa: ARG002
+    def generate_sql(self, question: str, schema_doc: str) -> str:
         q = question.lower()
         season = self._first(re.findall(r"\b(20\d{2})\b", q))
         week = self._first(re.findall(r"\bweek\s+(\d{1,2})\b", q))

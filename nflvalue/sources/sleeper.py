@@ -28,8 +28,8 @@ from typing import Dict, List, Optional
 
 import pandas as pd
 
-from ._http import get_json
 from ..freshness import stamp_now
+from ._http import get_json
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PLAYER_MAP_CACHE = os.path.join(ROOT, "historical", "sleeper_players.parquet")

@@ -33,7 +33,8 @@ def test_predeclared_battery_count_is_40():
 
 def test_report_header_predeclares_same_count():
     rp = os.path.join(ROOT, "reports", "factor_families_audit.md")
-    text = open(rp).read()
+    with open(rp) as handle:
+        text = handle.read()
     assert "exactly 40 tests" in text
     assert fam.MARKER in text
     # header (predeclaration) must precede any results
@@ -228,7 +229,8 @@ def test_battery_results_when_present_cover_all_40():
     bp = os.path.join(EXP, "battery_results.json")
     if not os.path.exists(bp):
         pytest.skip("battery not yet run")
-    res = json.load(open(bp))
+    with open(bp) as handle:
+        res = json.load(handle)
     assert len(res) == 40
     for t in fam.BATTERY:
         r = res[t["id"]]

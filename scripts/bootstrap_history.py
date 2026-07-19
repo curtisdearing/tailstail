@@ -23,7 +23,6 @@ sys.path.insert(0, str(ROOT))
 
 from nflvalue.advanced_features import EXT_PBP_COLUMNS  # noqa: E402
 
-
 HIST = ROOT / "historical"
 PBP_PATH = HIST / "historical_pbp.parquet"
 LINES_PATH = ROOT / "historical_lines.parquet"

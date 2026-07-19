@@ -54,7 +54,8 @@ def load_precommitment(protocol_path: str = PROTOCOL_PATH,
     quietly reporting against an easier bar. The check is not that the bar
     CANNOT move -- it is that it cannot move silently.
     """
-    precommitment = json.loads(open(precommitment_path).read())
+    with open(precommitment_path) as handle:
+        precommitment = json.loads(handle.read())
     actual = _sha256(protocol_path)
     declared = precommitment["protocol_sha256"]
     if actual != declared:
@@ -63,7 +64,8 @@ def load_precommitment(protocol_path: str = PROTOCOL_PATH,
             f"precommitted (declared {declared[:12]}..., found {actual[:12]}...). "
             "Relaxing a threshold after seeing results invalidates the sample: "
             "issue a new precommitment_id and start the count from zero.")
-    protocol = json.loads(open(protocol_path).read())
+    with open(protocol_path) as handle:
+        protocol = json.loads(handle.read())
     forward = protocol["forward_clv"]
     return {
         "precommitment_id": precommitment["precommitment_id"],

@@ -8,7 +8,6 @@ import numpy as np
 
 from .config import ScoringRules
 
-
 COMPONENT_COLUMNS = (
     "completions",
     "attempts",

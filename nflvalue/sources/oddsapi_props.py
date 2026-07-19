@@ -33,6 +33,7 @@ from typing import Callable, Dict, List, Optional
 
 import pandas as pd
 
+from .. import contracts
 from .. import db as dbmod
 from ..freshness import stamp_now
 from ._http import get_json
@@ -220,7 +221,7 @@ def to_prop_lines_frame(rows: List[Dict], sharp_books=("pinnacle",),
                 "game_id": gid, "market": market, "player_id": pid, "point": 0.5,
                 "over_price": yes_only[best_book], "under_price": None,
                 "book": best_book,
-                "consensus_p_over": round(float(np_mean := sum(
+                "consensus_p_over": round(float(sum(
                     oddsmath.implied_prob(v) for v in yes_only.values()) / len(yes_only)), 4),
                 "n_books": len(yes_only),
             })
@@ -301,6 +302,7 @@ def pull_week_props(cfg: Dict, event_map: Dict[str, str], conn=None,
 
     written = 0
     if all_rows:
+        contracts.check_frame(pd.DataFrame(all_rows), "odds_api.lines", **contracts.LINES)
         written = dbmod.upsert(conn, "lines", all_rows,
                                ["ts", "game_id", "book", "market", "player_name", "side"])
     return {"pulled": pulled, "skipped_budget": skipped_budget, "skipped_cap": skipped_cap,
@@ -342,6 +344,7 @@ def resnap_lines(cfg: Dict, event_map: Dict[str, str], conn=None,
             r["game_id"] = game_id
             rows.append(r)
         pulled.append(game_id)
+    contracts.check_frame(pd.DataFrame(rows), "odds_api.lines", **contracts.LINES)
     written = dbmod.upsert(conn, "lines", rows,
                            ["ts", "game_id", "book", "market", "player_name", "side"]) if rows else 0
     return {"pulled": pulled, "skipped_budget": skipped, "rows_written": written,
