@@ -67,3 +67,4 @@ jobs:
           tests/test_decision_ledger.py
           tests/test_phase_b_hardening.py
           tests/test_evidence_layer.py
+          tests/test_evidence_view.py
