@@ -42,3 +42,21 @@ The contract is frozen by:
 Neither repository should track the other repository's default branch. Once
 the contract has survived prospective use, its implementation can move to a
 small tagged `nflvalue-core` release and both consumers can pin that version.
+
+## Recorded deviation: tailstail's internal CLV ledger (2026-07)
+
+Phase A added an internal decision-snapshot ledger to tailstail — immutable
+pick snapshots, closing-line capture, forward CLV, and a precommitted kill bar.
+This was user-directed and is a deliberate exception to the split above, which
+had treated lines, prices, and CLV as the betting consumer's (fablesfable's)
+domain. To be precise about what did and did not change:
+
+- CLV remains **excluded from the shared contract**: it is never part of
+  `PlayerProjectionSnapshot` or the component-sample artifact, and a CLV field
+  appearing in the shared snapshot still fails validation.
+- The exception is scope, not schema. Tailstail now *computes and stores* CLV
+  internally to grade its own decision quality; it does not *export* it.
+  `tests/test_product_boundary.py` enforces the shared-schema boundary only —
+  it does not police this internal build.
+- Recorded here, in `docs/decisions_p3-5.md`, and in the runtime decision
+  ledger (`nflvalue/decision_ledger.py`). Shipped to `main` as PR #5.

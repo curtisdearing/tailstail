@@ -300,3 +300,34 @@ reversible; config keys are noted where one exists.
 - Ops: pack construction pickled/cached for chunked frame rebuilds; FTN
   cross-join OOM caught+fixed (game-only merge guard removed); AsOfLookup
   made picklable.
+
+## Phases A–D — decision-snapshot stack (2026-07-17/18, merged as PRs #5–#8)
+
+Shipped A→B→C→D to `main`, each PR targeting the previous branch. Three calls
+were flagged rather than settled, and all three merged as-is:
+
+1. **CLV built in tailstail, against the product boundary.** Phase A added
+   immutable decision snapshots, closing capture, forward CLV, and a
+   precommitted kill bar *inside* tailstail — deviating from
+   `docs/TAILSTAIL_FABLESFABLE_BOUNDARY.md`, which assigns lines/prices/CLV to
+   fablesfable. User-directed and explicit; the runtime decision ledger records
+   the deviation. `tests/test_product_boundary.py` enforces only the
+   shared-schema boundary, not this internal build. See the boundary doc's
+   "Recorded deviation" note.
+
+2. **`montecarlo.simulate` now takes an explicit seed, and that moves published
+   numbers.** `weekly.py` and the dashboard now emit different — deterministic —
+   values than before. The prior code drew from OS entropy, so there was no
+   stable prior value to preserve; this is logged as a determinism fix with no
+   accuracy claim attached.
+
+3. **`pipeline.run` no longer falls back to synthetic games on an odds-fetch
+   failure.** It raises unless `allow_demo_fallback=True`. Any scheduled job
+   that silently depended on the demo fallback will now fail loudly — intended,
+   but audit crons/CI before the next slate.
+
+Phase B added fail-loud I/O boundaries, explicit seeds, schema contracts, lint,
+and a 1.8x feature build; Phase C added the ranked evidence layer with mandatory
+counter-evidence and a verified translator; Phase D added the no-bet screen,
+selection cards, a non-dismissible CLV banner, and a language guard. Suites at
+merge: 113 tests (23+27+34+29) green, ruff clean.
