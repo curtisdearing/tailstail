@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "precommitment_id": "tailstail-clv-killcheck-2026-v1",
+  "declared_at_utc": "2026-07-18T00:00:00Z",
+  "declared_before_any_resolved_pair": true,
+  "thresholds_source": "analysis/accuracy_protocol.json#/forward_clv",
+  "protocol_sha256": "733e370c2dac3c7355827174f1e36def9bb1a38e6e317ec02b8980a56bd1ce42",
+  "horizon": {
+    "abandon_if_unmet_by_season": 2026,
+    "abandon_if_unmet_by_week": 18,
+    "minimum_resolved_before_verdict": 150,
+    "action_on_failure": "stop staking; revert to projection and entertainment tool; do not re-gate the same sample under a new threshold"
+  },
+  "relaxation_policy": "Thresholds and horizon are fixed once the first pair resolves. Any change invalidates the accumulated sample: it requires a new precommitment_id and a fresh sample counted from zero. The recorded protocol_sha256 is verified at every evaluation, so editing the thresholds in accuracy_protocol.json breaks this precommitment loudly instead of moving the goalposts quietly.",
+  "notes": "Thresholds are NOT restated here. They are read from the protocol at evaluation time so the two files cannot drift into disagreeing about what the bar was."
+}

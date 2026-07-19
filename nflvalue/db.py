@@ -166,6 +166,46 @@ SCHEMA = {
             PRIMARY KEY (season, week, market)
         );
     """,
+    # -- Phase A: immutable decision snapshots (the unit of measurement) ------ #
+    # One row per lean PRODUCED, whether or not it is ever staked. The row is
+    # written once and never touched again: ``decision_id`` IS the canonical
+    # content hash, so any edit would have to change the primary key. Closing
+    # information lives in a SEPARATE table on purpose -- writing a close back
+    # into the decision row is the leak that invalidates the whole measurement.
+    "decision_snapshots": """
+        CREATE TABLE IF NOT EXISTS decision_snapshots (
+            decision_id TEXT PRIMARY KEY,       -- canonical content hash (hex)
+            decided_at_utc TEXT NOT NULL,       -- when the lean existed, ISO-8601 Z
+            season INTEGER, week INTEGER,
+            game_id TEXT, player_id TEXT, player_name TEXT,
+            book TEXT NOT NULL,                 -- the book the price was OFFERED at
+            market TEXT NOT NULL, side TEXT NOT NULL,
+            price REAL NOT NULL,                -- decimal price at that instant
+            point REAL,                         -- line at that instant
+            model_prob REAL NOT NULL,
+            devig_prob REAL NOT NULL,           -- de-vigged implied prob of OUR side
+            prob_kind TEXT NOT NULL,            -- 'devig' | 'raw_implied'
+            edge REAL NOT NULL,                 -- model_prob - devig_prob
+            model_version TEXT NOT NULL, commit_sha TEXT NOT NULL,
+            hash_version INTEGER NOT NULL,
+            recorded_at TEXT NOT NULL           -- wall-clock write time (NOT hashed)
+        );
+    """,
+    # -- Phase A: closing capture, keyed to a decision, never merged into it -- #
+    "closing_snapshots": """
+        CREATE TABLE IF NOT EXISTS closing_snapshots (
+            decision_id TEXT NOT NULL,
+            captured_at_utc TEXT NOT NULL,      -- when the capture job ran
+            close_ts TEXT NOT NULL,             -- ts of the market snapshot used
+            kickoff_ts TEXT NOT NULL,
+            cutoff_ts TEXT NOT NULL,            -- kickoff minus buffer
+            close_point REAL, close_devig_prob REAL NOT NULL,
+            prob_kind TEXT NOT NULL, n_books INTEGER,
+            hash_version INTEGER NOT NULL, content_hash TEXT NOT NULL,
+            PRIMARY KEY (decision_id, captured_at_utc),
+            FOREIGN KEY (decision_id) REFERENCES decision_snapshots(decision_id)
+        );
+    """,
     # -- Context hypothesis ledger: tags recorded at publish, graded later ----- #
     "context_ledger": """
         CREATE TABLE IF NOT EXISTS context_ledger (
@@ -178,10 +218,38 @@ SCHEMA = {
 }
 
 
+# --------------------------------------------------------------------------- #
+# Append-only enforcement
+# --------------------------------------------------------------------------- #
+# A comment in a docstring is not an invariant. These triggers make mutation of
+# a recorded decision (or of a captured close) an error at the SQLite level,
+# including via ``upsert``, which is INSERT OR REPLACE and therefore fires the
+# DELETE trigger. Phase A rows must be appended with ``decision_ledger.append``.
+APPEND_ONLY_TABLES = ("decision_snapshots", "closing_snapshots")
+
+TRIGGERS = tuple(
+    ddl
+    for table in APPEND_ONLY_TABLES
+    for ddl in (
+        f"""CREATE TRIGGER IF NOT EXISTS {table}_no_update
+            BEFORE UPDATE ON {table}
+            BEGIN SELECT RAISE(ABORT, '{table} is append-only: UPDATE refused'); END;""",
+        f"""CREATE TRIGGER IF NOT EXISTS {table}_no_delete
+            BEFORE DELETE ON {table}
+            BEGIN SELECT RAISE(ABORT, '{table} is append-only: DELETE refused'); END;""",
+    )
+)
+
+
 def connect(db_path: str = DEFAULT_DB_PATH) -> sqlite3.Connection:
     """Open (and initialize) the warehouse DB, creating tables if needed."""
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
     conn = sqlite3.connect(db_path)
+    # REPLACE resolves a conflict by DELETEing the existing row, but SQLite
+    # fires that implicit delete against BEFORE DELETE triggers only when
+    # recursive triggers are enabled. Without this pragma ``upsert`` (INSERT OR
+    # REPLACE) silently rewrites append-only rows straight through the guard.
+    conn.execute("PRAGMA recursive_triggers = ON;")
     # WAL needs shared-memory mmap, which some mounted/synced project folders
     # don't support (raises "disk I/O error" on the first write); try modes in
     # order from most to least durable and keep whichever actually works.
@@ -195,6 +263,8 @@ def connect(db_path: str = DEFAULT_DB_PATH) -> sqlite3.Connection:
         except (sqlite3.OperationalError, sqlite3.DatabaseError):
             continue
     for ddl in SCHEMA.values():
+        conn.execute(ddl)
+    for ddl in TRIGGERS:
         conn.execute(ddl)
     conn.commit()
     return conn

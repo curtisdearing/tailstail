@@ -20,13 +20,72 @@ at the posted number" -- a strategy with zero timing skill scores ~0 here
 
 from __future__ import annotations
 
-from typing import Dict
+import hashlib
+import json
+import os
+from typing import Dict, Optional
 
 from . import db as dbmod
+from . import decision_ledger
 from .clv import rolling_clv
 
-DEFAULT_MIN_SAMPLE = 150
-POSITIVE_RATE_BAR = 0.52
+PROTOCOL_PATH = os.path.join(dbmod.ROOT, "analysis", "accuracy_protocol.json")
+PRECOMMITMENT_PATH = os.path.join(
+    dbmod.ROOT, "analysis", "clv_killcheck_precommitment.json")
+
+
+class PrecommitmentViolation(RuntimeError):
+    """Raised when the declared bar no longer matches what was declared."""
+
+
+def _sha256(path: str) -> str:
+    with open(path, "rb") as handle:
+        return hashlib.sha256(handle.read()).hexdigest()
+
+
+def load_precommitment(protocol_path: str = PROTOCOL_PATH,
+                       precommitment_path: str = PRECOMMITMENT_PATH) -> Dict:
+    """Load the bar the strategy was committed to BEFORE any result was seen.
+
+    Thresholds live in ``accuracy_protocol.json`` (single source of truth) and
+    the horizon lives in the precommitment file, which records the protocol
+    hash it was declared against. If someone edits the thresholds after seeing
+    results, that hash stops matching and every evaluation raises instead of
+    quietly reporting against an easier bar. The check is not that the bar
+    CANNOT move -- it is that it cannot move silently.
+    """
+    precommitment = json.loads(open(precommitment_path).read())
+    actual = _sha256(protocol_path)
+    declared = precommitment["protocol_sha256"]
+    if actual != declared:
+        raise PrecommitmentViolation(
+            "accuracy_protocol.json has changed since the CLV kill check was "
+            f"precommitted (declared {declared[:12]}..., found {actual[:12]}...). "
+            "Relaxing a threshold after seeing results invalidates the sample: "
+            "issue a new precommitment_id and start the count from zero.")
+    protocol = json.loads(open(protocol_path).read())
+    forward = protocol["forward_clv"]
+    return {
+        "precommitment_id": precommitment["precommitment_id"],
+        "declared_at_utc": precommitment["declared_at_utc"],
+        "protocol_sha256": actual,
+        "min_sample": int(forward["minimum_resolved"]),
+        "min_mean_clv": float(forward["minimum_mean_probability_clv"]),
+        "min_beat_close_rate": float(forward["minimum_beat_close_rate"]),
+        "horizon": precommitment["horizon"],
+        "relaxation_policy": precommitment["relaxation_policy"],
+    }
+
+
+def _bar() -> Dict:
+    try:
+        return load_precommitment()
+    except (FileNotFoundError, KeyError):  # pragma: no cover - legacy fallback
+        return {"min_sample": 150, "min_beat_close_rate": 0.52, "min_mean_clv": 0.0}
+
+
+DEFAULT_MIN_SAMPLE = _bar()["min_sample"]
+POSITIVE_RATE_BAR = _bar()["min_beat_close_rate"]
 
 
 def report(conn=None, min_sample: int = DEFAULT_MIN_SAMPLE, window: int = 50) -> Dict:
@@ -59,8 +118,71 @@ def report(conn=None, min_sample: int = DEFAULT_MIN_SAMPLE, window: int = 50) ->
             "verdict": verdict, "detail": detail}
 
 
+# --------------------------------------------------------------------------- #
+# Phase A verdict: decision-snapshot ledger, precommitted bar, week-block CI
+# --------------------------------------------------------------------------- #
+def forward_clv_report(conn=None, *, iterations: int = 20_000,
+                       random_seed: int = 6102026,
+                       precommitment: Optional[Dict] = None) -> Dict:
+    """Verdict over matched (decision, close) pairs from ``decision_ledger``.
+
+    Below the precommitted minimum this returns NO estimate of any kind. The
+    keys simply are not there, so a dashboard cannot render a mean, a rate, or
+    a direction from a sample that has not earned one. "Trending positive" at
+    n=40 is not a weak claim; it is a claim the data cannot support at all.
+    """
+    conn = conn or dbmod.connect()
+    bar = precommitment or load_precommitment()
+    pairs = decision_ledger.resolved_pairs(conn)
+    n_resolved = int(len(pairs))
+    n_unresolved = decision_ledger.unresolved_count(conn)
+
+    base = {
+        "n_resolved": n_resolved,
+        "n_unresolved": n_unresolved,
+        "min_sample": bar["min_sample"],
+        "precommitment_id": bar["precommitment_id"],
+        "protocol_sha256": bar["protocol_sha256"],
+        "horizon": bar["horizon"],
+    }
+
+    if n_resolved < bar["min_sample"]:
+        return {**base, "verdict": "INSUFFICIENT_SAMPLE", "detail": (
+            f"{n_resolved} resolved decision/close pairs of the "
+            f"{bar['min_sample']} precommitted ({n_unresolved} unresolved). "
+            "No CLV estimate is produced at this sample size — not a point "
+            "estimate, not a direction, not a trend. Keep logging.")}
+
+    boot = decision_ledger.paired_week_bootstrap_clv(
+        pairs, iterations=iterations, random_seed=random_seed)
+    beat_close_rate = float(pairs["beat_close"].mean())
+    passes = (boot["mean_clv_prob"] > bar["min_mean_clv"]
+              and beat_close_rate >= bar["min_beat_close_rate"])
+    stats = {**base, "mean_clv_prob": round(boot["mean_clv_prob"], 5),
+             "ci95": [round(v, 5) for v in boot["ci95"]],
+             "probability_nonpositive": round(boot["probability_nonpositive"], 4),
+             "beat_close_rate": round(beat_close_rate, 4),
+             "mean_point_move": round(float(pairs["point_move"].mean()), 3),
+             "weeks": boot["weeks"], "iterations": boot["iterations"],
+             "random_seed": boot["random_seed"]}
+
+    if passes:
+        return {**stats, "verdict": "GO", "detail": (
+            f"Mean probability CLV {boot['mean_clv_prob']:+.4f} "
+            f"(week-block 95% CI {boot['ci95'][0]:+.4f} to {boot['ci95'][1]:+.4f}), "
+            f"{beat_close_rate:.0%} beat the close over {n_resolved} pairs "
+            f"(bar: {bar['min_beat_close_rate']:.0%}). Consistent with real edge. "
+            "Staking still means quarter-to-half Kelly on a SHRUNK edge, a hard "
+            "per-bet cap, and a fixed monthly loss limit (spec §8).")}
+    return {**stats, "verdict": "NO_GO", "detail": (
+        f"KILL CRITERION MET: mean CLV {boot['mean_clv_prob']:+.4f}, "
+        f"{beat_close_rate:.0%} beat the close over {n_resolved} pairs. The "
+        "decisions do not beat the close. Revert to projection/entertainment "
+        f"tool; stop staking. Precommitted {bar['declared_at_utc']} as "
+        f"{bar['precommitment_id']} — this outcome was declared in advance.")}
+
+
 def main() -> None:  # pragma: no cover - thin CLI
-    import json
     print(json.dumps(report(), indent=2))
 
 
