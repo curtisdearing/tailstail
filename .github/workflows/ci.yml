@@ -66,3 +66,4 @@ jobs:
           tests/test_chemistry_engine.py
           tests/test_decision_ledger.py
           tests/test_phase_b_hardening.py
+          tests/test_evidence_layer.py
