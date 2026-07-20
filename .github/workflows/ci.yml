@@ -68,3 +68,8 @@ jobs:
           tests/test_phase_b_hardening.py
           tests/test_evidence_layer.py
           tests/test_evidence_view.py
+          tests/test_fantasy_cli.py
+          tests/test_fantasy_audit_dashboard.py
+          tests/test_fantasy_season_tooling.py
+          tests/test_role_multipliers.py
+          tests/test_fantasy_mc_audit_metrics.py
