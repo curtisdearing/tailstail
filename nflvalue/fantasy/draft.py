@@ -327,14 +327,27 @@ def simulate_season(
                 bye_mask[i, j] = False
 
     mu = players["mu_pergame"].to_numpy()[None, :, None]
+    # Hierarchical posteriors (see hierarchy.py) carry parameter uncertainty:
+    # when mu_post_sd is present, each simulation draws its own "true" mu.
+    if "mu_post_sd" in players.columns:
+        post_sd = np.nan_to_num(players["mu_post_sd"].to_numpy(), nan=0.0)
+        mu = mu + post_sd[None, :, None] * rng.standard_normal((simulations, p, 1))
     sigma = players["sigma_pergame"].to_numpy()[None, :, None]
     weekly = mu + sigma * rng.standard_t(t_dof, size=(simulations, p, n_weeks)) / np.sqrt(
         t_dof / (t_dof - 2.0)
     )
     np.clip(weekly, -4.0, None, out=weekly)
 
-    active_rate = players["availability_rate"].to_numpy()
-    active = rng.random((simulations, p, n_weeks)) < active_rate[None, :, None]
+    if {"avail_alpha", "avail_beta"} <= set(players.columns):
+        alpha = np.nan_to_num(players["avail_alpha"].to_numpy(), nan=8.0)
+        beta = np.nan_to_num(players["avail_beta"].to_numpy(), nan=2.0)
+        # One availability rate per (simulation, player), drawn from the
+        # Beta posterior — injury-history uncertainty widens season spread.
+        active_rate = rng.beta(alpha[None, :], beta[None, :], size=(simulations, p))
+        active = rng.random((simulations, p, n_weeks)) < active_rate[:, :, None]
+    else:
+        active_rate = players["availability_rate"].to_numpy()
+        active = rng.random((simulations, p, n_weeks)) < active_rate[None, :, None]
 
     hazard = players["position"].map(SEASON_END_HAZARD).fillna(0.006).to_numpy()
     ended = rng.random((simulations, p, n_weeks)) < hazard[None, :, None]

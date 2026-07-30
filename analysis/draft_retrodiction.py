@@ -35,6 +35,7 @@ from nflvalue.fantasy.draft import (
     pergame_baselines,
     simulate_season,
 )
+from nflvalue.fantasy.hierarchy import hierarchical_baselines
 from nflvalue.fantasy.models import FantasyEnsemble
 
 FRAME = "historical/fantasy/feature_frame.parquet"
@@ -95,11 +96,17 @@ def run() -> dict:
 
         for label, mdl, weight in (
             ("board_no_model_LOWER_BOUND", null_model, 0.0),
+            ("board_hier_LOWER_BOUND", null_model, 0.0),
             ("board_leaky_model_REFERENCE_ONLY", model, 0.6),
         ):
-            baselines = pergame_baselines(
-                frame, mdl, source_season=source, model_weight=weight
-            )
+            if label.startswith("board_hier"):
+                baselines = hierarchical_baselines(
+                    frame, mdl, source_season=source, model_weight=weight
+                )
+            else:
+                baselines = pergame_baselines(
+                    frame, mdl, source_season=source, model_weight=weight
+                )
             baselines = apply_offseason_adjustments(baselines)
             outlook = simulate_season(baselines, byes, simulations=1500, random_seed=42)
             projected = outlook.board.set_index("player_id")["season_mean"]

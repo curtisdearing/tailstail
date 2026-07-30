@@ -11,6 +11,16 @@
     "top36_hits": 19,
     "top36_rate": 0.528
    },
+   "board_hier_LOWER_BOUND": {
+    "n": 451,
+    "spearman": 0.7145,
+    "top12_hits": 3,
+    "top12_rate": 0.25,
+    "top24_hits": 9,
+    "top24_rate": 0.375,
+    "top36_hits": 19,
+    "top36_rate": 0.528
+   },
    "board_leaky_model_REFERENCE_ONLY": {
     "n": 451,
     "spearman": 0.6846,
@@ -52,6 +62,16 @@
     "top24_rate": 0.375,
     "top36_hits": 16,
     "top36_rate": 0.444
+   },
+   "board_hier_LOWER_BOUND": {
+    "n": 435,
+    "spearman": 0.7015,
+    "top12_hits": 4,
+    "top12_rate": 0.333,
+    "top24_hits": 8,
+    "top24_rate": 0.333,
+    "top36_hits": 15,
+    "top36_rate": 0.417
    },
    "board_leaky_model_REFERENCE_ONLY": {
     "n": 435,
@@ -95,6 +115,16 @@
     "top36_hits": 20,
     "top36_rate": 0.556
    },
+   "board_hier_LOWER_BOUND": {
+    "n": 437,
+    "spearman": 0.7336,
+    "top12_hits": 3,
+    "top12_rate": 0.25,
+    "top24_hits": 12,
+    "top24_rate": 0.5,
+    "top36_hits": 21,
+    "top36_rate": 0.583
+   },
    "board_leaky_model_REFERENCE_ONLY": {
     "n": 437,
     "spearman": 0.6737,
@@ -131,6 +161,10 @@
   "board_no_model_LOWER_BOUND": {
    "mean_spearman": 0.6815,
    "mean_top24_rate": 0.43
+  },
+  "board_hier_LOWER_BOUND": {
+   "mean_spearman": 0.7165,
+   "mean_top24_rate": 0.403
   },
   "board_leaky_model_REFERENCE_ONLY": {
    "mean_spearman": 0.6731,

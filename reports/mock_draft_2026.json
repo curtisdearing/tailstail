@@ -3,11 +3,11 @@
  "drafts_per_slot": 40,
  "sims_per_draft": 250,
  "baseline_title_probability": 0.08333333333333333,
- "note": "Opponents draft best-available by noisy ADP with positional sanity; we draft by progressive-ceiling round score. Lineups scored on season totals (documented approximation, symmetric across teams). IMPORTANT: rosters are scored by OUR OWN season simulator, so title probabilities are in-model \u2014 they measure how consistently the strategy converts board edges into rosters the model likes, not real-world odds. The RELATIVE slot ordering is the usable signal.",
+ "note": "Opponents draft best-available by noisy ADP with positional sanity; we draft by progressive-ceiling round score. Lineups scored on season totals (documented approximation, symmetric across teams). IMPORTANT: rosters are scored by OUR OWN season simulator, so title probabilities are in-model \u2014 the RELATIVE slot ordering is the usable signal.",
  "slots": {
   "1": {
-   "expected_points": 1523.4,
-   "title_probability": 0.792,
+   "expected_points": 1615.7,
+   "title_probability": 0.7566,
    "round_targets": {
     "1": [
      [
@@ -17,58 +17,18 @@
     ],
     "2": [
      [
-      "Trey McBride",
-      0.97
-     ],
-     [
       "Kyren Williams",
-      0.03
+      1.0
      ]
     ],
     "3": [
      [
-      "Kyren Williams",
-      0.97
-     ],
-     [
-      "Josh Allen",
-      0.03
-     ]
-    ]
-   }
-  },
-  "2": {
-   "expected_points": 1521.3,
-   "title_probability": 0.7761,
-   "round_targets": {
-    "1": [
-     [
-      "Jahmyr Gibbs",
-      0.55
-     ],
-     [
-      "Bijan Robinson",
-      0.45
-     ]
-    ],
-    "2": [
-     [
       "Trey McBride",
-      0.95
-     ],
-     [
-      "Kyren Williams",
-      0.05
-     ]
-    ],
-    "3": [
-     [
-      "Kyren Williams",
-      0.95
+      0.9
      ],
      [
       "Josh Allen",
-      0.03
+      0.07
      ],
      [
       "Josh Jacobs",
@@ -77,9 +37,45 @@
     ]
    }
   },
+  "2": {
+   "expected_points": 1612.8,
+   "title_probability": 0.7586,
+   "round_targets": {
+    "1": [
+     [
+      "Jahmyr Gibbs",
+      0.57
+     ],
+     [
+      "Bijan Robinson",
+      0.42
+     ]
+    ],
+    "2": [
+     [
+      "Kyren Williams",
+      1.0
+     ]
+    ],
+    "3": [
+     [
+      "Trey McBride",
+      0.85
+     ],
+     [
+      "Josh Allen",
+      0.1
+     ],
+     [
+      "Josh Jacobs",
+      0.05
+     ]
+    ]
+   }
+  },
   "3": {
-   "expected_points": 1510.1,
-   "title_probability": 0.753,
+   "expected_points": 1600.7,
+   "title_probability": 0.7184,
    "round_targets": {
     "1": [
      [
@@ -88,42 +84,38 @@
      ],
      [
       "Jahmyr Gibbs",
-      0.33
+      0.35
      ],
      [
       "Bijan Robinson",
-      0.28
+      0.25
      ]
     ],
     "2": [
      [
-      "Trey McBride",
-      0.95
-     ],
-     [
       "Kyren Williams",
-      0.05
+      1.0
      ]
     ],
     "3": [
      [
-      "Kyren Williams",
-      0.93
-     ],
-     [
-      "Josh Jacobs",
-      0.05
+      "Trey McBride",
+      0.88
      ],
      [
       "Josh Allen",
+      0.07
+     ],
+     [
+      "Javonte Williams",
       0.03
      ]
     ]
    }
   },
   "4": {
-   "expected_points": 1504.2,
-   "title_probability": 0.7214,
+   "expected_points": 1590.6,
+   "title_probability": 0.6981,
    "round_targets": {
     "1": [
      [
@@ -131,75 +123,39 @@
       0.65
      ],
      [
-      "Bijan Robinson",
+      "Jahmyr Gibbs",
       0.17
      ],
      [
-      "Jahmyr Gibbs",
+      "Bijan Robinson",
       0.17
      ]
     ],
     "2": [
      [
-      "Trey McBride",
+      "Kyren Williams",
       1.0
      ]
     ],
     "3": [
      [
-      "Kyren Williams",
-      0.97
+      "Trey McBride",
+      0.82
+     ],
+     [
+      "Josh Allen",
+      0.07
      ],
      [
       "Javonte Williams",
-      0.03
+      0.07
      ]
     ]
    }
   },
   "5": {
-   "expected_points": 1500.4,
-   "title_probability": 0.7204,
-   "round_targets": {
-    "1": [
-     [
-      "Jonathan Taylor",
-      0.93
-     ],
-     [
-      "Jahmyr Gibbs",
-      0.05
-     ],
-     [
-      "Bijan Robinson",
-      0.03
-     ]
-    ],
-    "2": [
-     [
-      "Trey McBride",
-      1.0
-     ]
-    ],
-    "3": [
-     [
-      "Kyren Williams",
-      0.9
-     ],
-     [
-      "Josh Allen",
-      0.05
-     ],
-     [
-      "Josh Jacobs",
-      0.05
-     ]
-    ]
-   }
-  },
-  "6": {
-   "expected_points": 1505.7,
-   "title_probability": 0.7272,
+   "expected_points": 1583.6,
+   "title_probability": 0.6694,
    "round_targets": {
     "1": [
      [
@@ -207,35 +163,79 @@
       0.82
      ],
      [
-      "Amon-Ra St. Brown",
-      0.17
+      "Bijan Robinson",
+      0.07
+     ],
+     [
+      "Jahmyr Gibbs",
+      0.05
      ]
     ],
     "2": [
      [
-      "Trey McBride",
+      "Kyren Williams",
       1.0
      ]
     ],
     "3": [
      [
+      "Trey McBride",
+      0.8
+     ],
+     [
+      "Josh Allen",
+      0.12
+     ],
+     [
+      "Javonte Williams",
+      0.05
+     ]
+    ]
+   }
+  },
+  "6": {
+   "expected_points": 1576.9,
+   "title_probability": 0.651,
+   "round_targets": {
+    "1": [
+     [
+      "Jonathan Taylor",
+      0.9
+     ],
+     [
+      "De'Von Achane",
+      0.1
+     ]
+    ],
+    "2": [
+     [
       "Kyren Williams",
       0.95
      ],
      [
-      "Javonte Williams",
-      0.03
+      "James Cook",
+      0.05
+     ]
+    ],
+    "3": [
+     [
+      "Trey McBride",
+      0.68
      ],
      [
-      "Josh Jacobs",
-      0.03
+      "Josh Allen",
+      0.17
+     ],
+     [
+      "Javonte Williams",
+      0.1
      ]
     ]
    }
   },
   "7": {
-   "expected_points": 1502.6,
-   "title_probability": 0.7357,
+   "expected_points": 1575.0,
+   "title_probability": 0.6226,
    "round_targets": {
     "1": [
      [
@@ -243,232 +243,260 @@
       0.72
      ],
      [
-      "Amon-Ra St. Brown",
-      0.23
-     ],
-     [
       "De'Von Achane",
-      0.05
+      0.28
      ]
     ],
     "2": [
      [
-      "Trey McBride",
+      "Kyren Williams",
       1.0
      ]
     ],
     "3": [
      [
-      "Kyren Williams",
-      0.95
+      "Trey McBride",
+      0.6
      ],
      [
-      "Javonte Williams",
-      0.05
+      "Josh Jacobs",
+      0.15
+     ],
+     [
+      "Josh Allen",
+      0.12
      ]
     ]
    }
   },
   "8": {
-   "expected_points": 1510.3,
-   "title_probability": 0.7562,
+   "expected_points": 1572.7,
+   "title_probability": 0.6379,
    "round_targets": {
     "1": [
      [
-      "Amon-Ra St. Brown",
-      0.57
+      "De'Von Achane",
+      0.75
      ],
      [
       "Jonathan Taylor",
-      0.25
+      0.23
      ],
      [
-      "De'Von Achane",
-      0.17
+      "Amon-Ra St. Brown",
+      0.03
      ]
     ],
     "2": [
      [
-      "Trey McBride",
-      1.0
+      "Kyren Williams",
+      0.97
+     ],
+     [
+      "James Cook",
+      0.03
      ]
     ],
     "3": [
      [
-      "Kyren Williams",
-      0.82
+      "Trey McBride",
+      0.5
      ],
      [
       "Javonte Williams",
-      0.15
+      0.35
      ],
      [
       "Josh Jacobs",
-      0.03
+      0.05
      ]
     ]
    }
   },
   "9": {
-   "expected_points": 1502.7,
-   "title_probability": 0.7294,
+   "expected_points": 1573.7,
+   "title_probability": 0.6377,
    "round_targets": {
     "1": [
      [
       "De'Von Achane",
-      0.65
+      0.62
      ],
      [
       "Amon-Ra St. Brown",
-      0.2
+      0.25
      ],
      [
       "Jonathan Taylor",
-      0.12
+      0.07
      ]
     ],
     "2": [
      [
-      "Trey McBride",
-      1.0
+      "Kyren Williams",
+      0.9
+     ],
+     [
+      "James Cook",
+      0.1
      ]
     ],
     "3": [
      [
-      "Kyren Williams",
-      0.93
+      "Trey McBride",
+      0.4
      ],
      [
       "Javonte Williams",
-      0.05
+      0.4
      ],
      [
-      "Josh Allen",
-      0.03
+      "Travis Etienne",
+      0.07
      ]
     ]
    }
   },
   "10": {
-   "expected_points": 1490.8,
-   "title_probability": 0.7029,
+   "expected_points": 1558.1,
+   "title_probability": 0.5783,
    "round_targets": {
     "1": [
      [
-      "Trey McBride",
-      0.35
-     ],
-     [
       "De'Von Achane",
-      0.3
+      0.53
      ],
      [
-      "Amon-Ra St. Brown",
-      0.17
+      "James Cook",
+      0.38
+     ],
+     [
+      "Jonathan Taylor",
+      0.05
      ]
     ],
     "2": [
      [
-      "Trey McBride",
-      0.65
+      "Kyren Williams",
+      0.8
      ],
      [
-      "Kyren Williams",
-      0.35
+      "James Cook",
+      0.17
+     ],
+     [
+      "De'Von Achane",
+      0.03
      ]
     ],
     "3": [
      [
-      "Kyren Williams",
-      0.57
+      "Trey McBride",
+      0.38
      ],
      [
       "Javonte Williams",
-      0.3
+      0.28
      ],
      [
-      "Travis Etienne",
-      0.1
+      "Kyren Williams",
+      0.17
      ]
     ]
    }
   },
   "11": {
-   "expected_points": 1471.6,
-   "title_probability": 0.6237,
+   "expected_points": 1543.3,
+   "title_probability": 0.5297,
    "round_targets": {
     "1": [
      [
-      "Trey McBride",
-      0.62
+      "James Cook",
+      0.47
      ],
      [
       "De'Von Achane",
-      0.38
+      0.3
+     ],
+     [
+      "Kyren Williams",
+      0.12
      ]
     ],
     "2": [
      [
       "Kyren Williams",
-      0.62
+      0.7
+     ],
+     [
+      "James Cook",
+      0.17
      ],
      [
       "Trey McBride",
-      0.38
+      0.12
      ]
     ],
     "3": [
      [
       "Javonte Williams",
-      0.55
+      0.4
      ],
      [
-      "Kyren Williams",
-      0.3
+      "Trey McBride",
+      0.25
      ],
      [
       "Travis Etienne",
-      0.12
+      0.2
      ]
     ]
    }
   },
   "12": {
-   "expected_points": 1459.2,
-   "title_probability": 0.571,
+   "expected_points": 1540.1,
+   "title_probability": 0.5225,
    "round_targets": {
     "1": [
      [
-      "Trey McBride",
-      0.9
+      "James Cook",
+      0.57
      ],
      [
       "De'Von Achane",
-      0.1
+      0.2
+     ],
+     [
+      "Kyren Williams",
+      0.2
      ]
     ],
     "2": [
      [
       "Kyren Williams",
-      0.9
+      0.68
      ],
      [
       "Trey McBride",
-      0.1
+      0.2
+     ],
+     [
+      "James Cook",
+      0.12
      ]
     ],
     "3": [
      [
       "Javonte Williams",
-      0.5
+      0.38
      ],
      [
       "Travis Etienne",
-      0.4
+      0.33
      ],
      [
-      "Kyren Williams",
-      0.05
+      "Trey McBride",
+      0.23
      ]
     ]
    }

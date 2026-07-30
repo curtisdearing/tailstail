@@ -19,6 +19,7 @@ from nflvalue.fantasy.draft import (
     pergame_baselines,
     simulate_season,
 )
+from nflvalue.fantasy.hierarchy import hierarchical_baselines
 from nflvalue.fantasy.models import FantasyEnsemble
 
 
@@ -48,6 +49,11 @@ def main() -> int:
     parser.add_argument("--ceiling", type=float, default=0.55)
     parser.add_argument("--sims", type=int, default=4000)
     parser.add_argument("--source-season", type=int, default=2025)
+    parser.add_argument(
+        "--pooling", choices=("hierarchical", "flat"), default="hierarchical",
+        help="hierarchical = empirical-Bayes partial pooling (retrodiction "
+        "Spearman 0.717 vs 0.682 flat; top-24 rate 0.40 vs 0.43)",
+    )
     parser.add_argument("--output", default="data/draft_board_2026")
     args = parser.parse_args()
 
@@ -56,7 +62,10 @@ def main() -> int:
     adp = load_adp(args.adp)
     byes = json.loads(Path(args.byes).read_text())
 
-    baselines = pergame_baselines(frame, model, source_season=args.source_season)
+    if args.pooling == "hierarchical":
+        baselines = hierarchical_baselines(frame, model, source_season=args.source_season)
+    else:
+        baselines = pergame_baselines(frame, model, source_season=args.source_season)
     current_teams = {
         row["name"]: row["team"] for _, row in adp.iterrows() if row.get("team")
     }
