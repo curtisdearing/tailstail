@@ -210,3 +210,34 @@ def test_fast_lineup_matches_reference_exactly():
     for roster in rosters:
         reference = float(lineup_points(season, roster, rules).mean())
         assert abs(fast.mean(roster) - reference) < 1e-9
+
+
+def test_round_ceiling_weight_progression():
+    from nflvalue.fantasy.draft import round_ceiling_weight
+
+    assert round_ceiling_weight(1) == pytest.approx(0.30)
+    assert round_ceiling_weight(4) == pytest.approx(0.54)
+    assert round_ceiling_weight(12) == pytest.approx(0.80)  # capped
+    assert round_ceiling_weight(2) > round_ceiling_weight(1)
+    with pytest.raises(ValueError):
+        round_ceiling_weight(0)
+
+
+def test_availability_probability_direction():
+    """Regression: the sign was flipped once — an ADP-1.7 star showed as
+    'available' at pick 24 and unavailable at pick 1."""
+    import pandas as pd
+
+    from nflvalue.fantasy.draft import availability_probability
+
+    board = pd.DataFrame({
+        "player_name": ["Star", "Mid", "Late"],
+        "adp": [1.7, 30.0, 90.0],
+        "adp_sd": [4.0, 8.0, 15.0],
+    })
+    at_pick_1 = availability_probability(board, 1)
+    at_pick_24 = availability_probability(board, 24)
+    assert at_pick_1.iloc[0] > 0.5          # star nearly always there at 1.01
+    assert at_pick_24.iloc[0] < 0.01        # and certainly gone at pick 24
+    assert at_pick_24.iloc[2] > 0.99        # ADP-90 player still on the board
+    assert at_pick_1.iloc[0] < at_pick_1.iloc[2]  # monotone in ADP distance

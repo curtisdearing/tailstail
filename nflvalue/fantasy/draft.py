@@ -461,5 +461,27 @@ def availability_probability(
         return pd.Series(1.0, index=board.index)
     sd = board.get("adp_sd", pd.Series(np.nan, index=board.index)).fillna(adp_sd_floor).clip(lower=adp_sd_floor)
     z = (adp - pick_number) / sd
-    prob = pd.Series(norm.cdf(-z), index=board.index)  # P(drafted later than pick)
+    # P(available at pick k) = P(market drafts him at a pick >= k) = CDF(z):
+    # a player with ADP far *after* your pick (z >> 0) is almost surely there;
+    # one with ADP far before it (z << 0) is almost surely gone.
+    prob = pd.Series(norm.cdf(z), index=board.index)
     return prob.where(adp.notna(), 1.0)
+
+
+def round_ceiling_weight(
+    round_number: int,
+    *,
+    start: float = 0.30,
+    step: float = 0.08,
+    cap: float = 0.80,
+) -> float:
+    """Progressive ceiling tilt by draft round.
+
+    Early rounds buy reliable production (busts there sink a season);
+    later rounds buy lottery tickets (their busts cost a waiver claim).
+    Round 1 -> ~0.30 P90 weight, rising ~0.08 per round, capped at 0.80.
+    """
+
+    if round_number < 1:
+        raise ValueError("round_number is 1-indexed")
+    return float(min(start + step * (round_number - 1), cap))
