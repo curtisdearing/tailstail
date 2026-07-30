@@ -125,12 +125,15 @@ def pergame_baselines(
     predictions = model.predict(rows)
     merged = rows[[
         "player_id", "player_name", "position", "team", "week",
-        "fantasy_points", "birth_date", "years_exp", "draft_number",
+        "fantasy_points", "played", "birth_date", "years_exp", "draft_number",
     ]].merge(
         predictions[["player_id", "week", "projection_mean"]],
         on=["player_id", "week"], how="left",
     )
-    played = merged[merged["fantasy_points"].notna()]
+    # The feature frame is a full roster-week grid: fantasy_points is NEVER
+    # NaN (DNP weeks are exact zeros), so notna() would count every roster
+    # week as a game. The frame's `played` flag is the real predicate.
+    played = merged[merged["played"].astype(bool)]
 
     position_mu = played.groupby("position")["fantasy_points"].mean()
 
@@ -184,9 +187,14 @@ def pergame_baselines(
 
     # Availability rate over the last two seasons (games / eligible weeks).
     recent = frame[frame["season"].isin([source_season - 1, source_season])]
-    counts = recent[recent["fantasy_points"].notna()].groupby("player_id").size()
-    seasons_present = recent.groupby("player_id")["season"].nunique()
-    eligible = seasons_present * 16.0
+    counts = recent[recent["played"].astype(bool)].groupby("player_id").size()
+    # Eligible weeks = team game-weeks per season: calendar weeks in the
+    # frame minus the bye (17 since the 2021 18-week schedule; 16 before).
+    weeks_per_season = recent.groupby("season")["week"].nunique() - 1
+    season_sets = recent.groupby("player_id")["season"].unique()
+    eligible = season_sets.map(
+        lambda seasons: float(sum(weeks_per_season.get(s, 16) for s in seasons))
+    )
     rate = (counts / eligible).clip(0.05, 1.0)
     baselines["availability_rate"] = baselines["player_id"].map(rate).fillna(0.8)
     # Shrink toward a position prior of 0.88 with pseudo-n of 8 games.

@@ -106,7 +106,9 @@ def run() -> dict:
             variants[label] = grade(projected, actual)
 
         # Naive baselines from season N-1 only.
-        last = frame[(frame["season"] == source) & frame["fantasy_points"].notna()]
+        # `played`, not notna(): the frame is a full roster-week grid where
+        # DNP weeks are exact zeros, so notna() keeps every roster week.
+        last = frame[(frame["season"] == source) & frame["played"].astype(bool)]
         by_player = last.groupby("player_id")["fantasy_points"].agg(["sum", "mean", "count"])
         variants["naive_lastyear_total"] = grade(by_player["sum"], actual)
         pergame = by_player.loc[by_player["count"] >= 6, "mean"]

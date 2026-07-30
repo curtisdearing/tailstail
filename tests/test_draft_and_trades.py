@@ -241,3 +241,108 @@ def test_availability_probability_direction():
     assert at_pick_24.iloc[0] < 0.01        # and certainly gone at pick 24
     assert at_pick_24.iloc[2] > 0.99        # ADP-90 player still on the board
     assert at_pick_1.iloc[0] < at_pick_1.iloc[2]  # monotone in ADP distance
+
+
+def test_pergame_baselines_use_played_flag_not_notna():
+    """Regression: the feature frame is a roster-week grid (fantasy_points is
+    never NaN; DNP weeks are exact zeros). Counting notna() weeks as games
+    deflated per-game means for injury-prone players (19.7 PPG -> 6.9) and
+    erased injury history from availability_rate."""
+    import pandas as pd
+
+    from nflvalue.fantasy.draft import pergame_baselines
+
+    class _NullModel:
+        def predict(self, rows):
+            return pd.DataFrame({
+                "player_id": rows["player_id"],
+                "week": rows["week"],
+                "projection_mean": pd.NA,
+            })
+
+    def _rows(pid, points, played):
+        return pd.DataFrame({
+            "season": 2025, "player_id": pid, "player_name": pid,
+            "position": "WR", "team": "TST",
+            "week": range(1, len(points) + 1),
+            "fantasy_points": points, "played": played,
+            "birth_date": "1998-01-01", "years_exp": 5, "draft_number": 20,
+        })
+
+    frame = pd.concat([
+        _rows("ironman", [12.0] * 17, [1] * 17),
+        # 7 games at 20.0, then 10 DNP roster weeks logged as 0.0
+        _rows("glass", [20.0] * 7 + [0.0] * 10, [1] * 7 + [0] * 10),
+    ], ignore_index=True)
+    frame["week"] = frame["week"].astype(int)
+
+    out = pergame_baselines(frame, _NullModel(), source_season=2025).set_index("player_id")
+    assert out.loc["glass", "games_played"] == 7
+    assert out.loc["glass", "mu_pergame_raw"] > 15.0  # not diluted by DNP zeros
+    assert out.loc["ironman", "games_played"] == 17
+    assert out.loc["glass", "availability_rate"] < out.loc["ironman", "availability_rate"] - 0.15
+
+
+def test_mock_draft_rosters_are_legal_and_disjoint():
+    import numpy as np
+    import pandas as pd
+
+    from nflvalue.fantasy.config import LineupRules
+    from nflvalue.fantasy.mock_draft import POSITION_CAPS, simulate_draft
+
+    rng = np.random.default_rng(0)
+    n = 220
+    positions = (["QB"] * 30) + (["RB"] * 70) + (["WR"] * 90) + (["TE"] * 30)
+    board = pd.DataFrame({
+        "player_id": [f"p{i}" for i in range(n)],
+        "player_name": [f"Player {i}" for i in range(n)],
+        "position": positions[:n],
+        "vor_mean": np.linspace(120, -20, n),
+        "vor_p90": np.linspace(160, -10, n),
+        "overall_rank": range(1, n + 1),
+        "adp": np.arange(1, n + 1, dtype=float),
+        "adp_sd": 6.0,
+    }).sample(frac=1.0, random_state=1).reset_index(drop=True)
+
+    rosters = simulate_draft(board, my_slot=5, league_teams=12, rounds=14, rng=rng)
+    all_picks = [p for picks in rosters.values() for p in picks]
+    assert len(all_picks) == len(set(all_picks)) == 12 * 14
+    rules = LineupRules()
+    for slot, picks in rosters.items():
+        counts = board.loc[picks, "position"].value_counts()
+        for pos, cap in POSITION_CAPS.items():
+            assert counts.get(pos, 0) <= cap, f"slot {slot} exceeds {pos} cap"
+        # every team can field a full starting lineup
+        for pos, needed in rules.starters.items():
+            if pos != "FLEX":
+                assert counts.get(pos, 0) >= needed, f"slot {slot} missing {pos}"
+
+
+def test_best_lineup_matches_bruteforce_on_flex():
+    import itertools
+
+    import numpy as np
+
+    from nflvalue.fantasy.config import LineupRules
+    from nflvalue.fantasy.mock_draft import _best_lineup
+
+    rules = LineupRules()
+    rng = np.random.default_rng(3)
+    positions = np.array(["QB", "QB", "RB", "RB", "RB", "WR", "WR", "WR", "TE", "TE"])
+    for _ in range(25):
+        points = rng.normal(10, 6, size=len(positions))
+        got = _best_lineup(points, positions, rules)
+        # brute force: choose 1QB,2RB,2WR,1TE + 1 flex from remaining RB/WR/TE
+        best = -1e9
+        idx = np.arange(len(positions))
+        for qb in itertools.combinations(idx[positions == "QB"], 1):
+            for rb in itertools.combinations(idx[positions == "RB"], 2):
+                for wr in itertools.combinations(idx[positions == "WR"], 2):
+                    for te in itertools.combinations(idx[positions == "TE"], 1):
+                        base = set(qb) | set(rb) | set(wr) | set(te)
+                        flex_pool = [i for i in idx if i not in base
+                                     and positions[i] in rules.flex_positions]
+                        for fx in flex_pool:
+                            best = max(best, points[list(base) + [fx]].sum())
+        assert got <= best + 1e-9  # greedy never claims more than optimum
+        assert got >= best - 1e-6 or (best - got) / max(abs(best), 1) < 0.02

@@ -44,7 +44,7 @@ def main() -> int:
     parser.add_argument("--model", default="data/fantasy_model.joblib")
     parser.add_argument("--adp", default="data/adp_ppr_2026.json")
     parser.add_argument("--byes", default="data/byes_2026.json")
-    parser.add_argument("--teams", type=int, default=6)
+    parser.add_argument("--teams", type=int, default=12)
     parser.add_argument("--ceiling", type=float, default=0.55)
     parser.add_argument("--sims", type=int, default=4000)
     parser.add_argument("--source-season", type=int, default=2025)
