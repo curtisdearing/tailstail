@@ -1,0 +1,218 @@
+{
+ "week": 1,
+ "remaining_weeks": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17
+ ],
+ "my_team": "Team1",
+ "proposals": [
+  {
+   "opponent": "Team4",
+   "send": [
+    "D'Andre Swift",
+    "RJ Harvey"
+   ],
+   "receive": [
+    "Josh Allen",
+    "Puka Nacua"
+   ],
+   "my_gain_per_sim": 483.76,
+   "their_gain_per_sim": 3.61,
+   "bye_relief": 0,
+   "playoff_tilt": 87.31,
+   "score": 527.415
+  },
+  {
+   "opponent": "Team4",
+   "send": [
+    "TreVeyon Henderson",
+    "RJ Harvey"
+   ],
+   "receive": [
+    "Josh Allen",
+    "Puka Nacua"
+   ],
+   "my_gain_per_sim": 483.05,
+   "their_gain_per_sim": 3.01,
+   "bye_relief": 0,
+   "playoff_tilt": 86.75,
+   "score": 526.425
+  },
+  {
+   "opponent": "Team4",
+   "send": [
+    "D'Andre Swift",
+    "TreVeyon Henderson"
+   ],
+   "receive": [
+    "Josh Allen",
+    "Puka Nacua"
+   ],
+   "my_gain_per_sim": 479.99,
+   "their_gain_per_sim": 11.09,
+   "bye_relief": 0,
+   "playoff_tilt": 85.71,
+   "score": 522.845
+  },
+  {
+   "opponent": "Team4",
+   "send": [
+    "RJ Harvey",
+    "Kenneth Gainwell"
+   ],
+   "receive": [
+    "Puka Nacua",
+    "Drake Maye"
+   ],
+   "my_gain_per_sim": 469.49,
+   "their_gain_per_sim": 8.31,
+   "bye_relief": 0,
+   "playoff_tilt": 85.05,
+   "score": 512.015
+  },
+  {
+   "opponent": "Team4",
+   "send": [
+    "Ashton Jeanty",
+    "Kenneth Gainwell"
+   ],
+   "receive": [
+    "Josh Allen",
+    "Puka Nacua"
+   ],
+   "my_gain_per_sim": 468.5,
+   "their_gain_per_sim": 22.14,
+   "bye_relief": 0,
+   "playoff_tilt": 83.96,
+   "score": 510.48
+  },
+  {
+   "opponent": "Team4",
+   "send": [
+    "Ashton Jeanty",
+    "RJ Harvey"
+   ],
+   "receive": [
+    "Josh Allen",
+    "Puka Nacua"
+   ],
+   "my_gain_per_sim": 467.3,
+   "their_gain_per_sim": 27.5,
+   "bye_relief": 0,
+   "playoff_tilt": 83.82,
+   "score": 509.21
+  },
+  {
+   "opponent": "Team4",
+   "send": [
+    "D'Andre Swift",
+    "Kenneth Gainwell"
+   ],
+   "receive": [
+    "Puka Nacua",
+    "Drake Maye"
+   ],
+   "my_gain_per_sim": 466.57,
+   "their_gain_per_sim": 16.39,
+   "bye_relief": 0,
+   "playoff_tilt": 84.34,
+   "score": 508.74
+  },
+  {
+   "opponent": "Team4",
+   "send": [
+    "D'Andre Swift",
+    "RJ Harvey"
+   ],
+   "receive": [
+    "Puka Nacua",
+    "Drake Maye"
+   ],
+   "my_gain_per_sim": 465.62,
+   "their_gain_per_sim": 21.74,
+   "bye_relief": 0,
+   "playoff_tilt": 84.28,
+   "score": 507.76
+  },
+  {
+   "opponent": "Team4",
+   "send": [
+    "TreVeyon Henderson",
+    "Kenneth Gainwell"
+   ],
+   "receive": [
+    "Puka Nacua",
+    "Drake Maye"
+   ],
+   "my_gain_per_sim": 465.8,
+   "their_gain_per_sim": 15.8,
+   "bye_relief": 0,
+   "playoff_tilt": 83.54,
+   "score": 507.57
+  },
+  {
+   "opponent": "Team4",
+   "send": [
+    "RJ Harvey",
+    "Kenneth Gainwell"
+   ],
+   "receive": [
+    "Josh Allen",
+    "Jaxon Smith-Njigba"
+   ],
+   "my_gain_per_sim": 463.85,
+   "their_gain_per_sim": 13.96,
+   "bye_relief": 0,
+   "playoff_tilt": 86.11,
+   "score": 506.905
+  },
+  {
+   "opponent": "Team4",
+   "send": [
+    "TreVeyon Henderson",
+    "RJ Harvey"
+   ],
+   "receive": [
+    "Puka Nacua",
+    "Drake Maye"
+   ],
+   "my_gain_per_sim": 464.92,
+   "their_gain_per_sim": 21.15,
+   "bye_relief": 0,
+   "playoff_tilt": 83.72,
+   "score": 506.78
+  },
+  {
+   "opponent": "Team4",
+   "send": [
+    "Ashton Jeanty",
+    "D'Andre Swift"
+   ],
+   "receive": [
+    "Josh Allen",
+    "Puka Nacua"
+   ],
+   "my_gain_per_sim": 464.19,
+   "their_gain_per_sim": 35.57,
+   "bye_relief": 0,
+   "playoff_tilt": 82.87,
+   "score": 505.625
+  }
+ ],
+ "unmatched_players": {}
+}
