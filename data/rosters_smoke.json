@@ -1,0 +1,76 @@
+{
+ "teams": [
+  {
+   "name": "Team1",
+   "players": [
+    "Jahmyr Gibbs",
+    "Kyren Williams",
+    "Ashton Jeanty",
+    "TreVeyon Henderson",
+    "D'Andre Swift",
+    "Kenneth Gainwell",
+    "RJ Harvey"
+   ]
+  },
+  {
+   "name": "Team2",
+   "players": [
+    "Bijan Robinson",
+    "James Cook",
+    "Chase Brown",
+    "Breece Hall",
+    "Rico Dowdle",
+    "Jake Ferguson",
+    "Brock Bowers"
+   ]
+  },
+  {
+   "name": "Team3",
+   "players": [
+    "Jonathan Taylor",
+    "Ja'Marr Chase",
+    "Derrick Henry",
+    "Kyle Pitts",
+    "Tyler Warren",
+    "A.J. Brown",
+    "Justin Jefferson"
+   ]
+  },
+  {
+   "name": "Team4",
+   "players": [
+    "Puka Nacua",
+    "Jaxon Smith-Njigba",
+    "Josh Allen",
+    "Josh Jacobs",
+    "Travis Kelce",
+    "Drake Maye",
+    "Jameson Williams"
+   ]
+  },
+  {
+   "name": "Team5",
+   "players": [
+    "Christian McCaffrey",
+    "Amon-Ra St. Brown",
+    "Saquon Barkley",
+    "Javonte Williams",
+    "Zay Flowers",
+    "Kenneth Walker III",
+    "Trevor Lawrence"
+   ]
+  },
+  {
+   "name": "Team6",
+   "players": [
+    "Trey McBride",
+    "De'Von Achane",
+    "Travis Etienne",
+    "George Pickens",
+    "Chris Olave",
+    "Matthew Stafford",
+    "DeVonta Smith"
+   ]
+  }
+ ]
+}

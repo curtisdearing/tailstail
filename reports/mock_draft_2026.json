@@ -1,0 +1,505 @@
+{
+ "league_teams": 12,
+ "drafts_per_slot": 40,
+ "sims_per_draft": 250,
+ "baseline_title_probability": 0.08333333333333333,
+ "note": "Opponents draft best-available by noisy ADP with positional sanity; we draft by progressive-ceiling round score. Lineups scored on season totals (documented approximation, symmetric across teams). IMPORTANT: rosters are scored by OUR OWN season simulator, so title probabilities are in-model \u2014 the RELATIVE slot ordering is the usable signal.",
+ "slots": {
+  "1": {
+   "expected_points": 1615.7,
+   "title_probability": 0.7566,
+   "round_targets": {
+    "1": [
+     [
+      "Jahmyr Gibbs",
+      1.0
+     ]
+    ],
+    "2": [
+     [
+      "Kyren Williams",
+      1.0
+     ]
+    ],
+    "3": [
+     [
+      "Trey McBride",
+      0.9
+     ],
+     [
+      "Josh Allen",
+      0.07
+     ],
+     [
+      "Josh Jacobs",
+      0.03
+     ]
+    ]
+   }
+  },
+  "2": {
+   "expected_points": 1612.8,
+   "title_probability": 0.7586,
+   "round_targets": {
+    "1": [
+     [
+      "Jahmyr Gibbs",
+      0.57
+     ],
+     [
+      "Bijan Robinson",
+      0.42
+     ]
+    ],
+    "2": [
+     [
+      "Kyren Williams",
+      1.0
+     ]
+    ],
+    "3": [
+     [
+      "Trey McBride",
+      0.85
+     ],
+     [
+      "Josh Allen",
+      0.1
+     ],
+     [
+      "Josh Jacobs",
+      0.05
+     ]
+    ]
+   }
+  },
+  "3": {
+   "expected_points": 1600.7,
+   "title_probability": 0.7184,
+   "round_targets": {
+    "1": [
+     [
+      "Jonathan Taylor",
+      0.4
+     ],
+     [
+      "Jahmyr Gibbs",
+      0.35
+     ],
+     [
+      "Bijan Robinson",
+      0.25
+     ]
+    ],
+    "2": [
+     [
+      "Kyren Williams",
+      1.0
+     ]
+    ],
+    "3": [
+     [
+      "Trey McBride",
+      0.88
+     ],
+     [
+      "Josh Allen",
+      0.07
+     ],
+     [
+      "Javonte Williams",
+      0.03
+     ]
+    ]
+   }
+  },
+  "4": {
+   "expected_points": 1590.6,
+   "title_probability": 0.6981,
+   "round_targets": {
+    "1": [
+     [
+      "Jonathan Taylor",
+      0.65
+     ],
+     [
+      "Jahmyr Gibbs",
+      0.17
+     ],
+     [
+      "Bijan Robinson",
+      0.17
+     ]
+    ],
+    "2": [
+     [
+      "Kyren Williams",
+      1.0
+     ]
+    ],
+    "3": [
+     [
+      "Trey McBride",
+      0.82
+     ],
+     [
+      "Josh Allen",
+      0.07
+     ],
+     [
+      "Javonte Williams",
+      0.07
+     ]
+    ]
+   }
+  },
+  "5": {
+   "expected_points": 1583.6,
+   "title_probability": 0.6694,
+   "round_targets": {
+    "1": [
+     [
+      "Jonathan Taylor",
+      0.82
+     ],
+     [
+      "Bijan Robinson",
+      0.07
+     ],
+     [
+      "Jahmyr Gibbs",
+      0.05
+     ]
+    ],
+    "2": [
+     [
+      "Kyren Williams",
+      1.0
+     ]
+    ],
+    "3": [
+     [
+      "Trey McBride",
+      0.8
+     ],
+     [
+      "Josh Allen",
+      0.12
+     ],
+     [
+      "Javonte Williams",
+      0.05
+     ]
+    ]
+   }
+  },
+  "6": {
+   "expected_points": 1576.9,
+   "title_probability": 0.651,
+   "round_targets": {
+    "1": [
+     [
+      "Jonathan Taylor",
+      0.9
+     ],
+     [
+      "De'Von Achane",
+      0.1
+     ]
+    ],
+    "2": [
+     [
+      "Kyren Williams",
+      0.95
+     ],
+     [
+      "James Cook",
+      0.05
+     ]
+    ],
+    "3": [
+     [
+      "Trey McBride",
+      0.68
+     ],
+     [
+      "Josh Allen",
+      0.17
+     ],
+     [
+      "Javonte Williams",
+      0.1
+     ]
+    ]
+   }
+  },
+  "7": {
+   "expected_points": 1575.0,
+   "title_probability": 0.6226,
+   "round_targets": {
+    "1": [
+     [
+      "Jonathan Taylor",
+      0.72
+     ],
+     [
+      "De'Von Achane",
+      0.28
+     ]
+    ],
+    "2": [
+     [
+      "Kyren Williams",
+      1.0
+     ]
+    ],
+    "3": [
+     [
+      "Trey McBride",
+      0.6
+     ],
+     [
+      "Josh Jacobs",
+      0.15
+     ],
+     [
+      "Josh Allen",
+      0.12
+     ]
+    ]
+   }
+  },
+  "8": {
+   "expected_points": 1572.7,
+   "title_probability": 0.6379,
+   "round_targets": {
+    "1": [
+     [
+      "De'Von Achane",
+      0.75
+     ],
+     [
+      "Jonathan Taylor",
+      0.23
+     ],
+     [
+      "Amon-Ra St. Brown",
+      0.03
+     ]
+    ],
+    "2": [
+     [
+      "Kyren Williams",
+      0.97
+     ],
+     [
+      "James Cook",
+      0.03
+     ]
+    ],
+    "3": [
+     [
+      "Trey McBride",
+      0.5
+     ],
+     [
+      "Javonte Williams",
+      0.35
+     ],
+     [
+      "Josh Jacobs",
+      0.05
+     ]
+    ]
+   }
+  },
+  "9": {
+   "expected_points": 1573.7,
+   "title_probability": 0.6377,
+   "round_targets": {
+    "1": [
+     [
+      "De'Von Achane",
+      0.62
+     ],
+     [
+      "Amon-Ra St. Brown",
+      0.25
+     ],
+     [
+      "Jonathan Taylor",
+      0.07
+     ]
+    ],
+    "2": [
+     [
+      "Kyren Williams",
+      0.9
+     ],
+     [
+      "James Cook",
+      0.1
+     ]
+    ],
+    "3": [
+     [
+      "Trey McBride",
+      0.4
+     ],
+     [
+      "Javonte Williams",
+      0.4
+     ],
+     [
+      "Travis Etienne",
+      0.07
+     ]
+    ]
+   }
+  },
+  "10": {
+   "expected_points": 1558.1,
+   "title_probability": 0.5783,
+   "round_targets": {
+    "1": [
+     [
+      "De'Von Achane",
+      0.53
+     ],
+     [
+      "James Cook",
+      0.38
+     ],
+     [
+      "Jonathan Taylor",
+      0.05
+     ]
+    ],
+    "2": [
+     [
+      "Kyren Williams",
+      0.8
+     ],
+     [
+      "James Cook",
+      0.17
+     ],
+     [
+      "De'Von Achane",
+      0.03
+     ]
+    ],
+    "3": [
+     [
+      "Trey McBride",
+      0.38
+     ],
+     [
+      "Javonte Williams",
+      0.28
+     ],
+     [
+      "Kyren Williams",
+      0.17
+     ]
+    ]
+   }
+  },
+  "11": {
+   "expected_points": 1543.3,
+   "title_probability": 0.5297,
+   "round_targets": {
+    "1": [
+     [
+      "James Cook",
+      0.47
+     ],
+     [
+      "De'Von Achane",
+      0.3
+     ],
+     [
+      "Kyren Williams",
+      0.12
+     ]
+    ],
+    "2": [
+     [
+      "Kyren Williams",
+      0.7
+     ],
+     [
+      "James Cook",
+      0.17
+     ],
+     [
+      "Trey McBride",
+      0.12
+     ]
+    ],
+    "3": [
+     [
+      "Javonte Williams",
+      0.4
+     ],
+     [
+      "Trey McBride",
+      0.25
+     ],
+     [
+      "Travis Etienne",
+      0.2
+     ]
+    ]
+   }
+  },
+  "12": {
+   "expected_points": 1540.1,
+   "title_probability": 0.5225,
+   "round_targets": {
+    "1": [
+     [
+      "James Cook",
+      0.57
+     ],
+     [
+      "De'Von Achane",
+      0.2
+     ],
+     [
+      "Kyren Williams",
+      0.2
+     ]
+    ],
+    "2": [
+     [
+      "Kyren Williams",
+      0.68
+     ],
+     [
+      "Trey McBride",
+      0.2
+     ],
+     [
+      "James Cook",
+      0.12
+     ]
+    ],
+    "3": [
+     [
+      "Javonte Williams",
+      0.38
+     ],
+     [
+      "Travis Etienne",
+      0.33
+     ],
+     [
+      "Trey McBride",
+      0.23
+     ]
+    ]
+   }
+  }
+ }
+}
