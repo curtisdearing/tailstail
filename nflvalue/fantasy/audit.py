@@ -9,6 +9,12 @@ import pandas as pd
 
 from .models import evaluate_predictions
 
+# Max tolerated pooled systematic bias (fantasy points).  The gated calibration
+# SLOPE cannot see a constant offset (a +5 under-projection still fits slope 1.0),
+# so a globally biased model could pass on relative MAE alone when the naive
+# baselines are even worse.  This absolute check closes that false-pass.
+MAX_MEAN_BIAS = 1.5
+
 
 def paired_week_bootstrap(
     predictions: pd.DataFrame,
@@ -110,5 +116,11 @@ def red_team_report(predictions: pd.DataFrame) -> dict[str, Any]:
             failures.append(f"improvement over {baseline} is not robustly positive")
     if not 0.80 <= slope <= 1.20:
         failures.append("projection calibration slope is outside [0.80, 1.20]")
+    mean_bias = report["calibration"]["mean_actual"] - report["calibration"]["mean_prediction"]
+    if abs(mean_bias) > MAX_MEAN_BIAS:
+        failures.append(
+            f"projection has a systematic mean bias of {mean_bias:+.2f} "
+            f"(beyond +/-{MAX_MEAN_BIAS} fantasy points)"
+        )
     report["release_gate"] = {"pass": not failures, "failures": failures}
     return report
