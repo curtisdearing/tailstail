@@ -26,6 +26,11 @@ STATE_PROFILES = {
     "fantasy": (
         "data/fantasy_model.joblib",
         "data/player_projection_snapshot.json",
+        # ESPN external-challenger comparison: the prospective ledger and the
+        # immutable pre-kickoff snapshots must survive between weekly runs,
+        # or the season grading series could never accumulate.
+        "data/espn_comparison_ledger.json",
+        "data/espn_snapshots/*.json",
     ),
 }
 
