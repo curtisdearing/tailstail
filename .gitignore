@@ -35,8 +35,11 @@ reports/my_team*.json
 reports/my_team*.md
 reports/team_intel_latest.md
 data/team_intel_latest.json
+# the decision card: the personalised page, and the contract behind it
+private/
 
 # generated locally by a run; rebuildable, and large
+data/fantasy_public.json
 data/shadow/
 data/accuracy_registry_test*.json
 _site/

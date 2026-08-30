@@ -14,7 +14,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue.fantasy import espn_compare
+from nflvalue.fantasy import decision_card, decision_page, espn_compare, private_boundary
 from nflvalue.fantasy import my_team as my_team_mod
 from nflvalue.fantasy.config import ModelConfig, ScoringRules, SimulationConfig
 from nflvalue.fantasy.dashboard import render_fantasy_dashboard
@@ -168,6 +168,7 @@ def run_my_team(
     contract=None,
     waiver_plan=None,
     espn_crosswalk: dict | None = None,
+    samples: dict | None = None,
 ) -> dict:
     """Build the Curtis-specific Monitor contract from the read-only snapshot.
 
@@ -204,7 +205,7 @@ def run_my_team(
     try:
         return my_team_mod.build(
             snapshot, now=generated_at, contract=contract, waiver_plan=waiver_plan,
-            crosswalk=crosswalk, projections=projections)
+            crosswalk=crosswalk, projections=projections, samples=samples)
     # A broken snapshot degrades this one section; it must not stop the publish.
     except Exception as exc:
         print(f"[my-team] contract unavailable this run: {type(exc).__name__}: {exc}")
@@ -217,6 +218,32 @@ def run_my_team(
         }
 
 
+def write_private_card(my_team_payload: dict, *, generated_at: str, model_version: str,
+                       json_path: str, html_path: str) -> dict | None:
+    """Build and write the private decision card, or say why there is none.
+
+    The card is the personalised half of this run and never reaches a public
+    artifact.  A failure here is reported and does not stop the publish: the
+    public site is Tailstail's own projections, and it does not depend on
+    anything about one league.
+    """
+    if my_team_payload.get("schema_version") != decision_card.SOURCE_CONTRACT:
+        print(f"[decision-card] no card this run: the league contract is "
+              f"{my_team_payload.get('schema_version')!r}, not {decision_card.SOURCE_CONTRACT}")
+        return None
+    try:
+        card = decision_card.build(my_team_payload, now=generated_at,
+                                   model_version=model_version)
+        decision_page.write(card, json_path=json_path, html_path=html_path,
+                            my_team=my_team_payload)
+    except Exception as exc:
+        print(f"[decision-card] card unavailable this run: {type(exc).__name__}: {exc}")
+        return None
+    print(f"[decision-card] {card['state']} · {len(card['decisions'])} decision(s) · "
+          f"{json_path}, {html_path}")
+    return card
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", default="historical/fantasy")
@@ -227,8 +254,13 @@ def main(argv=None) -> int:
     parser.add_argument("--scoring", choices=["ppr", "half_ppr", "standard"], default="ppr")
     parser.add_argument("--fast", action="store_true")
     parser.add_argument("--no-fetch", action="store_true")
-    parser.add_argument("--output", default="data/fantasy_latest.json")
+    parser.add_argument("--output", default="data/fantasy_latest.json",
+                        help="full weekly payload; private, gitignored, never published")
+    parser.add_argument("--public-output", default="data/fantasy_public.json",
+                        help="the allow-listed subset that the Pages site is built from")
     parser.add_argument("--dashboard", default="fantasy.html")
+    parser.add_argument("--private-card-json", default="private/my_team_latest.json")
+    parser.add_argument("--private-card-html", default="private/my_team.html")
     parser.add_argument("--league-snapshot-dir", default="data/espn_league")
     parser.add_argument("--model", default="data/fantasy_model.joblib")
     parser.add_argument("--projection-snapshot", default="data/player_projection_snapshot.json")
@@ -315,8 +347,16 @@ def main(argv=None) -> int:
         generated_at=generated,
         rules=rules,
     )
+    # The simulation's own draw matrix: one column per player, one row per
+    # simulated week.  Passing it through is what lets a start/sit delta be read
+    # off paired rows instead of assembled from two players' separate
+    # percentiles, and it is the difference between a decision the card can make
+    # and one it has to refuse.
+    player_samples = {str(column): result.points[column].to_numpy()
+                      for column in result.points.columns}
     my_team_payload = run_my_team(
         result.summaries, generated_at=generated, snapshot_dir=args.league_snapshot_dir,
+        samples=player_samples,
     )
     payload = {
         "espn_comparison": espn_comparison,
@@ -338,12 +378,34 @@ def main(argv=None) -> int:
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+
+    # The published JSON is assembled from an allow-list, then checked against
+    # this run's own league id and team names before it is written. The check is
+    # here rather than only in the tests because the thing it guards against is
+    # a *new* section somebody adds later, which no existing test knows about.
+    league = my_team_payload.get("league") or {}
+    private_names = [str(name) for name in (league.get("league_name"), league.get("team_name"),
+                                            league.get("team_abbrev")) if name]
+    public_payload = private_boundary.public_weekly_payload(payload)
+    private_boundary.assert_public_safe(public_payload, what=str(args.public_output),
+                                        league_id=league.get("league_id"), names=private_names)
+    public_output = Path(args.public_output)
+    public_output.parent.mkdir(parents=True, exist_ok=True)
+    public_output.write_text(json.dumps(public_payload, indent=2, sort_keys=True) + "\n")
+
     artifact.save(args.model)
     artifact.write_model_card("reports/fantasy_model_card.json")
     render_fantasy_dashboard(
         result.summaries, args.dashboard, season=season, week=week, generated_at=generated,
-        espn_comparison=espn_comparison, my_team=my_team_payload,
+        espn_comparison=espn_comparison,
     )
+    private_boundary.assert_public_text_safe(
+        Path(args.dashboard).read_text(), what=str(args.dashboard),
+        league_id=league.get("league_id"), names=private_names)
+
+    write_private_card(my_team_payload, generated_at=generated,
+                       model_version=os.environ.get("GITHUB_SHA", "local"),
+                       json_path=args.private_card_json, html_path=args.private_card_html)
     print(f"projected {len(result.summaries)} players for {season} week {week}")
     return 0
 

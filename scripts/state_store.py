@@ -23,14 +23,21 @@ STATE_PROFILES = {
         "data/weekly_props.json",
         "data/weights.json",
     ),
+    # A release asset on a public repository is published material. This
+    # profile therefore carries only Tailstail's own outputs.
+    #
+    # The ESPN external-challenger ledger and the immutable pre-kickoff ESPN
+    # snapshots used to travel here too, and they must still survive between
+    # weekly runs or the season grading series can never accumulate -- but the
+    # terms recorded on every one of those snapshots
+    # (nflvalue/sources/espn_projections.REDISTRIBUTION_RIGHTS) grant no
+    # redistribution right and say in terms that raw snapshots are "retained
+    # for audit, not republication". They are carried between runs by the
+    # workflow's actions/cache instead, which is scoped to the repository and
+    # published to nobody.
     "fantasy": (
         "data/fantasy_model.joblib",
         "data/player_projection_snapshot.json",
-        # ESPN external-challenger comparison: the prospective ledger and the
-        # immutable pre-kickoff snapshots must survive between weekly runs,
-        # or the season grading series could never accumulate.
-        "data/espn_comparison_ledger.json",
-        "data/espn_snapshots/*.json",
     ),
 }
 

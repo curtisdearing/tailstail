@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import html
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 import pandas as pd
 
@@ -117,264 +117,6 @@ def _espn_series_table(espn_comparison: dict[str, Any]) -> str:
     )
 
 
-# --------------------------------------------------------------------------- #
-# My team — the Monitor surface
-# --------------------------------------------------------------------------- #
-MY_TEAM_SECTION_TITLES = (
-    "My optimal lineup",
-    "Start/sit decisions",
-    "Draft status and picks",
-    "Waiver targets and recommended drops",
-    "Trade opportunities",
-    "K shadow recommendations",
-    "D/ST shadow recommendations",
-    "Data freshness and unresolved identities",
-)
-
-
-def _esc(value: Any) -> str:
-    return html.escape("" if value is None else str(value))
-
-
-def _no_pick(section: Mapping[str, Any]) -> str:
-    """The fail-closed banner. A reason is mandatory; there is no blank state."""
-    reason = _esc(section.get("reason") or "input unavailable")
-    return (
-        "<div class=\"nopick\"><b>NO CURRENT PICK</b>"
-        f"<span>{reason}</span></div>"
-    )
-
-
-def _meta_line(section: Mapping[str, Any]) -> str:
-    bits = []
-    if section.get("rationale"):
-        bits.append(f"Why: {_esc(section['rationale'])}")
-    if section.get("confidence"):
-        bits.append(f"Confidence: {_esc(section['confidence'])}")
-    if section.get("invalidation_trigger"):
-        bits.append(f"Wrong if: {_esc(section['invalidation_trigger'])}")
-    return f"<p class=\"honest\">{' · '.join(bits)}</p>" if bits else ""
-
-
-def _table(headers, rows) -> str:
-    if not rows:
-        return ""
-    head = "".join(f"<th>{_esc(h)}</th>" for h in headers)
-    body = "".join("<tr>" + "".join(f"<td>{cell}</td>" for cell in row) + "</tr>" for row in rows)
-    return (f"<div class=\"card\"><table><thead><tr>{head}</tr></thead>"
-            f"<tbody>{body}</tbody></table></div>")
-
-
-def _lineup_block(section: Mapping[str, Any]) -> str:
-    if section.get("status") != "ok":
-        out = _no_pick(section)
-        if section.get("violations"):
-            items = "".join(f"<li>{_esc(v)}</li>" for v in section["violations"])
-            out += f"<p class=\"honest\">Roster legality violations:</p><ul class=\"why\">{items}</ul>"
-        return out
-    rows = [
-        (f"<b>{_esc(e['slot'])}</b>", _esc(e["position"]), _esc(e["name"]),
-         f"{e['projected_mean']:.1f}", f"{e['projected_p10']:.1f}–{e['projected_p90']:.1f}")
-        for e in section["starters"]
-    ]
-    total = section.get("projected_total")
-    note = (f"<p class=\"honest\">Legal lineup, projected total "
-            f"{total:.1f} points.</p>" if isinstance(total, (int, float)) else "")
-    excluded = section.get("excluded") or []
-    excluded_html = ""
-    if excluded:
-        items = "".join(
-            f"<li>{_esc(e.get('name'))} ({_esc(e.get('position'))}) — {_esc(e.get('reason'))}</li>"
-            for e in excluded)
-        excluded_html = (f"<p class=\"honest\">Excluded from consideration "
-                         f"({len(excluded)}):</p><ul class=\"why\">{items}</ul>")
-    return note + _table(("Slot", "Pos", "Player", "Proj", "P10–P90"), rows) + excluded_html
-
-
-def _start_sit_block(section: Mapping[str, Any]) -> str:
-    if section.get("status") != "ok":
-        return _no_pick(section)
-    rows = []
-    for d in section["decisions"]:
-        sit = d.get("sit") or {}
-        unc = d.get("uncertainty") or {}
-        if unc.get("status") == "ok":
-            spread = f"{unc['p10_delta']:+.1f} … {unc['p90_delta']:+.1f}"
-            # Named for what it is. It is the share of the model's own simulated
-            # weeks in which the start wins, so it carries every error in the
-            # model that drew them and has not been checked against outcomes.
-            odds = f"{unc['model_relative_prob_start_scores_more']:.0%} of sims"
-        else:
-            spread = "—"
-            odds = "unavailable"
-        rows.append((
-            _esc(d["slot"]),
-            f"<b>{_esc(d['start']['name'])}</b><small>{_esc(d['start']['position'])}</small>",
-            f"{_esc(sit.get('name') or '—')}<small>{_esc(sit.get('position') or '')}</small>",
-            f"{d['projected_delta']:+.1f}",
-            _esc(spread),
-            _esc(odds),
-        ))
-    return _table(
-        ("Slot", "Start", "Sit", "Δ proj", "Δ P10…P90 (paired sims)",
-         "Start scores more (model-relative, not calibrated)"), rows)
-
-
-def _draft_block(section: Mapping[str, Any]) -> str:
-    state = _esc(section.get("state"))
-    note = _esc(section.get("note") or "")
-    head = (f"<p class=\"honest\">Draft state: <b>{state}</b>"
-            + (f" · scheduled {_esc(section.get('scheduled_at_utc'))}"
-               if section.get("scheduled_at_utc") else "")
-            + (f" · slot {_esc(section.get('my_draft_slot'))} of "
-               f"{_esc(section.get('rounds'))} rounds" if section.get("my_draft_slot") else "")
-            + f". {note}</p>")
-    picks = section.get("selections") or []
-    if picks:
-        rows = [(_esc(p.get("round")), _esc(p.get("overall_pick")), _esc(p.get("team_id")),
-                 f"<b>{_esc(p.get('player_name'))}</b><small>{_esc(p.get('position'))}</small>",
-                 _esc(p.get("espn_player_id")), _esc(p.get("selected_at") or "—"))
-                for p in picks]
-        body = ("<h3>Actual selections</h3>"
-                + _table(("Rd", "Overall", "Team", "Player", "ESPN id", "Selected"), rows))
-    else:
-        body = ("<p class=\"honest\">No actual selections yet — every pick slot is still "
-                "empty. Nothing below is a pick.</p>")
-    targets = section.get("targets") or {}
-    if targets.get("status") == "ok" and targets.get("entries"):
-        rows = [(_esc(t.get("board_rank")), _esc(t.get("position")),
-                 f"<b>{_esc(t.get('name'))}</b>", _esc(t.get("tier")),
-                 "<span class=\"tag\">TARGET — not a pick</span>")
-                for t in targets["entries"]]
-        body += ("<h3>Pre-draft targets</h3>"
-                 + _table(("Board", "Pos", "Player", "Tier", "Label"), rows))
-    elif targets:
-        body += "<h3>Pre-draft targets</h3>" + _no_pick(targets)
-    return head + body
-
-
-def _waiver_block(section: Mapping[str, Any]) -> str:
-    if section.get("status") != "ok":
-        return _no_pick(section)
-    rows = []
-    for t in section.get("targets", []):
-        add = t.get("add") or {}
-        drop = t.get("drop") or {}
-        delta = (t.get("lineup_delta") or {}).get("own_optimal_lineup_delta")
-        shadow = ('<span class="tag">SHADOW</span> ' if t.get("status") == "shadow" else "")
-        rows.append((
-            f"{shadow}<b>{_esc(add.get('name'))}</b><small>{_esc(add.get('position'))}</small>",
-            f"{_esc(drop.get('name') or '—')}<small>{_esc(t.get('drop_state'))}</small>",
-            (f"{delta:+.1f}" if isinstance(delta, (int, float))
-             else _esc(t.get("lineup_delta_status") or "unavailable")),
-            _esc(t.get("confidence")),
-            _esc(t.get("rationale")),
-        ))
-    return (_table(("Add", "Legal drop", "Lineup Δ", "Confidence", "Why"), rows)
-            + "<p class=\"honest\">Every row is recommendation-only — no claim is "
-              "submitted to ESPN from this page or the pipeline behind it.</p>")
-
-
-def _trade_block(section: Mapping[str, Any]) -> str:
-    if section.get("status") != "ok":
-        return _no_pick(section)
-    rows = [(_esc(o.get("counterparty_team_id")), _esc(o.get("send")), _esc(o.get("receive")),
-             _esc(o.get("rationale"))) for o in section.get("opportunities", [])]
-    return _table(("Team", "Send", "Receive", "Why"), rows)
-
-
-def _shadow_block(section: Mapping[str, Any]) -> str:
-    label = (f"<p class=\"honest\"><span class=\"tag\">SHADOW</span> "
-             f"{_esc(section.get('label'))}</p>")
-    if section.get("status") != "ok":
-        return label + _no_pick(section)
-    rows = [(_esc(e["slot"]), f"<b>{_esc(e['name'])}</b>", f"{e['projected_mean']:.1f}",
-             f"{e['projected_p10']:.1f}–{e['projected_p90']:.1f}")
-            for e in section.get("starters", [])]
-    return label + _table(("Slot", "Player", "Proj", "P10–P90"), rows)
-
-
-def _freshness_block(my_team: Mapping[str, Any]) -> str:
-    fresh = my_team.get("freshness") or {}
-    state = str(fresh.get("state", "unknown"))
-    sources = my_team.get("sources") or []
-    rows = [(_esc(s.get("name")), _esc(s.get("access")), _esc(s.get("retrieved_at")),
-             f"<code>{_esc((s.get('raw_sha256') or '')[:12])}</code>") for s in sources]
-    unresolved = my_team.get("unresolved_identities") or {}
-    entries = unresolved.get("entries") or []
-    if entries:
-        items = "".join(
-            f"<li>ESPN id {_esc(e.get('espn_player_id'))} — {_esc(e.get('name'))} "
-            f"({_esc(e.get('position'))}): {_esc(e.get('reason'))}</li>" for e in entries)
-        unresolved_html = (f"<p class=\"honest\">Unresolved identities "
-                           f"({unresolved.get('count', 0)}) — reported, never scored as zero:"
-                           f"</p><ul class=\"why\">{items}</ul>")
-    else:
-        unresolved_html = ("<p class=\"honest\">Unresolved identities: none — every rostered "
-                           "player mapped to a model identity.</p>")
-    return (
-        f"<p class=\"honest\">Snapshot freshness: <b class=\"f-{_esc(state)}\">{_esc(state)}</b>"
-        f" · captured {_esc(fresh.get('captured_at'))} · age "
-        f"{_esc(fresh.get('age_hours'))}h · evaluated {_esc(fresh.get('evaluated_at'))}. "
-        f"Scoring identity: {_hash_label(my_team)}.</p>"
-        + _table(("Source", "Access", "Retrieved", "SHA-256"), rows)
-        + unresolved_html
-    )
-
-
-def _hash_label(my_team: Mapping[str, Any]) -> str:
-    """Null hashes are stated as unestablished, never rendered as blanks."""
-    scoring = my_team.get("scoring_hash")
-    roster = my_team.get("roster_slot_hash")
-    if not scoring and not roster:
-        return ("<b class=\"f-stale\">not established</b> — "
-                + _esc(my_team.get("hash_reason") or "no league contract supplied"))
-    return (f"scoring <code>{_esc(str(scoring)[:12])}</code>, "
-            f"roster-slot <code>{_esc(str(roster)[:12])}</code> "
-            f"(source: {_esc(my_team.get('hash_source') or 'unknown')})")
-
-
-def _my_team_section(my_team: dict[str, Any] | None) -> str:
-    """Eight labelled sections. Absent input renders nothing at all."""
-    if not my_team:
-        return ""
-    league = my_team.get("league") or {}
-    header = (
-        "<h2>My team — Monitor</h2>"
-        f"<p class=\"honest\">{_esc(league.get('team_name'))} · "
-        f"{_esc(league.get('platform'))} league {_esc(league.get('league_id'))} · "
-        f"{_esc(league.get('season'))} scoring period {_esc(league.get('scoring_period'))} · "
-        f"team {_esc(league.get('team_id'))} of {_esc(league.get('size'))} · "
-        f"contract {_esc(my_team.get('schema_version'))} · "
-        f"overall confidence {_esc(my_team.get('confidence'))}. "
-        "Fantasy only — separate from Fablesfable betting selections. "
-        f"{_esc(my_team.get('espn_use'))}.</p>"
-    )
-    blocks = (
-        (MY_TEAM_SECTION_TITLES[0], _lineup_block(my_team.get("optimal_lineup") or {}),
-         my_team.get("optimal_lineup") or {}),
-        (MY_TEAM_SECTION_TITLES[1], _start_sit_block(my_team.get("start_sit") or {}),
-         my_team.get("start_sit") or {}),
-        (MY_TEAM_SECTION_TITLES[2], _draft_block(my_team.get("draft") or {}),
-         my_team.get("draft") or {}),
-        (MY_TEAM_SECTION_TITLES[3], _waiver_block(my_team.get("waivers") or {}),
-         my_team.get("waivers") or {}),
-        (MY_TEAM_SECTION_TITLES[4], _trade_block(my_team.get("trades") or {}),
-         my_team.get("trades") or {}),
-        (MY_TEAM_SECTION_TITLES[5], _shadow_block(my_team.get("kicker_shadow") or {}),
-         my_team.get("kicker_shadow") or {}),
-        (MY_TEAM_SECTION_TITLES[6], _shadow_block(my_team.get("dst_shadow") or {}),
-         my_team.get("dst_shadow") or {}),
-        (MY_TEAM_SECTION_TITLES[7], _freshness_block(my_team), {}),
-    )
-    parts = [header]
-    for index, (title, body, section) in enumerate(blocks, start=1):
-        parts.append(f"<h3 id=\"my-team-{index}\">{index}. {_esc(title)}</h3>")
-        parts.append(body)
-        parts.append(_meta_line(section))
-    return "".join(parts)
-
-
 def render_fantasy_dashboard(
     summaries: pd.DataFrame,
     path: str | Path,
@@ -383,8 +125,15 @@ def render_fantasy_dashboard(
     week: int,
     generated_at: str,
     espn_comparison: dict[str, Any] | None = None,
-    my_team: dict[str, Any] | None = None,
 ) -> None:
+    """The public weekly page: Tailstail's own projections and the ESPN grading.
+
+    It carries no personalised content.  The eight-section ``my_team`` contract
+    that used to render below the table moved to
+    :mod:`nflvalue.fantasy.decision_page`, which writes to a gitignored path,
+    because this file is copied verbatim to a public site every week and a
+    private league's rosters, team names and league id went with it.
+    """
     rows = []
     for row in summaries.sort_values(["position", "mean"], ascending=[True, False]).to_dict("records"):
         rows.append(
@@ -421,7 +170,6 @@ th:nth-child(-n+2),td:nth-child(-n+2){{text-align:left}}small{{display:block;col
 <p>Correlated football-event Monte Carlo centered on a season-forward Bayesian/boosting/forest ensemble. Generated {html.escape(generated_at)}. Ranges are outcomes, not guarantees.</p>
 <div class="card"><table><thead><tr><th>Pos</th><th>Player</th><th>Mean</th><th>Median</th><th>Raw events</th><th>P10</th><th>P90</th><th>15+</th><th>20+</th><th>Active</th><th>Check</th></tr></thead>
 <tbody>{''.join(rows)}</tbody></table></div>
-{_my_team_section(my_team)}
 {_espn_section(espn_comparison)}
 </main></body></html>"""
     path = Path(path)

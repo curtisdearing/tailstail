@@ -57,6 +57,17 @@ and its own GitHub Pages site. It requires no Odds API or betting Discord
 secret. Legacy prop modules remain in the tree temporarily while the shared
 core contract is extracted; no Tailstail production workflow invokes them.
 
+### Public and private output
+
+A weekly run writes two artifacts. `fantasy.html` and `data/fantasy_public.json`
+are public: Tailstail's own projections and the aggregate model grading, built
+from an allow-list and checked before they are written. The league this project
+is pointed at is private, so its snapshot, rosters, team names and league id —
+and the personalised `decision-card/1` page built from them — are written to the
+gitignored `private/` directory and are never published, never uploaded as a
+workflow artifact, and never packed into a release asset. See
+[docs/DECISION_CARD.md](docs/DECISION_CARD.md).
+
 ## Validation
 
 The fantasy engine uses position-specific Bayesian ridge, gradient boosting,

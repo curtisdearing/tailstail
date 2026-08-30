@@ -96,7 +96,32 @@ jobs:
           key: fantasy-history-${{ runner.os }}-${{ github.run_id }}
           restore-keys: fantasy-history-${{ runner.os }}-
 
-      - name: Restore prior fantasy state (ESPN comparison ledger + snapshots)
+      # The ESPN comparison ledger and its pre-kickoff snapshots are carried
+      # between runs here rather than in the release asset: they are ESPN's
+      # per-player projections, fetched under terms that grant no
+      # redistribution right, and a release asset on a public repository is
+      # published material. A cache is repository-scoped and published to
+      # nobody. A cache miss costs the season grading series its history, which
+      # the run reports; it never costs the projections themselves.
+      - name: Restore the ESPN comparison ledger (never a public asset)
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            data/espn_comparison_ledger.json
+            data/espn_snapshots
+          key: espn-comparison-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: espn-comparison-${{ runner.os }}-
+
+      - name: Report whether the ESPN grading history survived
+        shell: bash
+        run: |
+          if [[ -f data/espn_comparison_ledger.json ]]; then
+            echo "ESPN comparison ledger restored"
+          else
+            echo "::warning::no ESPN comparison ledger in cache; the season grading series starts fresh this run"
+          fi
+
+      - name: Restore prior fantasy state (model + projection snapshot)
         shell: bash
         run: |
           if gh release view "$STATE_TAG" --json body --jq .body > "$RUNNER_TEMP/fantasy-pointer.json" 2>/dev/null; then
@@ -136,9 +161,22 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+          import sys
+          sys.path.insert(0, ".")
+          from nflvalue.fantasy import private_boundary
           fantasy = json.loads(Path("data/fantasy_latest.json").read_text())
+          public = json.loads(Path("data/fantasy_public.json").read_text())
           snapshot = json.loads(Path("data/player_projection_snapshot.json").read_text())
           assert fantasy["players"], "weekly fantasy output contains no players"
+          # Everything below this line is published. The private half of the run
+          # -- the league snapshot, its rosters and the personalised decision
+          # card -- must not be in any of it.
+          assert public["players"], "public payload contains no players"
+          assert "my_team" not in public
+          private_boundary.assert_public_safe(public, what="data/fantasy_public.json")
+          private_boundary.assert_public_text_safe(
+              Path("fantasy.html").read_text(), what="fantasy.html")
+          assert not Path("_site").exists() or not list(Path("_site").glob("my_team*"))
           assert fantasy["simulation"]["simulations"] >= 1000
           assert snapshot["schema_version"] == 1
           assert snapshot["players"], "shared projection snapshot contains no players"
@@ -184,6 +222,15 @@ jobs:
           path: historical/fantasy
           key: fantasy-history-${{ runner.os }}-${{ github.run_id }}
 
+      - name: Save the ESPN comparison ledger
+        if: steps.mode.outputs.production == 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            data/espn_comparison_ledger.json
+            data/espn_snapshots
+          key: espn-comparison-${{ runner.os }}-${{ github.run_id }}
+
       # The artifact carries model state and ESPN snapshots, so it is named by
       # run mode: a diagnostic archive must never be mistaken for the season's
       # real ledger when someone downloads one months later.
@@ -192,12 +239,10 @@ jobs:
           name: tailstail-fantasy-${{ steps.mode.outputs.production == 'true' && 'production' || 'diagnostic' }}-${{ github.run_id }}
           retention-days: 30
           path: |
-            data/fantasy_latest.json
+            data/fantasy_public.json
             data/fantasy_model.joblib
             data/player_projection_snapshot.json
             data/player_projection_samples.parquet
-            data/espn_comparison_ledger.json
-            data/espn_snapshots/
             reports/fantasy_model_card.json
             fantasy.html
 
@@ -206,7 +251,10 @@ jobs:
         run: |
           mkdir -p _site
           cp fantasy.html _site/index.html
-          cp data/fantasy_latest.json _site/fantasy_latest.json
+          # The allow-listed subset, not the full payload: data/fantasy_latest.json
+          # carries the personalised my_team contract and this directory is served
+          # to the public internet.
+          cp data/fantasy_public.json _site/fantasy_latest.json
           cp data/player_projection_snapshot.json _site/player_projection_snapshot.json
       - uses: actions/configure-pages@v5
         if: steps.mode.outputs.production == 'true'

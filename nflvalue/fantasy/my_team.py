@@ -71,6 +71,9 @@ INELIGIBLE_INJURY = frozenset({"OUT", "IR", "INJURY_RESERVE", "SUSPENSION", "NA"
 
 FRESH_HOURS = 6.0
 STALE_HOURS = 24.0
+#: Clock skew between the capture host and this one that is not evidence of a
+#: bad timestamp. Matches the adapter's own 120s tolerance.
+FUTURE_TOLERANCE_HOURS = 120.0 / 3600.0
 
 _NO_WAIVER_PLAN = (
     "no waiver plan was supplied for this snapshot — nflvalue.fantasy.waivers.plan() "
@@ -205,7 +208,14 @@ def freshness(snapshot: Mapping[str, Any], *, now: str) -> dict:
                 "evaluated_at": now,
                 "reason": "the snapshot carries no readable retrieved_at"}
     age = (current - captured).total_seconds() / 3600.0
-    if age < FRESH_HOURS:
+    # A capture dated ahead of the clock is not the freshest possible reading,
+    # it is a clock disagreement or a hand-edited file -- and the naive test
+    # `age < FRESH_HOURS` calls it "fresh", which is the one answer that makes
+    # it invisible. The adapter refuses a future `retrieved_at` at capture
+    # time; this catches the same shape arriving by any other route.
+    if age < -FUTURE_TOLERANCE_HOURS:
+        state = "future"
+    elif age < FRESH_HOURS:
         state = "fresh"
     elif age < STALE_HOURS:
         state = "aging"
@@ -218,7 +228,9 @@ def freshness(snapshot: Mapping[str, Any], *, now: str) -> dict:
         "evaluated_at": now,
         "fresh_under_hours": FRESH_HOURS,
         "stale_at_or_over_hours": STALE_HOURS,
-        "reason": (f"snapshot is {round(age, 1)}h old" if state != "fresh" else None),
+        "reason": ((f"snapshot is dated {round(-age, 1)}h ahead of the clock"
+                    if state == "future" else f"snapshot is {round(age, 1)}h old")
+                   if state != "fresh" else None),
     }
 
 
@@ -324,6 +336,7 @@ def _players_from_snapshot(snapshot: Mapping[str, Any], team_id: int, *,
             "espn_player_id": espn_id,
             "name": entry.get("full_name"),
             "position": entry.get("default_position"),
+            "pro_team_id": entry.get("pro_team_id"),
             "injury_status": entry.get("injury_status"),
             "lineup_slot": entry.get("lineup_slot"),
             "bye_week": byes.get(model_id),
@@ -474,6 +487,7 @@ def _starter(player: Mapping[str, Any], slot_name: str) -> dict:
         "espn_player_id": player.get("espn_player_id"),
         "name": player.get("name"),
         "position": player.get("position"),
+        "pro_team_id": player.get("pro_team_id"),
         "projected_mean": float(projection.get("mean", 0.0)),
         "projected_p10": float(projection.get("p10", 0.0)),
         "projected_p90": float(projection.get("p90", 0.0)),
@@ -570,10 +584,12 @@ def _start_sit(lineup: Mapping[str, Any], resolved: Sequence[Mapping[str, Any]])
             "slot": slot,
             "start": {"name": entry["name"], "player_id": entry["player_id"],
                       "espn_player_id": entry["espn_player_id"],
-                      "position": entry["position"], "projected_mean": entry["projected_mean"]},
+                      "position": entry["position"], "pro_team_id": entry.get("pro_team_id"),
+                      "projected_mean": entry["projected_mean"]},
             "sit": ({"name": out.get("name"), "player_id": out.get("player_id"),
                      "espn_player_id": out.get("espn_player_id"),
-                     "position": out.get("position"), "projected_mean": out_mean}
+                     "position": out.get("position"), "pro_team_id": out.get("pro_team_id"),
+                     "projected_mean": out_mean}
                     if out is not None else None),
             "projected_delta": round(delta, 2),
             "uncertainty": summary,
@@ -903,6 +919,7 @@ def build(snapshot: Mapping[str, Any], *, now: str, contract: Any | None = None,
             "access": "read_only",
             "retrieved_at": snapshot.get("retrieved_at"),
             "league_hash": (snapshot.get("hashes") or {}).get("league"),
+            "roster_hash": (snapshot.get("hashes") or {}).get("roster"),
         }],
         "roster": resolved,
         "draft": draft,
