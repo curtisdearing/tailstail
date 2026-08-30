@@ -62,8 +62,13 @@ requires a new dated freeze note that supersedes it, never an edit.
   kickoff.
 - Scorecard (unchanged from `docs/ACCURACY_PROTOCOL.md`): MAE/RMSE by
   position, Spearman, interval coverage + width, distribution scores where
-  samples are retained. Baseline to beat: **MAE 5.09 / RMSE 6.72 / Spearman
-  0.625 / 80%-interval coverage 82.24%** on the 11,481 player-week replay.
+  samples are retained. Baseline to beat, as reproduced from source on
+  2026-08-30: **MAE 5.0941 / RMSE 6.7215 / Spearman 0.6240 / 80%-interval
+  coverage 82.41%** on an 11,482 player-week replay (mean CRPS 3.693). The
+  figure this replaces — MAE 5.09 / RMSE 6.72 / Spearman 0.625 / coverage
+  82.24% on 11,481 rows — was produced from an earlier nflverse pull in an
+  environment that recorded only numpy and pandas versions; the delta is
+  ~0.003 MAE and both runs are kept in `data/accuracy_registry.json`.
 - Synthetic lines (`floor(prior trailing mean)+0.5`, TD=0.5) support trend and
   regression tests ONLY — never profit, ROI, edge, or CLV claims. Forward CLV
   (internal ledger; recorded boundary deviation) claims nothing until

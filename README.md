@@ -65,11 +65,23 @@ stacking. The event simulator samples shared pace, team volume, player
 target/carry shares, efficiency, availability, and touchdowns before applying
 league scoring.
 
-Current untouched 2023–2025 full-PPR evaluation: 11,481 player-weeks, 5.091
-MAE, 6.718 RMSE, 0.625 Spearman rank correlation, and 82.0% coverage for nominal
-80% intervals. Role shocks and touchdowns remain the largest errors. These
-numbers describe the public-data decision pool; they are not a claim of
-universal accuracy.
+Current 2023–2025 full-PPR evaluation, rebuilt from source on 2026-08-30 and
+reproduced end to end: **11,482 player-weeks, 5.0941 MAE, 6.7215 RMSE, 0.6240
+Spearman, 82.34% coverage for nominal 80% intervals** (82.41% after the
+calibrated Monte Carlo replay, mean CRPS 3.693). Role shocks and touchdowns
+remain the largest errors. These numbers describe the public-data decision
+pool; they are not a claim of universal accuracy.
+
+The previously published figures — 11,481 rows, 5.0914 MAE, 6.7184 RMSE,
+0.6246 Spearman, 82.24% replay coverage — came from an earlier nflverse pull
+under numpy 2.0.2 / pandas 2.3.3. The fresh pull carries one additional
+eligible player-week and vendor restatements of snap, injury and
+expected-opportunity rows, so the two runs differ by ~0.003 MAE. Both are
+recorded in `data/accuracy_registry.json`; neither is reconciled away.
+
+`data/accuracy_registry.json` is the single scoreboard, written only by
+`analysis/eval_harness.py`, and every number in it carries the hash of the
+input that produced it.
 
 Read:
 

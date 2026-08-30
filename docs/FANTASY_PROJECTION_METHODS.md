@@ -149,3 +149,124 @@ not presented as the final result.
 No factor is promoted because it sounds football-smart. It is promoted only
 when it is pregame reproducible, survives a future-season test, and improves a
 declared metric without breaking calibration or a position-level release gate.
+
+## 2026-08-30 accuracy audit and shadow challenge
+
+The corpus was rebuilt from source rather than reused. `python -m
+nflvalue.fantasy.history_audit --seasons 2019:2025` refuses to build unless all
+six nflverse feeds — player stats, weekly rosters, schedules, snap counts,
+injuries and expected opportunity — are present for **every** required season.
+The three the weekly pipeline treats as optional are required here, because
+each one supplies a named champion feature: snaps feed
+`pre_offense_pct_ewm4`, injuries feed `injury_out`/`practice_dnp`, and
+expected opportunity feeds `pre_expected_points_ewm4`, one of the two
+published baselines. A frame built without them is a different frame, and
+scoring it would report a missing cache as a model result.
+
+Rebuilt corpus: 96,999 player-weeks across 2019–2025, 26,727 model-eligible,
+122 features, content hash `449d769b…`. Every feed digest, row count per
+season, package version and interpreter is in
+`reports/history_rebuild_manifest.json`.
+
+### Champion reproduction
+
+| Metric | Reproduced 2026-08-30 | Previously published | Delta |
+|---|---:|---:|---:|
+| Eligible player-weeks | 11,482 | 11,481 | +1 |
+| MAE | 5.0941 | 5.0914 | +0.0027 |
+| RMSE | 6.7215 | 6.7184 | +0.0031 |
+| Spearman | 0.6240 | 0.6246 | −0.0006 |
+| Conformal 80% coverage | 82.34% | 82.05% | +0.29pp |
+| Calibrated MC 80% coverage | 82.41% | 82.24% | +0.17pp |
+
+The previous run was made under numpy 2.0.2 / pandas 2.3.3 with no interpreter,
+scikit-learn or scipy version recorded, so it cannot be reproduced bit for bit
+from its own manifest — that gap is the finding, not the 0.003 MAE. The fresh
+nflverse pull carries one additional eligible player-week and vendor
+restatements of snap, injury and expected-opportunity rows. Both runs are kept
+in `data/accuracy_registry.json`; neither is reconciled away.
+
+The raw event centre stays rejected for point accuracy: +0.3605 MAE against the
+direct ensemble, 95% CI [+0.297, +0.425], 0/20,000 bootstrap draws favouring
+it. It remains distribution-only.
+
+### Shadow challengers
+
+Two challengers were preregistered in `analysis/shadow_challenge_2026.json`
+(sha256 `02458795…`) **before** either was scored, and each is the identical
+pipeline with `model_families` restricted to one learner — no new family, no
+new feature. Development ran on outer seasons 2021–2024; the 2025 locked
+checkpoint was inspected only after the development decision was on disk.
+
+| Window | Arm | n | MAE | RMSE | Spearman | MAE vs champion | P(better) |
+|---|---|---:|---:|---:|---:|---:|---:|
+| 2021–2024 | champion ensemble | 15,373 | 5.1362 | 6.7601 | 0.6198 | — | — |
+| 2021–2024 | Bayesian ridge only | 15,373 | 5.2101 | 6.8551 | 0.6138 | −0.0738 | 0.000 |
+| 2021–2024 | HistGB only | 15,373 | 5.1791 | 6.8001 | 0.6096 | −0.0429 | 0.000 |
+| 2025 | champion ensemble | 3,817 | 5.1870 | 6.7904 | 0.6128 | — | — |
+| 2025 | Bayesian ridge only | 3,817 | 5.2367 | 6.7922 | 0.6138 | −0.0497 | 0.005 |
+| 2025 | HistGB only | 3,817 | 5.2541 | 6.8544 | 0.6029 | −0.0671 | 0.000 |
+
+**Both challengers are rejected in both windows.** The four-family stack earns
+its complexity. The 2025 checkpoint confirmed the development decision; it did
+not create one, and nothing was retuned after it was opened.
+
+Decision-level regret, on identical randomly drawn 12-team rosters (864
+development teams, 216 checkpoint teams, 1QB/2RB/2WR/1TE/1FLEX): the
+Bayesian-ridge arm left *slightly less* on the bench than the champion in both
+windows (−0.034 and −0.272 points per team-week). That difference is not
+distinguishable from zero — P(improvement) 0.55 and 0.73 against a 0.90
+threshold — so it is recorded as an observation, not a signal. It is the honest
+version of task 6 of the audit: point accuracy and start/sit accuracy are
+different objectives, and the gap between them here is noise.
+
+### The backtest does not reproduce bit for bit, and why that is fine
+
+Running the audited backtest twice — same seed, same frame hash, same machine,
+same environment — produces predictions whose canonical content hash differs.
+The instability was isolated to one learner and one line:
+
+| Learner | Fitted object | Predictions |
+|---|---|---|
+| Bayesian ridge | stable | stable |
+| HistGradientBoosting | stable | stable |
+| MLP | stable | stable |
+| Random forest, `n_jobs=-1` | **stable** | **unstable** |
+| Random forest, `n_jobs=1` | stable | stable |
+
+The same fitted forest, predicted five times with `n_jobs=-1`, gives five
+different bit patterns; with `n_jobs=1` it gives one. `RandomForestRegressor`
+accumulates each tree's contribution into a shared array in thread-completion
+order, and floating-point addition is not associative. `random_state` is doing
+its job — the trees are identical — so the model is mathematically unchanged.
+
+Magnitude: MAE moved 3.6e-9 between two full 11,482-row runs, RMSE 9.3e-9,
+Spearman 3.4e-8; interval coverage was bit-identical, and both trailing
+baselines were bit-identical.
+
+The consequence that matters: **a canonical content hash of the outer
+predictions is not a valid "did the model change?" gate for this pipeline.**
+Metrics are reproducible to eight significant figures; hashes are not
+reproducible at all. `tests/test_backtest_determinism.py` pins the stable
+directions so this cannot silently drift into something worse. The one-word fix
+is in `nflvalue/fantasy/models.py`, the frozen production forecast centre,
+which this audit is not permitted to modify.
+
+### A correction to the gate itself
+
+The preregistered condition `nominal80_absolute_coverage_error_pp_max: 2.0` is
+stricter than the registry's own release threshold, which sets a coverage
+*floor* of 0.80 rather than a two-sided band. The champion itself over-covers
+at 82.3–82.6% and would fail that condition. It was left unchanged because the
+protocol forbids revisiting a threshold after seeing results, and no decision
+turned on it: both challengers failed the primary MAE conditions outright.
+A future preregistration should state the coverage condition as a floor plus a
+width penalty, not a symmetric band.
+
+### What was not gradeable
+
+2026 prospective grading — the final judge — has zero rows. The 2026 schedule
+is published (272 games, weeks 1–18) with no recorded scores; nflverse reports
+the current season as 2025, publishes no 2026 weekly rosters, and returns HTTP
+404 for 2026 weekly player stats. First kickoff is 2026-09-10. This is recorded
+as pending, not as a passing result.

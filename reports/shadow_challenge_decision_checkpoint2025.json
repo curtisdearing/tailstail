@@ -1,0 +1,186 @@
+{
+  "champion": "champion_ensemble",
+  "frame_content_sha256": "449d769b3f61cf31db758e41f4e8abca476ab96e9768dc75ff79cae26b5948de",
+  "git_commit": "2a9be554135a4ba4edcfc16dcd5b81bc8b5fb0bf",
+  "kind": "promotion-gate-decision",
+  "outcome": "keep the current ensemble",
+  "outer_seasons": [
+    2025
+  ],
+  "preregistration_path": "analysis/shadow_challenge_2026.json",
+  "preregistration_sha256": "02458795418ecc60c65fa0b405f3932acc4bd6879ef481ae3d1f070c208150ef",
+  "results_path": "shadow_checkpoint2025.json",
+  "results_sha256": "8b7c080a72f225e8c2564ddf4a3f680522791a4ca54b08676e50a0db43997cae",
+  "verdicts": {
+    "bayesian_ridge_only": {
+      "checks": {
+        "mae_improvement_over_champion_min": {
+          "observed": -0.04970304813652911,
+          "pass": false,
+          "required_at_least": 0.05
+        },
+        "mean_weekly_lineup_regret_must_not_regress": {
+          "challenger": 15.115370370370371,
+          "champion": 15.387777777777778,
+          "pass": true
+        },
+        "nominal80_absolute_coverage_error_pp_max": {
+          "allowed_at_most": 2.0,
+          "observed": 1.1108200157191495,
+          "pass": true
+        },
+        "nominal80_undercoverage_pp_max": {
+          "allowed_at_most": 1.0,
+          "observed": 0.0,
+          "pass": true
+        },
+        "per_position_mae_regression_max": {
+          "allowed_at_most": 0.1,
+          "by_position": {
+            "QB": {
+              "challenger_mae": 5.870450472053449,
+              "champion_mae": 5.7250211452164965,
+              "n": 593,
+              "regression": 0.1454293268369522
+            },
+            "RB": {
+              "challenger_mae": 5.46744217327461,
+              "champion_mae": 5.4518060958917545,
+              "n": 996,
+              "regression": 0.01563607738285544
+            },
+            "TE": {
+              "challenger_mae": 4.374580918090823,
+              "champion_mae": 4.417343976207525,
+              "n": 665,
+              "regression": -0.042763058116702446
+            },
+            "WR": {
+              "challenger_mae": 5.216003447618912,
+              "champion_mae": 5.141569126123646,
+              "n": 1563,
+              "regression": 0.07443432149526608
+            }
+          },
+          "observed_worst": 0.1454293268369522,
+          "pass": false
+        },
+        "probability_of_improvement_min": {
+          "observed": 0.00535,
+          "pass": false,
+          "required_at_least": 0.9
+        },
+        "rmse_must_not_regress": {
+          "challenger": 6.792222062246776,
+          "champion": 6.790412116247574,
+          "pass": false
+        },
+        "spearman_regression_max": {
+          "allowed_at_most": 0.01,
+          "observed_regression": -0.0009714256709631997,
+          "pass": true
+        },
+        "top10_weekly_overlap_min": {
+          "observed": 0.7555555555555556,
+          "pass": true,
+          "required_at_least": 0.5
+        }
+      },
+      "decision": "REJECT",
+      "failed_conditions": [
+        "mae_improvement_over_champion_min",
+        "probability_of_improvement_min",
+        "rmse_must_not_regress",
+        "per_position_mae_regression_max"
+      ],
+      "noninferior_record": false,
+      "promoted": false
+    },
+    "hist_gradient_boosting_only": {
+      "checks": {
+        "mae_improvement_over_champion_min": {
+          "observed": -0.06710201512386141,
+          "pass": false,
+          "required_at_least": 0.05
+        },
+        "mean_weekly_lineup_regret_must_not_regress": {
+          "challenger": 15.431203703703703,
+          "champion": 15.387777777777778,
+          "pass": false
+        },
+        "nominal80_absolute_coverage_error_pp_max": {
+          "allowed_at_most": 2.0,
+          "observed": 0.01571915116583833,
+          "pass": true
+        },
+        "nominal80_undercoverage_pp_max": {
+          "allowed_at_most": 1.0,
+          "observed": 0.01571915116583833,
+          "pass": true
+        },
+        "per_position_mae_regression_max": {
+          "allowed_at_most": 0.1,
+          "by_position": {
+            "QB": {
+              "challenger_mae": 5.8686952157466035,
+              "champion_mae": 5.7250211452164965,
+              "n": 593,
+              "regression": 0.14367407053010695
+            },
+            "RB": {
+              "challenger_mae": 5.536272968706613,
+              "champion_mae": 5.4518060958917545,
+              "n": 996,
+              "regression": 0.08446687281485854
+            },
+            "TE": {
+              "challenger_mae": 4.4762646596063815,
+              "champion_mae": 4.417343976207525,
+              "n": 665,
+              "regression": 0.058920683398856255
+            },
+            "WR": {
+              "challenger_mae": 5.17203515818992,
+              "champion_mae": 5.141569126123646,
+              "n": 1563,
+              "regression": 0.03046603206627374
+            }
+          },
+          "observed_worst": 0.14367407053010695,
+          "pass": false
+        },
+        "probability_of_improvement_min": {
+          "observed": 0.0,
+          "pass": false,
+          "required_at_least": 0.9
+        },
+        "rmse_must_not_regress": {
+          "challenger": 6.8543967823741205,
+          "champion": 6.790412116247574,
+          "pass": false
+        },
+        "spearman_regression_max": {
+          "allowed_at_most": 0.01,
+          "observed_regression": 0.009943648041620845,
+          "pass": true
+        },
+        "top10_weekly_overlap_min": {
+          "observed": 0.7944444444444445,
+          "pass": true,
+          "required_at_least": 0.5
+        }
+      },
+      "decision": "REJECT",
+      "failed_conditions": [
+        "mae_improvement_over_champion_min",
+        "probability_of_improvement_min",
+        "rmse_must_not_regress",
+        "per_position_mae_regression_max",
+        "mean_weekly_lineup_regret_must_not_regress"
+      ],
+      "noninferior_record": false,
+      "promoted": false
+    }
+  },
+  "window": "locked_regression_checkpoint_2025"
+}

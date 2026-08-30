@@ -1,140 +1,184 @@
 {
- "schema_version": 2,
- "generated": "2026-07-16 14:56 UTC",
- "git_head": "e97c997",
- "holdout_policy": "tune on 2020-2024 walk-forward; 2025 is a locked regression checkpoint; 2026 prospective predictions are final",
  "accept_gates": {
   "fantasy_mae_points": -0.05,
   "fantasy_rank_spearman": 0.01,
+  "ranker_log_loss": -0.002,
   "sim_coverage_error_pp": -2.0,
-  "sim_undercoverage_penalty_pp": -1.0,
-  "ranker_log_loss": -0.002
+  "sim_undercoverage_penalty_pp": -1.0
  },
- "release_thresholds": {
-  "nominal_interval_coverage": 0.8,
-  "sanity_top10_overlap_min": 0.5,
-  "minimum_probability_of_improvement": 0.9
+ "environment": {
+  "implementation": "CPython",
+  "machine": "arm64",
+  "packages": {
+   "joblib": "1.5.3",
+   "nflreadpy": "0.1.5",
+   "numpy": "2.4.6",
+   "pandas": "3.0.5",
+   "pyarrow": "25.0.1",
+   "scikit-learn": "1.9.0",
+   "scipy": "1.17.1"
+  },
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "python": "3.11.15"
  },
- "protocol": {
-  "schema_version": 1,
-  "protocol_id": "nfl-accuracy-2026-v1",
-  "status": "preseason_preregistered",
-  "truth_windows": {
-   "development": "2020-2024 expanding walk-forward",
-   "locked_regression_benchmark": "2025; inspect only at an accept/reject checkpoint",
-   "prospective_final_judge": "2026 regular season; no relabeling or hindsight exclusions"
-  },
-  "synthetic_lines": {
-   "purpose": "historical ranking trend and regression testing only",
-   "construction": "floor(strictly-prior player trailing mean) + 0.5; anytime TD is fixed at 0.5",
-   "required_columns": [
-    "line_source",
-    "season",
-    "week",
-    "player_id",
-    "market"
-   ],
-   "forbidden_claims": [
-    "profit",
-    "ROI",
-    "market edge",
-    "closing-line value"
-   ],
-   "real_market_judge": "forward same-side consensus closing-line value"
-  },
-  "matched_control": {
-   "minimum_exposed_n": 100,
-   "minimum_control_n": 100,
-   "match_keys": [
-    "position_or_market",
-    "depth_role",
-    "season_phase"
-   ],
-   "game_script_strata": [
-    "favored",
-    "neutral",
-    "underdog"
-   ],
-   "cluster_unit": "team-season",
-   "multiple_testing": "Benjamini-Hochberg q < 0.05",
-   "season_forward_replication_required": true,
-   "fallback": "research_only when a required key or stratum is unavailable"
-  },
-  "narrative_factors": {
-   "examples": [
-    "birthday",
-    "revenge",
-    "homecoming",
-    "primetime",
-    "stadium"
-   ],
-   "minimum_exposed_n": 100,
-   "minimum_control_n": 100,
-   "maximum_live_effect": 0.03,
-   "policy": "shadow only until matched-control, multiplicity, and season-forward gates all pass"
-  },
-  "acceptance": {
-   "one_lever_per_track_per_checkpoint": true,
-   "parallel_tracks": [
-    "tailstail_fantasy",
-    "fablesfable_props"
-   ],
-   "shared_core_changes": "serialize both tracks and rerun both suites",
-   "paired_resampling_unit": "season-week",
-   "minimum_probability_of_improvement": 0.9,
-   "stop_after_consecutive_rejections": 3,
-   "sanity_top_n": 10,
-   "sanity_min_overlap": 0.5,
-   "expected_delta_required_before_run": true,
-   "ensemble_challenger_after_single_lever_plateau": true
-  },
-  "calibration": {
-   "bins": 10,
-   "metrics": [
-    "brier",
-    "ece",
-    "overconfidence_ece"
-   ],
-   "overconfidence_definition": "sum bin_weight * max(mean_prediction - observed_rate, 0)"
-  },
-  "forward_clv": {
-   "minimum_resolved": 150,
-   "minimum_mean_probability_clv": 0.0,
-   "minimum_beat_close_rate": 0.52,
-   "comparison": "entry versus same-side cross-book consensus close",
-   "unresolved_policy": "exclude and report exact unresolved n"
-  },
-  "operations": {
-   "freeze_date": "2026-09-05",
-   "week_1_target": "2026-09-10",
-   "bye_week_checkpoint": "after Week 8: data/schema audit, calibration review, no lever promotion without the same gates",
-   "public_baselines": "external until source, timestamp, scoring, coverage, and redistribution rights are pinned",
-   "compute_budget": "record rows, simulations, runtime, seed, and package versions for every distribution audit",
-   "known_risks": [
-    "NFL rule changes",
-    "roster and free-agency churn",
-    "data-vendor schema drift",
-    "human lever-selection bias",
-    "simulation compute growth"
-   ]
-  }
+ "espn_external_challenger": {
+  "never_changes_predictions": "asserted structurally (no projection-path module imports the ESPN layer) and behaviourally (garbage ESPN values leave every stored model projection identical)",
+  "prospective_2026": "graded weekly from the pre-kickoff ledger; no backfill",
+  "role": "scored against, never scored with",
+  "runs_in_ci": "tests/test_espn_compare.py and tests/test_espn_external_challenger.py are in the offline lane CI runs as `pytest -q -m offline`"
  },
+ "generated": "2026-08-30 20:04 UTC",
+ "git_head": "2a9be554135a4ba4edcfc16dcd5b81bc8b5fb0bf",
+ "holdout_policy": "expanding season-forward development through 2024; 2025 is the locked regression checkpoint, inspected once after the development decision is written; 2026 prospective predictions are the final judge",
  "inputs": {
-  "historical/historical_pbp.parquet": null,
-  "historical_lines.parquet": null,
-  "historical/rosters_weekly.parquet": null,
-  "historical/injuries.parquet": null,
-  "historical/players_meta.parquet": null,
-  "historical/fantasy/feature_frame.parquet": null,
-  "data/factor_frame.parquet": null,
+  "analysis/accuracy_protocol.json": "733e370c2dac3c7355827174f1e36def9bb1a38e6e317ec02b8980a56bd1ce42",
+  "analysis/shadow_challenge_2026.json": "02458795418ecc60c65fa0b405f3932acc4bd6879ef481ae3d1f070c208150ef",
   "config.json": "49060b2d58282f0945efc3cc1db3a316490e8b4b037c9113b97c5362b6fc68ff",
-  "analysis/accuracy_protocol.json": "733e370c2dac3c7355827174f1e36def9bb1a38e6e317ec02b8980a56bd1ce42"
+  "historical/fantasy/expected_points.parquet": "55e08dd2e116e0fd59f19bad2b7a317de751b139d8ad8c80e081b3e6c7cc64ff",
+  "historical/fantasy/feature_frame.parquet": "c9a4f7efa031f16fc265c0c8923a1f29d5168850b56f1c70414402c392597e84",
+  "historical/fantasy/injuries.parquet": "1bd91ce8f999a9d48e7ba3ba7c6c003baa66e08189c97571bb399781e131fe58",
+  "historical/fantasy/player_stats.parquet": "aaf5af469401803ddf3e4c4686f2096b71c577dc7416f5d127227518ad755c69",
+  "historical/fantasy/schedules.parquet": "493fede2280b2a6cc4d2e1357fc863cb45393235e98ee350b2d238b43fd82d36",
+  "historical/fantasy/snap_counts.parquet": "ed5fc5bb8a68043ea4ac324678490ef04d2aee17e15af59747764e24eecfc62a",
+  "historical/fantasy/weekly_rosters.parquet": "a251fb2d5848937174c37abb5056dea91ea5cc54e00503a8da77fa16024be075"
  },
  "metrics": {
-  "fantasy_model_card": "not built yet (run: python -m nflvalue.fantasy.cli train)",
-  "fantasy_red_team_backtest": "not built yet (run: python -m nflvalue.fantasy.cli backtest)",
-  "fantasy_data_quality": {
-   "present": true
+  "baselines_required": [
+   "trailing fantasy points (pre_fantasy_points_ewm4)",
+   "trailing expected points (pre_expected_points_ewm4)",
+   "ESPN weekly projections (external challenger, never a model input)"
+  ],
+  "champion_challenger_decision": "REJECT both preregistered challengers (bayesian_ridge_only, hist_gradient_boosting_only); keep the direct position-specific ensemble as the frozen 2026 forecast center",
+  "champion_reproduction": {
+   "baselines": {
+    "baseline_pre_expected_points_ewm4": {
+     "bias_actual_minus_prediction": 0.19358548575203938,
+     "mae": 5.594375896125,
+     "rmse": 7.307584114056772,
+     "spearman": 0.5219396159580879
+    },
+    "baseline_pre_fantasy_points_ewm4": {
+     "bias_actual_minus_prediction": 0.16316416953813945,
+     "mae": 5.696326412245215,
+     "rmse": 7.515494472174235,
+     "spearman": 0.5078858508729778
+    }
+   },
+   "by_position": {
+    "QB": {
+     "bias_actual_minus_prediction": -0.1797049968577626,
+     "coverage80": 0.8101193860147812,
+     "mae": 5.55692110859033,
+     "rmse": 7.213750226313154,
+     "spearman": 0.5424945067136885
+    },
+    "RB": {
+     "bias_actual_minus_prediction": 0.19286267283482042,
+     "coverage80": 0.8263612217795485,
+     "mae": 5.177924529744463,
+     "rmse": 6.804449483747616,
+     "spearman": 0.6180895614097834
+    },
+    "TE": {
+     "bias_actual_minus_prediction": -0.08446513962010611,
+     "coverage80": 0.8219677251431546,
+     "mae": 4.267674928271961,
+     "rmse": 5.703887338017931,
+     "spearman": 0.5418692771377053
+    },
+    "WR": {
+     "bias_actual_minus_prediction": -0.0611143720073371,
+     "coverage80": 0.8269311064718163,
+     "mae": 5.2028814780935,
+     "rmse": 6.8573807110807685,
+     "spearman": 0.5661169568745832
+    }
+   },
+   "by_season": {
+    "2023": {
+     "bias_actual_minus_prediction": 0.10429571878284874,
+     "coverage80": 0.8426645930533956,
+     "mae": 5.012270817551804,
+     "rmse": 6.648713960572391,
+     "spearman": 0.6215599099998241
+    },
+    "2024": {
+     "bias_actual_minus_prediction": 0.19694914857661588,
+     "coverage80": 0.82374573154715,
+     "mae": 5.083912591913607,
+     "rmse": 6.725295311114989,
+     "spearman": 0.6401758560298211
+    },
+    "2025": {
+     "bias_actual_minus_prediction": -0.3516773344812944,
+     "coverage80": 0.803510610427037,
+     "mae": 5.18699048450329,
+     "rmse": 6.790412187050448,
+     "spearman": 0.6128429188999298
+    }
+   },
+   "deltas_vs_stored": {
+    "mae": 0.0027071878487205936,
+    "rmse": 0.003060888190277389,
+    "rows": 1,
+    "spearman": -0.0005897571982331762
+   },
+   "direct_ensemble": {
+    "bias_actual_minus_prediction": -0.01656454398359986,
+    "conformal_coverage80": 0.8233757185159379,
+    "mae": 5.094107187848721,
+    "rmse": 6.721460888190277,
+    "rows": 11482,
+    "spearman": 0.6240102428017669
+   },
+   "environment": {
+    "canonical_csv_version": 1,
+    "implementation": "CPython",
+    "machine": "arm64",
+    "packages": {
+     "joblib": "1.5.3",
+     "nflreadpy": "0.1.5",
+     "numpy": "2.4.6",
+     "pandas": "3.0.5",
+     "polars": "1.44.1",
+     "pyarrow": "25.0.1",
+     "scikit-learn": "1.9.0",
+     "scipy": "1.17.1"
+    },
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.15"
+   },
+   "frame_content_sha256": "449d769b3f61cf31db758e41f4e8abca476ab96e9768dc75ff79cae26b5948de",
+   "git_commit": "2a9be554135a4ba4edcfc16dcd5b81bc8b5fb0bf",
+   "independent_season_week_blocks": 54,
+   "predictions_content_sha256": "b163ef995099bae3b1dbf5aea72289ae1eda14b5f85bed908d5c740e30c09279",
+   "reproducibility": {
+    "cause": "RandomForestRegressor.predict with n_jobs=-1 accumulates per-tree predictions in thread-completion order; floating-point addition is not associative, so the last significant digits move between runs. The fitted trees themselves are bit-identical (random_state works), and the same forest predicted with n_jobs=1 is bit-identical. Verified in this session: trees STABLE, predictions UNSTABLE at n_jobs=-1, STABLE at n_jobs=1.",
+    "content_hash_is_not_a_model_identity": true,
+    "impact": "every published metric is sound to eight significant figures; only the content hash is unusable as a did-the-model-change gate",
+    "metrics_reproduce_to": "~1e-8 in MAE across repeat runs of this exact command",
+    "not_fixed_here": "the one-word change lives in nflvalue/fantasy/models.py, which is the frozen production forecast centre this audit is forbidden to modify"
+   },
+   "rows": 11482,
+   "seed": 6102026,
+   "stored_claims": {
+    "mae": 5.0914,
+    "monte_carlo_coverage80": 0.8224022297709259,
+    "rmse": 6.7184,
+    "rows": 11481,
+    "spearman": 0.6246,
+    "test_seasons": [
+     2023,
+     2024,
+     2025
+    ]
+   },
+   "test_seasons": [
+    2023,
+    2024,
+    2025
+   ],
+   "wall_seconds": 36.2
   },
   "factor_audit": {
    "frame_rows": 116554,
@@ -146,41 +190,629 @@
     "Post-bye -> WR receiving yards"
    ]
   },
+  "fantasy_data_quality": {
+   "eligible_rows": 26727,
+   "feature_count": 122,
+   "positions": {
+    "QB": 13320,
+    "RB": 23948,
+    "TE": 21008,
+    "WR": 38723
+   },
+   "rows": 96999,
+   "seasons": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+   ]
+  },
+  "fantasy_model_card": {
+   "feature_count": 122,
+   "path": "reports/fantasy_model_card.json",
+   "trained_at": "2026-08-30T19:46:05.189763+00:00",
+   "training_seasons": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+   ]
+  },
+  "fantasy_red_team_backtest": {
+   "path": "reports/fantasy_red_team.json",
+   "sha256": "9bfc180adc7000f8a432304c543573f9e073829f0aeaf62687e2dc08a854132e"
+  },
   "nested_projection": {
    "conclusion": "No eligible factor-combination procedure beat its segment reference accuracy, no combination scored 100%, and no factor changes live scoring.",
    "highest_eligible": {
-    "segment": "WR1 receiving yards",
     "accuracy": 0.5836,
     "outer_n": 281,
+    "segment": "WR1 receiving yards",
     "selective_lift_pp": -0.28
    }
   },
+  "shadow_challenge": {
+   "development": {
+    "arms": {
+     "bayesian_ridge_only": {
+      "bias_actual_minus_prediction": -0.07658718749059264,
+      "coverage80": 0.8279450985494048,
+      "coverage_error_pp": 2.7945098549404745,
+      "mae": 5.210060955772615,
+      "mean_interval_width": 17.691013499931383,
+      "median_interval_width": 17.742881996231162,
+      "n": 15373,
+      "pinball_q10": 0.9995433040070716,
+      "pinball_q90": 1.4149398608462487,
+      "rmse": 6.855059868190162,
+      "spearman": 0.6138223466368163
+     },
+     "champion_ensemble": {
+      "bias_actual_minus_prediction": -0.11036103794173055,
+      "coverage80": 0.8261237234111755,
+      "coverage_error_pp": 2.6123723411175415,
+      "mae": 5.136243120555086,
+      "mean_interval_width": 17.660766611286046,
+      "median_interval_width": 17.736544296745663,
+      "n": 15373,
+      "pinball_q10": 0.9816341286525697,
+      "pinball_q90": 1.4133570264408104,
+      "rmse": 6.760121504899697,
+      "spearman": 0.6197931810979994
+     },
+     "hist_gradient_boosting_only": {
+      "bias_actual_minus_prediction": -0.1681616560933676,
+      "coverage80": 0.8344500097573668,
+      "coverage_error_pp": 3.4450009757366784,
+      "mae": 5.179148232147638,
+      "mean_interval_width": 17.94004112466378,
+      "median_interval_width": 17.85652897268042,
+      "n": 15373,
+      "pinball_q10": 0.9885638547730028,
+      "pinball_q90": 1.42789973763367,
+      "rmse": 6.800067011130419,
+      "spearman": 0.6095559501319353
+     }
+    },
+    "comparisons": {
+     "bayesian_ridge_only": {
+      "paired_block_bootstrap": {
+       "ci95": [
+        -0.09176312686518005,
+        -0.05627685095248258
+       ],
+       "iterations": 20000,
+       "mae_improvement": -0.07381783521752884,
+       "n": 15373,
+       "probability_of_improvement": 0.0,
+       "seed": 6102026,
+       "week_win_rate": 0.19444444444444445,
+       "weeks": 72
+      },
+      "top10_overlap": {
+       "mean_overlap": 0.7736111111111111,
+       "min_overlap": 0.6,
+       "top_n": 10,
+       "weeks": 72
+      }
+     },
+     "hist_gradient_boosting_only": {
+      "paired_block_bootstrap": {
+       "ci95": [
+        -0.061310818176836895,
+        -0.023774620588048204
+       ],
+       "iterations": 20000,
+       "mae_improvement": -0.042905111592551615,
+       "n": 15373,
+       "probability_of_improvement": 0.0,
+       "seed": 6102026,
+       "week_win_rate": 0.3055555555555556,
+       "weeks": 72
+      },
+      "top10_overlap": {
+       "mean_overlap": 0.7583333333333333,
+       "min_overlap": 0.4,
+       "top_n": 10,
+       "weeks": 72
+      }
+     }
+    },
+    "decision": {
+     "bayesian_ridge_only": {
+      "decision": "REJECT",
+      "failed_conditions": [
+       "mae_improvement_over_champion_min",
+       "probability_of_improvement_min",
+       "rmse_must_not_regress",
+       "nominal80_absolute_coverage_error_pp_max",
+       "per_position_mae_regression_max"
+      ],
+      "noninferior_record": false
+     },
+     "hist_gradient_boosting_only": {
+      "decision": "REJECT",
+      "failed_conditions": [
+       "mae_improvement_over_champion_min",
+       "probability_of_improvement_min",
+       "spearman_regression_max",
+       "rmse_must_not_regress",
+       "nominal80_absolute_coverage_error_pp_max",
+       "mean_weekly_lineup_regret_must_not_regress"
+      ],
+      "noninferior_record": false
+     }
+    },
+    "outcome": "keep the current ensemble",
+    "outer_seasons": [
+     2021,
+     2022,
+     2023,
+     2024
+    ]
+   },
+   "lineup_regret": {
+    "checkpoint2025": {
+     "arms": {
+      "bayesian_ridge_only": {
+       "mean_regret": 15.115370370370371,
+       "mean_started_points": 86.77407407407408,
+       "median_regret": 12.900000000000006,
+       "n_teams": 216,
+       "p90_regret": 30.709999999999994
+      },
+      "champion_ensemble": {
+       "mean_regret": 15.387777777777778,
+       "mean_started_points": 86.50166666666667,
+       "median_regret": 14.299999999999997,
+       "n_teams": 216,
+       "p90_regret": 29.240000000000002
+      },
+      "hist_gradient_boosting_only": {
+       "mean_regret": 15.431203703703703,
+       "mean_started_points": 86.45824074074075,
+       "median_regret": 13.449999999999989,
+       "n_teams": 216,
+       "p90_regret": 29.14999999999999
+      }
+     },
+     "oracle_mean_points": 101.88944444444445,
+     "paired_vs_champion": {
+      "bayesian_ridge_only": {
+       "blocks": 18,
+       "champion_name": "champion_ensemble",
+       "ci95": [
+        -0.6296365740740748,
+        1.1272916666666648
+       ],
+       "iterations": 2000,
+       "probability_of_improvement": 0.727,
+       "regret_reduction_vs_champion": 0.2724074074074072
+      },
+      "hist_gradient_boosting_only": {
+       "blocks": 18,
+       "champion_name": "champion_ensemble",
+       "ci95": [
+        -0.8412777777777773,
+        0.6816041666666661
+       ],
+       "iterations": 2000,
+       "probability_of_improvement": 0.4715,
+       "regret_reduction_vs_champion": -0.043425925925925445
+      }
+     },
+     "roster_size": 14,
+     "seed": 6102026,
+     "shared_player_weeks": 3817,
+     "slots": {
+      "FLEX": 1,
+      "QB": 1,
+      "RB": 2,
+      "TE": 1,
+      "WR": 2
+     },
+     "teams_per_week": 12,
+     "teams_scored": 216,
+     "weeks_scored": 18
+    },
+    "development": {
+     "arms": {
+      "bayesian_ridge_only": {
+       "mean_regret": 15.885138888888887,
+       "mean_started_points": 86.99268518518518,
+       "median_regret": 14.400000000000006,
+       "n_teams": 864,
+       "p90_regret": 31.62400000000001
+      },
+      "champion_ensemble": {
+       "mean_regret": 15.919351851851852,
+       "mean_started_points": 86.95847222222221,
+       "median_regret": 14.399999999999999,
+       "n_teams": 864,
+       "p90_regret": 32.227999999999994
+      },
+      "hist_gradient_boosting_only": {
+       "mean_regret": 16.31872685185185,
+       "mean_started_points": 86.55909722222222,
+       "median_regret": 14.510000000000005,
+       "n_teams": 864,
+       "p90_regret": 33.43200000000002
+      }
+     },
+     "oracle_mean_points": 102.87782407407407,
+     "paired_vs_champion": {
+      "bayesian_ridge_only": {
+       "blocks": 72,
+       "champion_name": "champion_ensemble",
+       "ci95": [
+        -0.427295717592592,
+        0.5045682870370375
+       ],
+       "iterations": 2000,
+       "probability_of_improvement": 0.5505,
+       "regret_reduction_vs_champion": 0.034212962962963195
+      },
+      "hist_gradient_boosting_only": {
+       "blocks": 72,
+       "champion_name": "champion_ensemble",
+       "ci95": [
+        -0.86482349537037,
+        0.06235763888888896
+       ],
+       "iterations": 2000,
+       "probability_of_improvement": 0.0445,
+       "regret_reduction_vs_champion": -0.3993749999999998
+      }
+     },
+     "roster_size": 14,
+     "seed": 6102026,
+     "shared_player_weeks": 15373,
+     "slots": {
+      "FLEX": 1,
+      "QB": 1,
+      "RB": 2,
+      "TE": 1,
+      "WR": 2
+     },
+     "teams_per_week": 12,
+     "teams_scored": 864,
+     "weeks_scored": 72
+    }
+   },
+   "locked_regression_checkpoint_2025": {
+    "arms": {
+     "bayesian_ridge_only": {
+      "bias_actual_minus_prediction": -0.34862242215235967,
+      "coverage80": 0.8111082001571915,
+      "coverage_error_pp": 1.1108200157191495,
+      "mae": 5.236693537769967,
+      "mean_interval_width": 17.093067740171627,
+      "median_interval_width": 17.220451779308036,
+      "n": 3817,
+      "pinball_q10": 0.9627681187493589,
+      "pinball_q90": 1.4243652496224477,
+      "rmse": 6.792222062246776,
+      "spearman": 0.6138137197227704
+     },
+     "champion_ensemble": {
+      "bias_actual_minus_prediction": -0.35167673963988866,
+      "coverage80": 0.803510610427037,
+      "coverage_error_pp": 0.3510610427036931,
+      "mae": 5.1869904896334385,
+      "mean_interval_width": 16.939366340484444,
+      "median_interval_width": 17.043259205411093,
+      "n": 3817,
+      "pinball_q10": 0.9812595174608136,
+      "pinball_q90": 1.4214906700970804,
+      "rmse": 6.790412116247574,
+      "spearman": 0.6128422940518072
+     },
+     "hist_gradient_boosting_only": {
+      "bias_actual_minus_prediction": -0.42124992935645506,
+      "coverage80": 0.7998428084883417,
+      "coverage_error_pp": -0.01571915116583833,
+      "mae": 5.2540925047573,
+      "mean_interval_width": 16.96781738825354,
+      "median_interval_width": 17.053318304033183,
+      "n": 3817,
+      "pinball_q10": 0.9827024158694964,
+      "pinball_q90": 1.432995067030909,
+      "rmse": 6.8543967823741205,
+      "spearman": 0.6028986460101864
+     }
+    },
+    "comparisons": {
+     "bayesian_ridge_only": {
+      "paired_block_bootstrap": {
+       "ci95": [
+        -0.09127113231986363,
+        -0.010777028185119913
+       ],
+       "iterations": 20000,
+       "mae_improvement": -0.04970304813652911,
+       "n": 3817,
+       "probability_of_improvement": 0.00535,
+       "seed": 6102026,
+       "week_win_rate": 0.3888888888888889,
+       "weeks": 18
+      },
+      "top10_overlap": {
+       "mean_overlap": 0.7555555555555556,
+       "min_overlap": 0.6,
+       "top_n": 10,
+       "weeks": 18
+      }
+     },
+     "hist_gradient_boosting_only": {
+      "paired_block_bootstrap": {
+       "ci95": [
+        -0.09430116944837812,
+        -0.03940259320603714
+       ],
+       "iterations": 20000,
+       "mae_improvement": -0.06710201512386141,
+       "n": 3817,
+       "probability_of_improvement": 0.0,
+       "seed": 6102026,
+       "week_win_rate": 0.2222222222222222,
+       "weeks": 18
+      },
+      "top10_overlap": {
+       "mean_overlap": 0.7944444444444445,
+       "min_overlap": 0.6,
+       "top_n": 10,
+       "weeks": 18
+      }
+     }
+    },
+    "decision": {
+     "bayesian_ridge_only": {
+      "decision": "REJECT",
+      "failed_conditions": [
+       "mae_improvement_over_champion_min",
+       "probability_of_improvement_min",
+       "rmse_must_not_regress",
+       "per_position_mae_regression_max"
+      ],
+      "noninferior_record": false
+     },
+     "hist_gradient_boosting_only": {
+      "decision": "REJECT",
+      "failed_conditions": [
+       "mae_improvement_over_champion_min",
+       "probability_of_improvement_min",
+       "rmse_must_not_regress",
+       "per_position_mae_regression_max",
+       "mean_weekly_lineup_regret_must_not_regress"
+      ],
+      "noninferior_record": false
+     }
+    },
+    "inspected_after_development_decision": true,
+    "outcome": "keep the current ensemble",
+    "outer_seasons": [
+     2025
+    ]
+   },
+   "preregistration": {
+    "path": "analysis/shadow_challenge_2026.json",
+    "sha256": "02458795418ecc60c65fa0b405f3932acc4bd6879ef481ae3d1f070c208150ef",
+    "written_before_any_challenger_was_scored": true
+   },
+   "prospective_2026": {
+    "gradeable_rows": 0,
+    "reason": "the 2026 schedule is published (272 games, weeks 1-18) with zero recorded scores; nflverse reports the current season as 2025, publishes no 2026 weekly rosters, and returns HTTP 404 for 2026 weekly player stats",
+    "status": "not gradeable yet"
+   }
+  },
   "simulation_calibration": {
-   "n": 11481,
+   "absolute_coverage_error_pp": 2.4072,
+   "methods": {
+    "calibrated_monte_carlo": {
+     "bias_actual_minus_prediction": -0.01656700015920628,
+     "coverage80": 0.8240724612436857,
+     "crps_mean": 3.69327834446168,
+     "crps_n": 11482,
+     "mae": 5.094110775169115,
+     "mean_interval_width": 17.269781687877547,
+     "n": 11482,
+     "rmse": 6.721468401473694,
+     "spearman": 0.6240085752320829
+    },
+    "direct_ensemble": {
+     "bias_actual_minus_prediction": -0.016567000159214695,
+     "coverage80": 0.8233757185159379,
+     "mae": 5.094110775169124,
+     "mean_interval_width": 17.231959778102386,
+     "n": 11482,
+     "rmse": 6.721468401473703,
+     "spearman": 0.6240085752753667
+    },
+    "raw_event_simulator": {
+     "bias_actual_minus_prediction": 0.40830054178547637,
+     "mae": 5.4546279217070275,
+     "n": 11482,
+     "rmse": 7.232465082247414,
+     "spearman": 0.5445997491271451
+    }
+   },
    "nominal_coverage": 0.8,
-   "observed_coverage": 0.8224022297709259,
-   "absolute_coverage_error_pp": 2.2402,
-   "undercoverage_penalty_pp": 0.0,
-   "mean_interval_width": 17.23588321165533,
+   "observed_coverage": 0.8240724612436857,
+   "outer_predictions_canonical_csv_sha256": "9cbbf5cbc8ed27936f7c28655b4ad67c0967a39e9e78d43cde89f69d0671999d",
+   "paired_comparisons": {
+    "calibrated_mc_vs_direct": {
+     "candidate": "mc_calibrated_mean",
+     "ci95": [
+      0.0,
+      0.0
+     ],
+     "mae_delta_candidate_minus_reference": 0.0,
+     "n": 11482,
+     "probability_candidate_better": 0.0,
+     "probability_tie": 1.0,
+     "reference": "projection_mean",
+     "week_tie_rate": 1.0,
+     "week_win_rate": 0.0,
+     "weeks": 54
+    },
+    "raw_event_vs_direct": {
+     "candidate": "mc_raw_event_mean",
+     "ci95": [
+      0.29686239596216846,
+      0.4250830278157208
+     ],
+     "mae_delta_candidate_minus_reference": 0.36051714653790323,
+     "n": 11482,
+     "probability_candidate_better": 0.0,
+     "probability_tie": 0.0,
+     "reference": "projection_mean",
+     "week_tie_rate": 0.0,
+     "week_win_rate": 0.05555555555555555,
+     "weeks": 54
+    }
+   },
+   "raw_event_center_status": "rejected for point accuracy; distribution-only",
    "release_gate": {
     "active_degenerate_intervals": 0,
     "failures": [],
-    "max_calibrated_center_drift": 2.6563196087181495e-12,
+    "max_calibrated_center_drift": 2.824962486158711e-12,
     "pass": true,
     "warnings": [
      "raw event simulator is less accurate than the direct ensemble and is distribution-only",
-     "263 player-weeks required residual fallback because event tails were unstable",
+     "254 player-weeks required residual fallback because event tails were unstable",
      "role_decrease_5_plus coverage is heterogeneous at 71.6%",
      "stable_role_abs_lt_3 coverage is heterogeneous at 88.3%",
      "team_changed coverage is heterogeneous at 89.9%",
      "injury_questionable coverage is heterogeneous at 90.9%",
-     "practice_dnp coverage is heterogeneous at 92.2%"
+     "practice_dnp coverage is heterogeneous at 92.8%"
     ]
-   }
+   },
+   "replay_outputs_canonical_csv_sha256": "c63cfea705b4c3306fb575ff096e7d85ebf7a928c5e3a2d69b9fcbb06ab63399",
+   "replayed_rows": 11482,
+   "runtime_versions": {
+    "numpy": "2.4.6",
+    "pandas": "3.0.5"
+   },
+   "season_weeks": 54,
+   "seed": 6102026,
+   "simulations_per_week": 1000,
+   "undercoverage_penalty_pp": 0.0
+  }
+ },
+ "protocol": {
+  "acceptance": {
+   "ensemble_challenger_after_single_lever_plateau": true,
+   "expected_delta_required_before_run": true,
+   "minimum_probability_of_improvement": 0.9,
+   "one_lever_per_track_per_checkpoint": true,
+   "paired_resampling_unit": "season-week",
+   "parallel_tracks": [
+    "tailstail_fantasy",
+    "fablesfable_props"
+   ],
+   "sanity_min_overlap": 0.5,
+   "sanity_top_n": 10,
+   "shared_core_changes": "serialize both tracks and rerun both suites",
+   "stop_after_consecutive_rejections": 3
   },
-  "baselines_required": [
-   "trailing-mean (3-game rolling)",
-   "public consensus"
-  ]
- }
+  "calibration": {
+   "bins": 10,
+   "metrics": [
+    "brier",
+    "ece",
+    "overconfidence_ece"
+   ],
+   "overconfidence_definition": "sum bin_weight * max(mean_prediction - observed_rate, 0)"
+  },
+  "forward_clv": {
+   "comparison": "entry versus same-side cross-book consensus close",
+   "minimum_beat_close_rate": 0.52,
+   "minimum_mean_probability_clv": 0.0,
+   "minimum_resolved": 150,
+   "unresolved_policy": "exclude and report exact unresolved n"
+  },
+  "matched_control": {
+   "cluster_unit": "team-season",
+   "fallback": "research_only when a required key or stratum is unavailable",
+   "game_script_strata": [
+    "favored",
+    "neutral",
+    "underdog"
+   ],
+   "match_keys": [
+    "position_or_market",
+    "depth_role",
+    "season_phase"
+   ],
+   "minimum_control_n": 100,
+   "minimum_exposed_n": 100,
+   "multiple_testing": "Benjamini-Hochberg q < 0.05",
+   "season_forward_replication_required": true
+  },
+  "narrative_factors": {
+   "examples": [
+    "birthday",
+    "revenge",
+    "homecoming",
+    "primetime",
+    "stadium"
+   ],
+   "maximum_live_effect": 0.03,
+   "minimum_control_n": 100,
+   "minimum_exposed_n": 100,
+   "policy": "shadow only until matched-control, multiplicity, and season-forward gates all pass"
+  },
+  "operations": {
+   "bye_week_checkpoint": "after Week 8: data/schema audit, calibration review, no lever promotion without the same gates",
+   "compute_budget": "record rows, simulations, runtime, seed, and package versions for every distribution audit",
+   "freeze_date": "2026-09-05",
+   "known_risks": [
+    "NFL rule changes",
+    "roster and free-agency churn",
+    "data-vendor schema drift",
+    "human lever-selection bias",
+    "simulation compute growth"
+   ],
+   "public_baselines": "external until source, timestamp, scoring, coverage, and redistribution rights are pinned",
+   "week_1_target": "2026-09-10"
+  },
+  "protocol_id": "nfl-accuracy-2026-v1",
+  "schema_version": 1,
+  "status": "preseason_preregistered",
+  "synthetic_lines": {
+   "construction": "floor(strictly-prior player trailing mean) + 0.5; anytime TD is fixed at 0.5",
+   "forbidden_claims": [
+    "profit",
+    "ROI",
+    "market edge",
+    "closing-line value"
+   ],
+   "purpose": "historical ranking trend and regression testing only",
+   "real_market_judge": "forward same-side consensus closing-line value",
+   "required_columns": [
+    "line_source",
+    "season",
+    "week",
+    "player_id",
+    "market"
+   ]
+  },
+  "truth_windows": {
+   "development": "2020-2024 expanding walk-forward",
+   "locked_regression_benchmark": "2025; inspect only at an accept/reject checkpoint",
+   "prospective_final_judge": "2026 regular season; no relabeling or hindsight exclusions"
+  }
+ },
+ "release_thresholds": {
+  "minimum_probability_of_improvement": 0.9,
+  "nominal_interval_coverage": 0.8,
+  "sanity_top10_overlap_min": 0.5
+ },
+ "schema_version": 3
 }

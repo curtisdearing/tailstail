@@ -1,0 +1,173 @@
+{
+  "baselines": {
+    "baseline_pre_expected_points_ewm4": {
+      "bias_actual_minus_prediction": 0.19358548575203938,
+      "mae": 5.594375896125,
+      "rmse": 7.307584114056772,
+      "spearman": 0.5219396159580879
+    },
+    "baseline_pre_fantasy_points_ewm4": {
+      "bias_actual_minus_prediction": 0.16316416953813945,
+      "mae": 5.696326412245215,
+      "rmse": 7.515494472174235,
+      "spearman": 0.5078858508729778
+    }
+  },
+  "by_position": {
+    "QB": {
+      "bias_actual_minus_prediction": -0.1797049968577626,
+      "coverage80": 0.8101193860147812,
+      "mae": 5.55692110859033,
+      "rmse": 7.213750226313154,
+      "spearman": 0.5424945067136885
+    },
+    "RB": {
+      "bias_actual_minus_prediction": 0.19286267283482042,
+      "coverage80": 0.8263612217795485,
+      "mae": 5.177924529744463,
+      "rmse": 6.804449483747616,
+      "spearman": 0.6180895614097834
+    },
+    "TE": {
+      "bias_actual_minus_prediction": -0.08446513962010611,
+      "coverage80": 0.8219677251431546,
+      "mae": 4.267674928271961,
+      "rmse": 5.703887338017931,
+      "spearman": 0.5418692771377053
+    },
+    "WR": {
+      "bias_actual_minus_prediction": -0.0611143720073371,
+      "coverage80": 0.8269311064718163,
+      "mae": 5.2028814780935,
+      "rmse": 6.8573807110807685,
+      "spearman": 0.5661169568745832
+    }
+  },
+  "by_season": {
+    "2023": {
+      "bias_actual_minus_prediction": 0.10429571878284874,
+      "coverage80": 0.8426645930533956,
+      "mae": 5.012270817551804,
+      "rmse": 6.648713960572391,
+      "spearman": 0.6215599099998241
+    },
+    "2024": {
+      "bias_actual_minus_prediction": 0.19694914857661588,
+      "coverage80": 0.82374573154715,
+      "mae": 5.083912591913607,
+      "rmse": 6.725295311114989,
+      "spearman": 0.6401758560298211
+    },
+    "2025": {
+      "bias_actual_minus_prediction": -0.3516773344812944,
+      "coverage80": 0.803510610427037,
+      "mae": 5.18699048450329,
+      "rmse": 6.790412187050448,
+      "spearman": 0.6128429188999298
+    }
+  },
+  "config": {
+    "conformal_alpha": 0.2,
+    "fast": false,
+    "model_families": [
+      "bayesian",
+      "gradient_boosting",
+      "random_forest",
+      "mlp"
+    ],
+    "positions": [
+      "QB",
+      "RB",
+      "WR",
+      "TE"
+    ],
+    "stack_l2": 0.04,
+    "stack_validation_seasons": 3,
+    "stack_weight_cap": 0.65
+  },
+  "deltas_vs_stored": {
+    "mae": 0.0027071878487205936,
+    "rmse": 0.003060888190277389,
+    "rows": 1,
+    "spearman": -0.0005897571982331762
+  },
+  "environment": {
+    "canonical_csv_version": 1,
+    "implementation": "CPython",
+    "machine": "arm64",
+    "packages": {
+      "joblib": "1.5.3",
+      "nflreadpy": "0.1.5",
+      "numpy": "2.4.6",
+      "pandas": "3.0.5",
+      "polars": "1.44.1",
+      "pyarrow": "25.0.1",
+      "scikit-learn": "1.9.0",
+      "scipy": "1.17.1"
+    },
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.15"
+  },
+  "generated_at": "2026-08-30T20:04:45.195852+00:00",
+  "git_commit": "2a9be554135a4ba4edcfc16dcd5b81bc8b5fb0bf",
+  "independent_season_week_blocks": 54,
+  "inputs": {
+    "frame_content_sha256": "449d769b3f61cf31db758e41f4e8abca476ab96e9768dc75ff79cae26b5948de",
+    "frame_path": "historical/fantasy/feature_frame.parquet",
+    "frame_rows": 96999
+  },
+  "kind": "champion-reproduction",
+  "observed": {
+    "bias_actual_minus_prediction": -0.01656454398359986,
+    "conformal_coverage80": 0.8233757185159379,
+    "mae": 5.094107187848721,
+    "rmse": 6.721460888190277,
+    "rows": 11482,
+    "spearman": 0.6240102428017669
+  },
+  "predictions_content_sha256": "b163ef995099bae3b1dbf5aea72289ae1eda14b5f85bed908d5c740e30c09279",
+  "predictions_parquet": "reports/fantasy_outer_predictions.parquet",
+  "reproducibility": {
+    "cause": "RandomForestRegressor.predict with n_jobs=-1 accumulates per-tree predictions in thread-completion order; floating-point addition is not associative, so the last significant digits move between runs. The fitted trees themselves are bit-identical (random_state works), and the same forest predicted with n_jobs=1 is bit-identical. Verified in this session: trees STABLE, predictions UNSTABLE at n_jobs=-1, STABLE at n_jobs=1.",
+    "content_hash_is_not_a_model_identity": true,
+    "impact": "every published metric is sound to eight significant figures; only the content hash is unusable as a did-the-model-change gate",
+    "metrics_reproduce_to": "~1e-8 in MAE across repeat runs of this exact command",
+    "not_fixed_here": "the one-word change lives in nflvalue/fantasy/models.py, which is the frozen production forecast centre this audit is forbidden to modify"
+  },
+  "rows_by_season_week_max": 253,
+  "rows_by_season_week_min": 171,
+  "scoring": {
+    "fumble_lost": -2.0,
+    "interception": -2.0,
+    "passing_300_bonus": 0.0,
+    "passing_td": 4.0,
+    "passing_yard": 0.04,
+    "receiving_100_bonus": 0.0,
+    "receiving_td": 6.0,
+    "receiving_yard": 0.1,
+    "reception": 1.0,
+    "rushing_100_bonus": 0.0,
+    "rushing_td": 6.0,
+    "rushing_yard": 0.1,
+    "two_point": 2.0
+  },
+  "seed": 6102026,
+  "stored_claims": {
+    "mae": 5.0914,
+    "monte_carlo_coverage80": 0.8224022297709259,
+    "rmse": 6.7184,
+    "rows": 11481,
+    "spearman": 0.6246,
+    "test_seasons": [
+      2023,
+      2024,
+      2025
+    ]
+  },
+  "test_seasons": [
+    2023,
+    2024,
+    2025
+  ],
+  "wall_seconds": 36.2
+}
