@@ -58,7 +58,7 @@ import hashlib
 import json
 import math
 from dataclasses import dataclass, field
-from typing import Mapping, Sequence
+from typing import Any, Mapping, Sequence
 
 import numpy as np
 
@@ -218,7 +218,10 @@ class TeamOutcome:
     made_playoffs: float
     seed_distribution: Mapping[int, float]
     round_advancement: Mapping[str, float]
-    championship_probability: float
+    #: None when the run was not authorised to publish it: a championship
+    #: probability is the most-quoted number this simulator produces and the
+    #: one that most depends on weeks nobody has projected yet.
+    championship_probability: float | None
 
 
 @dataclass(frozen=True)
@@ -316,61 +319,24 @@ def _slot_instances(starting_slots: Mapping[str, int]) -> tuple[str, ...]:
 def optimal_lineup(points: Mapping[int, float],
                    roster: Sequence[RosterSpot],
                    starting_slots: Mapping[str, int]) -> Lineup:
-    """The best LEGAL lineup, solved exactly.
+    """The best legal lineup, from the one engine (see `lineup.optimize`).
 
-    Greedy position-filling is the tempting shortcut and it is wrong: filling
-    RB and WR first and giving the FLEX whatever survives can leave points on
-    the bench, because the best FLEX may be the player a base slot already
-    took. This is a maximum-weight assignment between players and slot
-    instances, so the answer is optimal by construction rather than by luck.
-
-    Ties are broken toward base slots before FLEX, deterministically, so the
-    same roster and the same points always produce the same assignment. A slot
-    with no eligible player is left empty and named -- that is legal in ESPN,
-    and hiding it would make a short roster look like a full one.
+    The maximum-weight assignment that used to live here is now shared with the
+    weekly card, the waiver planner and the trade scan, so a lineup worth 118.4
+    to the bracket is worth 118.4 to all of them.
     """
-    from scipy.optimize import linear_sum_assignment
+    from . import lineup as lineup_engine
 
-    slots = _slot_instances(starting_slots)
-    players = sorted(roster, key=lambda spot: spot.player_id)
-    if not slots:
-        return Lineup(total=0.0, assignment={}, empty_slots=())
-    if not players:
-        return Lineup(total=0.0,
-                      assignment=dict.fromkeys(starting_slots, ()),
-                      empty_slots=tuple(sorted(slots)))
-
-    matrix = np.full((len(players), len(slots)), _UNELIGIBLE, dtype=float)
-    for i, spot in enumerate(players):
-        value = float(points.get(spot.player_id, 0.0))
-        for j, slot in enumerate(slots):
-            if slot in spot.eligible_slots:
-                # The FLEX seat is DISCOUNTED by a hair, so among equally
-                # scoring optimal lineups the solver seats the smallest
-                # eligible score there and the base slots keep the big ones.
-                # That is the lineup a human would write down, and the
-                # discount is ~1e-8 points -- far below any real difference,
-                # so it orders ties without ever changing the optimum.
-                matrix[i, j] = value * (1.0 - _TIE_EPSILON) if slot == "FLEX" \
-                    else value + _TIE_EPSILON
-
-    rows, cols = linear_sum_assignment(matrix, maximize=True)
-
-    assignment: dict[str, list[int]] = {slot: [] for slot in starting_slots}
-    filled = [False] * len(slots)
-    total = 0.0
-    for i, j in zip(rows, cols):
-        if matrix[i, j] <= _UNELIGIBLE / 2:
-            continue                      # not eligible: leave the slot empty
-        assignment[slots[j]].append(players[i].player_id)
-        filled[j] = True
-        total += float(points.get(players[i].player_id, 0.0))
-
-    empty = tuple(sorted(slot for j, slot in enumerate(slots) if not filled[j]))
-    return Lineup(total=total,
+    players = tuple(
+        lineup_engine.LineupPlayer(player_id=spot.player_id,
+                                   eligible_slots=frozenset(spot.eligible_slots))
+        for spot in roster
+    )
+    result = lineup_engine.optimize(points, players, starting_slots)
+    return Lineup(total=result.total,
                   assignment={slot: tuple(sorted(ids))
-                              for slot, ids in assignment.items()},
-                  empty_slots=empty)
+                              for slot, ids in result.assignment.items()},
+                  empty_slots=result.empty_slots)
 
 
 # --------------------------------------------------------------------------- #
@@ -818,14 +784,25 @@ def from_snapshot(snapshot, *, tiebreakers: Sequence[str] | None = None
 def _draw_team_week(rng: np.random.Generator, roster: Sequence[RosterSpot],
                     means: Mapping[int, float], sds: Mapping[int, float],
                     rho: float) -> dict[int, float]:
-    """
-One team, one week: a shared team factor plus individual noise.
+    """QUARANTINED. Research only — not reachable from `simulate_league`.
 
-    Teammates share game script, pace and blowout risk, so their weeks are
-    positively correlated. Drawing them independently would understate how
-    often a team posts an extreme total, which is precisely the quantity a
-    head-to-head matchup is decided by.
+    This is a two-parameter truncated Normal with a hand-set equicorrelation:
+    every teammate pair correlated at exactly `rho`, every cross-team pair at
+    zero, no skew, no zero-inflation, and `max(0, ...)` truncation that biases
+    the realised mean above the mean it was given. `rho` defaulted to 0.35,
+    which is a number somebody chose, not one anybody measured.
+
+    It also discarded the correlated event simulation entirely: the projection
+    layer produces a joint sample matrix per week, and this replaced it with
+    two scalars per player. Championship probabilities computed this way are
+    properties of the parametric assumption, not of the projections.
+
+    Kept for the diagnostic in `team_week_correlation_check` and for nothing
+    else; `simulate_league` now requires real per-period sample matrices.
     """
+    # The original reasoning was right -- teammates share game script, pace and
+    # blowout risk, so drawing them independently understates how often a team
+    # posts an extreme total. A hand-set rho is not how to capture it.
     shared = float(rng.standard_normal())
     a, b = math.sqrt(rho), math.sqrt(1.0 - rho)
     out: dict[int, float] = {}
@@ -858,7 +835,19 @@ def team_week_correlation_check(*, rho: float, seed: int,
 # --------------------------------------------------------------------------- #
 # 7 · The season
 # --------------------------------------------------------------------------- #
-def _config_hash(fmt: LeagueFormat, means, sds, simulations, seed, basis, rho) -> str:
+def _sample_digest(period_samples: Mapping[int, Mapping[int, Any]]) -> str:
+    """A digest of the actual draws, so a run cannot be reproduced from a label."""
+    parts = []
+    for period in sorted(period_samples):
+        rows = period_samples[period]
+        for player_id in sorted(rows):
+            vector = np.asarray(rows[player_id], dtype=float)
+            parts.append(f"{period}:{player_id}:{len(vector)}:"
+                         f"{float(vector.sum()):.6f}:{float(vector.var()):.6f}")
+    return hashlib.sha256("|".join(parts).encode("utf-8")).hexdigest()
+
+
+def _config_hash(fmt: LeagueFormat, period_samples, simulations, seed, basis) -> str:
     payload = {
         "team_ids": list(fmt.team_ids),
         "schedule": {str(p): [list(g) for g in fmt.schedule[p]]
@@ -874,33 +863,72 @@ def _config_hash(fmt: LeagueFormat, means, sds, simulations, seed, basis, rho) -
         "playoff_tie_rule": fmt.playoff_tie_rule,
         "home_bonus": fmt.home_bonus,
         "source_hashes": dict(sorted(fmt.source_hashes.items())),
-        "means": {str(k): round(float(v), 6) for k, v in sorted(means.items())},
-        "sds": {str(k): round(float(v), 6) for k, v in sorted(sds.items())},
+        "period_samples": _sample_digest(period_samples),
         "simulations": int(simulations),
         "seed": int(seed),
         "basis": {str(k): v for k, v in sorted(basis.items())},
-        "rho": round(float(rho), 6),
     }
     blob = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
-def _week_total(rng, fmt: LeagueFormat, rosters, means, sds, rho,
-                team_period: dict, team: int, period: int) -> float:
-    """One team's optimal legal lineup for one matchup period, memoised into
-    ``team_period`` so the bracket scores the same week the season did."""
-    points = _draw_team_week(rng, rosters[team], means, sds, rho)
+def _week_total(fmt: LeagueFormat, rosters, samples: Mapping[int, Mapping[int, Any]],
+                team_period: dict, team: int, period: int, draw: int) -> float:
+    """One team's optimal legal lineup for one matchup period, from real samples.
+
+    `samples[period][player_id]` is that period's correlated draw vector from
+    the projection layer, so row `draw` is one joint week: the same game
+    script for every player in it. Memoised into `team_period` so the bracket
+    scores the same week the season did.
+    """
+    period_samples = samples[period]
+    points = {spot.player_id: float(period_samples[spot.player_id][draw])
+              for spot in rosters[team] if spot.player_id in period_samples}
     total = optimal_lineup(points, rosters[team], fmt.starting_slots).total
     team_period[(team, period)] = total
     return total
 
 
+def validate_period_samples(samples: Mapping[int, Mapping[int, Any]],
+                            periods: Sequence[int], rosters, simulations: int,
+                            period_basis: Mapping[int, str]) -> None:
+    """Every scored period needs its own draws, of the right height.
+
+    `period_basis` used to be an audit label and nothing else: a
+    rest-of-season assumption week was drawn from the same two scalars as a
+    fully projected one, so the label described a distinction the arithmetic
+    did not make. It now has to point at real inputs — a period labelled
+    `weekly_projection` must have that week's samples, and a period with no
+    samples at all is refused rather than filled in from a neighbour.
+    """
+    missing = sorted(period for period in periods if period not in samples)
+    if missing:
+        raise LeagueSimError(
+            f"period(s) {missing} have no sample matrix. A week with no projection is a "
+            "modelling assumption, and this simulator will not manufacture one by "
+            "reusing another week's mean and standard deviation.")
+    for period in periods:
+        rows = samples[period]
+        if not rows:
+            raise LeagueSimError(f"period {period} has an empty sample matrix")
+        heights = {len(np.asarray(vector)) for vector in rows.values()}
+        if heights != {simulations}:
+            raise LeagueSimError(
+                f"period {period} samples are {sorted(heights)} rows deep but the run asks "
+                f"for {simulations}; a truncated or recycled matrix is not a joint sample")
+        needed = {spot.player_id for roster in rosters.values() for spot in roster}
+        absent = sorted(pid for pid in needed if pid not in rows)
+        if absent:
+            raise LeagueSimError(
+                f"period {period} is missing samples for rostered player(s) {absent[:5]}"
+                f"{' …' if len(absent) > 5 else ''}; those players would be scored as zero")
+
+
 def simulate_league(fmt: LeagueFormat, *, rosters: Mapping[int, Sequence[RosterSpot]],
-                    player_means: Mapping[int, float],
-                    player_sds: Mapping[int, float],
+                    period_samples: Mapping[int, Mapping[int, Any]],
                     simulations: int, seed: int,
                     period_basis: Mapping[int, str],
-                    rho: float = 0.35) -> LeagueSimResult:
+                    publish_championship_probabilities: bool = False) -> LeagueSimResult:
     """Run the whole league: schedule, standings, seeding, bracket.
 
     Every simulated season replays the real schedule one matchup period at a
@@ -932,12 +960,22 @@ def simulate_league(fmt: LeagueFormat, *, rosters: Mapping[int, Sequence[RosterS
             "and must be labelled as one.")
     if simulations < 1:
         raise LeagueSimError("at least one simulation is required")
+    validate_period_samples(period_samples, all_periods, rosters, simulations, period_basis)
+
+    future = [period for period in playoff_periods if period not in period_samples]
+    if future and publish_championship_probabilities:
+        raise LeagueSimError(
+            f"playoff period(s) {future} have no samples, so a championship probability "
+            "would be a property of whatever week was substituted for them. Run this "
+            "research-only, or supply the samples.")
 
     missing_rosters = sorted(set(fmt.team_ids) - set(rosters))
     if missing_rosters:
         raise LeagueSimError(f"team(s) {missing_rosters} have no roster")
 
-    rng = np.random.default_rng(seed)
+    # No RNG here any more: the randomness lives in the sample matrices the
+    # projection layer produced, and `seed` is carried into the config hash so
+    # a run is still identified by what produced its draws.
     teams = tuple(fmt.team_ids)
     wins = dict.fromkeys(teams, 0.0)
     losses = dict.fromkeys(teams, 0.0)
@@ -949,7 +987,9 @@ def simulate_league(fmt: LeagueFormat, *, rosters: Mapping[int, Sequence[RosterS
     advanced: dict[int, dict[str, int]] = {
         t: {rnd.name: 0 for rnd in rounds} for t in teams}
 
-    for _ in range(int(simulations)):
+    # Each pass reads one row of every period's sample matrix, so a season is a
+    # coherent draw across weeks rather than a fresh parametric roll per week.
+    for simulation in range(int(simulations)):
         w = dict.fromkeys(teams, 0)
         loss = dict.fromkeys(teams, 0)
         tie = dict.fromkeys(teams, 0)
@@ -960,10 +1000,10 @@ def simulate_league(fmt: LeagueFormat, *, rosters: Mapping[int, Sequence[RosterS
 
         for period in fmt.regular_season_periods:
             for home, away in fmt.schedule[period]:
-                hp = _week_total(rng, fmt, rosters, player_means, player_sds,
-                                 rho, team_period, home, period)
-                ap = _week_total(rng, fmt, rosters, player_means, player_sds,
-                                 rho, team_period, away, period)
+                hp = _week_total(fmt, rosters, period_samples, team_period,
+                                 home, period, simulation)
+                ap = _week_total(fmt, rosters, period_samples, team_period,
+                                 away, period, simulation)
                 pf[home] += hp
                 pf[away] += ap
                 pa[home] += ap
@@ -1003,8 +1043,8 @@ def simulate_league(fmt: LeagueFormat, *, rosters: Mapping[int, Sequence[RosterS
             made[t] += 1
         for period in playoff_periods:
             for t in qualifiers:
-                _week_total(rng, fmt, rosters, player_means, player_sds, rho,
-                            team_period, t, period)
+                _week_total(fmt, rosters, period_samples, team_period, t, period,
+                            simulation)
 
         outcome = run_bracket(seeds=qualifiers, rounds=rounds,
                               team_period_points=team_period,
@@ -1023,7 +1063,8 @@ def simulate_league(fmt: LeagueFormat, *, rosters: Mapping[int, Sequence[RosterS
             made_playoffs=made[t] / n,
             seed_distribution={k: v / n for k, v in sorted(seed_counts[t].items())},
             round_advancement={k: v / n for k, v in advanced[t].items()},
-            championship_probability=champs[t] / n,
+            championship_probability=(champs[t] / n
+                                      if publish_championship_probabilities else None),
         )
         for t in teams
     }
@@ -1033,14 +1074,16 @@ def simulate_league(fmt: LeagueFormat, *, rosters: Mapping[int, Sequence[RosterS
 
     return LeagueSimResult(
         teams=results, simulations=int(simulations), seed=int(seed),
-        config_hash=_config_hash(fmt, player_means, player_sds, simulations,
-                                 seed, period_basis, rho),
+        config_hash=_config_hash(fmt, period_samples, simulations, seed, period_basis),
         source_hashes=dict(fmt.source_hashes),
         periods_by_basis=basis_counts,
         probability_kind=PROBABILITY_KIND,
         disclaimer=DISCLAIMER,
         notes=tuple(fmt.notes) + (
-            f"weekly player outcomes drawn with within-team correlation rho={rho}",
+            "weekly player outcomes read from the projection layer's own per-period "
+            "correlated sample matrices; no parametric outcome model is used here",
             "managers assumed to start their optimal legal lineup every week",
-        ),
+        ) + ((
+            "championship probabilities withheld: see published_championship_probabilities",
+        ) if not publish_championship_probabilities else ()),
     )

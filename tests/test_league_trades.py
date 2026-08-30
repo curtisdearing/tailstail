@@ -61,6 +61,17 @@ PLACEHOLDER_TOKENS = ("Team1", "Team2", "Team3", "Team4", "Team5",
 # --------------------------------------------------------------------------- #
 # Fixtures
 # --------------------------------------------------------------------------- #
+
+def _scan(*args, **kwargs):
+    """Every test is an on-demand caller: a person asked for this scan, now.
+
+    `scan_trades` requires the acknowledgement because the weekly card must not
+    call it on a schedule and end up trading against whatever board is on disk.
+    """
+    kwargs.setdefault("on_demand", True)
+    return league_trades.scan_trades(*args, **kwargs)
+
+
 def _expected():
     return espn_league.ExpectedIdentity(
         league_id=LEAGUE_ID, season=SEASON, team_id=TEAM_ID,
@@ -251,7 +262,7 @@ def test_a_player_in_a_pending_transaction_is_locked(snapshot):
 
 def test_locked_players_never_appear_in_a_package(snapshot, board, season, byes):
     locked = league_trades.locked_players(snapshot)
-    scan = league_trades.scan_trades(snapshot, board, season, byes=byes,
+    scan = _scan(snapshot, board, season, byes=byes,
                                      min_my_gain=0.0, min_prob_not_worse=0.0)
     for package in scan.packages:
         moved = {p["espn_player_id"] for p in package.mine.sends + package.mine.receives}
@@ -266,7 +277,7 @@ def test_a_caller_supplied_lock_is_honoured(snapshot, board, season):
         snapshot, extra={target: "kickoff has passed for this player's NFL game"})
     assert locked[target].startswith("kickoff")
 
-    scan = league_trades.scan_trades(snapshot, board, season, min_my_gain=0.0,
+    scan = _scan(snapshot, board, season, min_my_gain=0.0,
                                      min_prob_not_worse=0.0, extra_locked={target: "locked by kickoff"})
     for package in scan.packages:
         assert target not in {p["espn_player_id"] for p in package.mine.sends}
@@ -276,7 +287,7 @@ def test_ir_players_are_not_tradeable_by_this_tool(snapshot, board, season):
     ir_ids = {player["espn_id"] for player in league_trades._roster_players(snapshot)
               if player["on_ir"]}
     assert ir_ids, "the fixture stashes a player on IR"
-    scan = league_trades.scan_trades(snapshot, board, season, min_my_gain=0.0, min_prob_not_worse=0.0)
+    scan = _scan(snapshot, board, season, min_my_gain=0.0, min_prob_not_worse=0.0)
     for package in scan.packages:
         moved = {p["espn_player_id"] for p in package.mine.sends + package.mine.receives}
         assert not (moved & ir_ids)
@@ -364,7 +375,7 @@ def test_ir_players_do_not_count_against_the_roster_cap(snapshot):
 # 5. Roster-space effects on 2-for-1 shapes
 # =========================================================================== #
 def test_receiving_two_for_one_costs_a_roster_spot(snapshot, board, season, byes):
-    scan = league_trades.scan_trades(snapshot, board, season, byes=byes,
+    scan = _scan(snapshot, board, season, byes=byes,
                                      min_my_gain=0.0, min_prob_not_worse=0.0, max_package=2)
     for package in scan.packages:
         net = len(package.mine.receives) - len(package.mine.sends)
@@ -409,7 +420,7 @@ def test_lineup_evaluator_matches_the_reference_optimizer(snapshot, board, seaso
 
 
 def test_packages_report_a_distribution_not_just_a_mean(snapshot, board, season, byes):
-    scan = league_trades.scan_trades(snapshot, board, season, byes=byes,
+    scan = _scan(snapshot, board, season, byes=byes,
                                      min_my_gain=0.0, min_prob_not_worse=0.0)
     assert scan.packages
     delta = scan.packages[0].mine.delta
@@ -424,7 +435,7 @@ def test_packages_report_a_distribution_not_just_a_mean(snapshot, board, season,
 
 
 def test_the_gate_is_two_sided(snapshot, board, season):
-    scan = league_trades.scan_trades(snapshot, board, season,
+    scan = _scan(snapshot, board, season,
                                      min_my_gain=0.5, min_prob_not_worse=0.55, their_tolerance=0.0)
     for package in scan.packages:
         assert package.mine.delta.mean >= 0.5
@@ -435,7 +446,7 @@ def test_the_gate_is_two_sided(snapshot, board, season):
 
 
 def test_an_unreachable_gate_produces_an_explicit_hold(snapshot, board, season):
-    scan = league_trades.scan_trades(snapshot, board, season, min_my_gain=10_000.0)
+    scan = _scan(snapshot, board, season, min_my_gain=10_000.0)
     assert scan.state == "hold"
     assert scan.packages == ()
     assert scan.hold_reason and "Hold." in scan.hold_reason
@@ -447,7 +458,7 @@ def test_an_unreachable_gate_produces_an_explicit_hold(snapshot, board, season):
 # 7. Output shape and honesty
 # =========================================================================== #
 def test_every_package_shows_exact_sends_and_receives(snapshot, board, season, byes):
-    scan = league_trades.scan_trades(snapshot, board, season, byes=byes,
+    scan = _scan(snapshot, board, season, byes=byes,
                                      min_my_gain=0.0, min_prob_not_worse=0.0)
     assert scan.packages
     for package in scan.packages:
@@ -460,7 +471,7 @@ def test_every_package_shows_exact_sends_and_receives(snapshot, board, season, b
 
 
 def test_no_package_claims_the_other_manager_would_accept(snapshot, board, season, byes):
-    scan = league_trades.scan_trades(snapshot, board, season, byes=byes,
+    scan = _scan(snapshot, board, season, byes=byes,
                                      min_my_gain=0.0, min_prob_not_worse=0.0)
     payload = json.dumps(league_trades.scan_to_dict(scan)).lower()
     for claim in ("would accept", "will accept", "they'll take", "guaranteed",
@@ -473,7 +484,7 @@ def test_no_package_claims_the_other_manager_would_accept(snapshot, board, seaso
 
 def test_every_package_carries_rationale_uncertainty_and_plausibility(snapshot, board,
                                                                      season, byes):
-    scan = league_trades.scan_trades(snapshot, board, season, byes=byes,
+    scan = _scan(snapshot, board, season, byes=byes,
                                      min_my_gain=0.0, min_prob_not_worse=0.0)
     for package in scan.packages:
         assert package.rationale and package.plausibility and package.uncertainty
@@ -483,7 +494,7 @@ def test_every_package_carries_rationale_uncertainty_and_plausibility(snapshot, 
 
 
 def test_output_contains_no_placeholder_team_or_player_artifacts(snapshot, board, season, byes):
-    scan = league_trades.scan_trades(snapshot, board, season, byes=byes,
+    scan = _scan(snapshot, board, season, byes=byes,
                                      min_my_gain=0.0, min_prob_not_worse=0.0)
     payload = json.dumps(league_trades.scan_to_dict(scan))
     for token in PLACEHOLDER_TOKENS:
@@ -497,7 +508,7 @@ def test_output_contains_no_placeholder_team_or_player_artifacts(snapshot, board
 
 
 def test_the_scan_reports_unmatched_identities_at_the_top_level(snapshot, board, season):
-    scan = league_trades.scan_trades(snapshot, board, season, min_my_gain=0.0, min_prob_not_worse=0.0)
+    scan = _scan(snapshot, board, season, min_my_gain=0.0, min_prob_not_worse=0.0)
     assert scan.identity["unmatched"], "unmatched players must be visible in the artifact"
     assert any(row["name"] == "Dontae Whitfield" for row in scan.identity["unmatched"])
     assert scan.identity["shadow"]
@@ -505,7 +516,7 @@ def test_the_scan_reports_unmatched_identities_at_the_top_level(snapshot, board,
 
 
 def test_the_scan_carries_the_snapshot_hashes_and_provenance(snapshot, board, season):
-    scan = league_trades.scan_trades(snapshot, board, season, min_my_gain=0.0, min_prob_not_worse=0.0)
+    scan = _scan(snapshot, board, season, min_my_gain=0.0, min_prob_not_worse=0.0)
     assert scan.league["league_id"] == LEAGUE_ID and scan.league["season"] == SEASON
     for name in ("league_hash", "scoring_hash", "roster_hash"):
         assert len(scan.league[name]) == 64
@@ -514,7 +525,7 @@ def test_the_scan_carries_the_snapshot_hashes_and_provenance(snapshot, board, se
 
 
 def test_scan_is_json_serializable(snapshot, board, season, byes):
-    scan = league_trades.scan_trades(snapshot, board, season, byes=byes,
+    scan = _scan(snapshot, board, season, byes=byes,
                                      min_my_gain=0.0, min_prob_not_worse=0.0)
     payload = json.dumps(league_trades.scan_to_dict(scan), indent=1)
     assert json.loads(payload)["state"] in ("proposals", "hold")
@@ -525,7 +536,7 @@ def test_scan_is_json_serializable(snapshot, board, season, byes):
 # =========================================================================== #
 def test_promoting_shadow_positions_without_projections_is_refused(snapshot, board, season):
     with pytest.raises(league_trades.TradeScanError, match="shadow_projections"):
-        league_trades.scan_trades(snapshot, board, season, promote_shadow=True)
+        _scan(snapshot, board, season, promote_shadow=True)
 
 
 def test_a_pre_draft_league_cannot_be_scanned(board):
@@ -537,13 +548,13 @@ def test_a_pre_draft_league_cannot_be_scanned(board):
         player_meta=pd.DataFrame(columns=["player_id", "player_name", "position", "team"]),
         metadata={})
     with pytest.raises(league_trades.TradeScanError, match=r"pre-draft|empty_pre_draft"):
-        league_trades.scan_trades(snapshot, board, season)
+        _scan(snapshot, board, season)
 
 
 def test_an_unknown_snapshot_schema_is_refused(snapshot, board, season):
     drifted = dict(snapshot, schema_version="espn-league/99")
     with pytest.raises(league_trades.TradeScanError, match="schema"):
-        league_trades.scan_trades(drifted, board, season)
+        _scan(drifted, board, season)
 
 
 # =========================================================================== #
@@ -559,7 +570,7 @@ def test_bye_context_uses_real_pro_team_abbreviations(snapshot, board, byes):
 
 
 def test_packages_report_bye_pressure_on_both_sides(snapshot, board, season, byes):
-    scan = league_trades.scan_trades(snapshot, board, season, byes=byes,
+    scan = _scan(snapshot, board, season, byes=byes,
                                      upcoming_weeks=(6, 7, 8),
                                      min_my_gain=0.0, min_prob_not_worse=0.0)
     assert scan.rules["upcoming_weeks"] == [6, 7, 8]
@@ -583,7 +594,7 @@ def test_the_module_has_no_write_path():
 def test_the_scan_does_not_mutate_its_inputs(snapshot, board, season, byes):
     before = json.dumps(snapshot, sort_keys=True)
     board_before = board.copy()
-    league_trades.scan_trades(snapshot, board, season, byes=byes,
+    _scan(snapshot, board, season, byes=byes,
                               min_my_gain=0.0, min_prob_not_worse=0.0)
     assert json.dumps(snapshot, sort_keys=True) == before
     pd.testing.assert_frame_equal(board, board_before)
@@ -593,3 +604,43 @@ def test_the_trade_scan_cli_takes_no_credentials():
     source = (ROOT / "scripts" / "trade_scan.py").read_text()
     for flag in ("--espn-s2", "--swid", "--espn_s2", "espn_s2=", "swid="):
         assert flag not in source, f"{flag!r} would put a session cookie in shell history"
+
+
+# --------------------------------------------------------------------------- #
+# An unidentifiable starter blocks the team, not just the footnotes
+# --------------------------------------------------------------------------- #
+def test_a_startable_unmatched_player_blocks_that_team_entirely(raw_league, board, season):
+    """A warning at the top of the scan does not travel with the package.
+
+    Every lineup total for that side is computed as though the player does not
+    exist, so a package can look like a gain purely because the roster it is
+    measured against is missing a starter.
+    """
+    broken = deepcopy(raw_league)
+    for team in broken["teams"]:
+        if team["id"] != 2:
+            continue
+        for entry in team["roster"]["entries"]:
+            if entry.get("lineupSlotId") == 20:          # a bench skill player
+                entry["playerPoolEntry"]["player"]["fullName"] = "Nobody Whoexists"
+                break
+    scan = _scan(_snapshot_dict(broken), board, season, min_my_gain=0.0,
+                 min_prob_not_worse=0.0)
+    assert "2" in scan.context["blocked_teams"]
+    assert all(p.theirs.team_id != 2 for p in scan.packages), (
+        "a team whose lineup cannot be valued must not appear in a package")
+    assert any("excluded entirely" in warning for warning in scan.warnings)
+
+
+def test_an_unmatched_player_on_ir_does_not_block_his_team(raw_league, board, season):
+    """He cannot be seated, so failing to price him cannot move a lineup."""
+    scan = _scan(_snapshot_dict(raw_league), board, season, min_my_gain=0.0,
+                 min_prob_not_worse=0.0)
+    assert scan.identity["unmatched"], "the fixture should still report him"
+    assert "1" not in scan.context["blocked_teams"]
+
+
+def test_a_scan_is_refused_unless_the_caller_asked_for_one(snapshot, board, season):
+    """It is not part of the weekly card, and the default says so."""
+    with pytest.raises(league_trades.TradeScanError, match="on demand"):
+        league_trades.scan_trades(snapshot, board, season)

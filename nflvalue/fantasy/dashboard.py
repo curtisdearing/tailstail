@@ -198,15 +198,26 @@ def _start_sit_block(section: Mapping[str, Any]) -> str:
     for d in section["decisions"]:
         sit = d.get("sit") or {}
         unc = d.get("uncertainty") or {}
+        if unc.get("status") == "ok":
+            spread = f"{unc['p10_delta']:+.1f} … {unc['p90_delta']:+.1f}"
+            # Named for what it is. It is the share of the model's own simulated
+            # weeks in which the start wins, so it carries every error in the
+            # model that drew them and has not been checked against outcomes.
+            odds = f"{unc['model_relative_prob_start_scores_more']:.0%} of sims"
+        else:
+            spread = "—"
+            odds = "unavailable"
         rows.append((
             _esc(d["slot"]),
             f"<b>{_esc(d['start']['name'])}</b><small>{_esc(d['start']['position'])}</small>",
             f"{_esc(sit.get('name') or '—')}<small>{_esc(sit.get('position') or '')}</small>",
             f"{d['projected_delta']:+.1f}",
-            f"{unc.get('p10_delta', 0):+.1f} … {unc.get('p90_delta', 0):+.1f}",
-            _esc(d.get("confidence")),
+            _esc(spread),
+            _esc(odds),
         ))
-    return _table(("Slot", "Start", "Sit", "Δ proj", "Δ P10…P90", "Confidence"), rows)
+    return _table(
+        ("Slot", "Start", "Sit", "Δ proj", "Δ P10…P90 (paired sims)",
+         "Start scores more (model-relative, not calibrated)"), rows)
 
 
 def _draft_block(section: Mapping[str, Any]) -> str:

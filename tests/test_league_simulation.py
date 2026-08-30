@@ -63,6 +63,34 @@ RS14 = circle_schedule(EIGHT_TEAMS, 14)
 # --------------------------------------------------------------------------- #
 # 1 · Schedule validation — fail closed, and say which team
 # --------------------------------------------------------------------------- #
+
+def _period_samples(means=None, *, periods=range(1, 19), simulations=40, sd=5.0,
+                    seed=6102026, rho=0.35):
+    """A TEST DOUBLE for the projection layer's per-period sample matrices.
+
+    The parametric draw this builds used to live inside `league_sim` and stood
+    in for the real correlated samples on every week of every season. It is a
+    fixture now, and it is here rather than there on purpose: the simulator
+    must consume draws somebody else produced, so that a rest-of-season
+    assumption week and a projected week are visibly different inputs instead
+    of the same two scalars wearing different labels.
+    """
+    import numpy as _np
+
+    means = means or _means()
+    rng = _np.random.default_rng(seed)
+    out = {}
+    for period in periods:
+        shared = rng.normal(0.0, 1.0, simulations)
+        a, b = _np.sqrt(rho), _np.sqrt(1.0 - rho)
+        out[int(period)] = {
+            int(pid): _np.maximum(
+                0.0, mean + sd * (a * shared + b * rng.normal(0.0, 1.0, simulations)))
+            for pid, mean in means.items()
+        }
+    return out
+
+
 def test_a_complete_round_robin_validates():
     report = LS.validate_schedule(FOUR_TEAMS, RR4, periods=(1, 2, 3))
     assert report.ok
@@ -501,9 +529,9 @@ def _means():
 
 def test_a_full_league_runs_and_conserves_games():
     result = LS.simulate_league(
-        _league(), rosters=_rosters(), player_means=_means(),
-        player_sds=dict.fromkeys(_means(), 5.0),
+        _league(), rosters=_rosters(), period_samples=_period_samples(simulations=40, seed=6102026),
         simulations=40, seed=6102026,
+        publish_championship_probabilities=True,
         period_basis={p: ("weekly_projection" if p == 1
                           else "rest_of_season_assumption")
                       for p in range(1, 19)},
@@ -517,9 +545,9 @@ def test_a_full_league_runs_and_conserves_games():
 
 def test_the_stronger_team_wins_more_often_than_the_weaker_one():
     result = LS.simulate_league(
-        _league(), rosters=_rosters(), player_means=_means(),
-        player_sds=dict.fromkeys(_means(), 5.0),
+        _league(), rosters=_rosters(), period_samples=_period_samples(simulations=60, seed=6102026),
         simulations=60, seed=6102026,
+        publish_championship_probabilities=True,
         period_basis=dict.fromkeys(range(1, 19), "rest_of_season_assumption"),
     )
     assert result.teams[1].wins > result.teams[8].wins
@@ -527,9 +555,9 @@ def test_the_stronger_team_wins_more_often_than_the_weaker_one():
 
 
 def test_the_same_seed_reproduces_the_run_exactly():
-    kwargs = dict(rosters=_rosters(), player_means=_means(),
-                  player_sds=dict.fromkeys(_means(), 5.0),
+    kwargs = dict(rosters=_rosters(), period_samples=_period_samples(simulations=25, seed=99),
                   simulations=25, seed=99,
+                  publish_championship_probabilities=True,
                   period_basis=dict.fromkeys(range(1, 19), "rest_of_season_assumption"))
     a = LS.simulate_league(_league(), **kwargs)
     b = LS.simulate_league(_league(), **kwargs)
@@ -539,9 +567,10 @@ def test_the_same_seed_reproduces_the_run_exactly():
 
 
 def test_a_different_seed_gives_a_different_run():
-    kwargs = dict(rosters=_rosters(), player_means=_means(),
-                  player_sds=dict.fromkeys(_means(), 5.0),
+    kwargs = dict(rosters=_rosters(),
+                  period_samples=_period_samples(simulations=25),
                   simulations=25,
+                  publish_championship_probabilities=True,
                   period_basis=dict.fromkeys(range(1, 19), "rest_of_season_assumption"))
     a = LS.simulate_league(_league(), seed=1, **kwargs)
     b = LS.simulate_league(_league(), seed=2, **kwargs)
@@ -551,9 +580,9 @@ def test_a_different_seed_gives_a_different_run():
 
 def test_source_hashes_and_the_projection_basis_survive_into_the_result():
     result = LS.simulate_league(
-        _league(), rosters=_rosters(), player_means=_means(),
-        player_sds=dict.fromkeys(_means(), 5.0),
+        _league(), rosters=_rosters(), period_samples=_period_samples(simulations=10, seed=7),
         simulations=10, seed=7,
+        publish_championship_probabilities=True,
         period_basis={p: ("weekly_projection" if p <= 2
                           else "rest_of_season_assumption")
                       for p in range(1, 19)},
@@ -568,18 +597,18 @@ def test_a_period_with_no_declared_basis_fails_closed():
     Leaving it unlabelled is how a projection quietly becomes a forecast."""
     with pytest.raises(LS.LeagueSimError, match="basis"):
         LS.simulate_league(
-            _league(), rosters=_rosters(), player_means=_means(),
-            player_sds=dict.fromkeys(_means(), 5.0),
+            _league(), rosters=_rosters(), period_samples=_period_samples(simulations=5, seed=7),
             simulations=5, seed=7,
+            publish_championship_probabilities=True,
             period_basis={1: "weekly_projection"},
         )
 
 
 def test_the_result_refuses_to_call_itself_calibrated():
     result = LS.simulate_league(
-        _league(), rosters=_rosters(), player_means=_means(),
-        player_sds=dict.fromkeys(_means(), 5.0),
+        _league(), rosters=_rosters(), period_samples=_period_samples(simulations=10, seed=7),
         simulations=10, seed=7,
+        publish_championship_probabilities=True,
         period_basis=dict.fromkeys(range(1, 19), "rest_of_season_assumption"),
     )
     text = result.disclaimer.lower()
@@ -602,9 +631,9 @@ def test_an_invalid_schedule_stops_the_whole_simulation():
     broken[7] = ((1, 2), (3, 4), (5, 6), (7, 7))
     with pytest.raises(LS.ScheduleError):
         LS.simulate_league(
-            _league(schedule=broken), rosters=_rosters(), player_means=_means(),
-            player_sds=dict.fromkeys(_means(), 5.0),
+            _league(schedule=broken), rosters=_rosters(), period_samples=_period_samples(simulations=5, seed=7),
             simulations=5, seed=7,
+            publish_championship_probabilities=True,
             period_basis=dict.fromkeys(range(1, 19), "rest_of_season_assumption"),
         )
 
@@ -708,12 +737,15 @@ def test_the_real_league_simulates_end_to_end(snapshot):
             means[spot.player_id] = 10.0 + (8 - team_id) * 0.5 + (i % 3)
             sds[spot.player_id] = 4.0
     playoff_periods = range(15, 15 + 2)
+    periods = list(fmt.regular_season_periods) + list(playoff_periods)
     result = LS.simulate_league(
-        fmt, rosters=rosters, player_means=means, player_sds=sds,
+        fmt, rosters=rosters,
+        period_samples=_period_samples(means, periods=periods, simulations=20, sd=4.0),
         simulations=20, seed=6102026,
+        publish_championship_probabilities=True,
         period_basis={p: ("weekly_projection" if p == 1
                           else "rest_of_season_assumption")
-                      for p in list(fmt.regular_season_periods) + list(playoff_periods)},
+                      for p in periods},
     )
     assert set(result.teams) == set(fmt.team_ids)
     assert sum(r.championship_probability for r in result.teams.values()) == pytest.approx(1.0)
@@ -743,3 +775,73 @@ def test_a_roster_that_cannot_fill_the_slots_scores_nothing_for_them(snapshot):
     assert filler.empty_slots == ("D/ST", "K", "QB", "RB", "RB", "TE")
     assert filler.total == pytest.approx(30.0)            # WR, WR, FLEX only
     assert len(rosters[2]) == 16, "a full roster that still cannot field a lineup"
+
+
+# --------------------------------------------------------------------------- #
+# The outcome generator is quarantined, and period_basis has to mean something
+# --------------------------------------------------------------------------- #
+def test_a_period_with_no_samples_is_refused_not_filled_in():
+    """A week nobody projected is a modelling assumption, not a projection."""
+    samples = _period_samples(simulations=10)
+    del samples[7]
+    with pytest.raises(LS.LeagueSimError, match="no sample matrix"):
+        LS.simulate_league(
+            _league(), rosters=_rosters(), period_samples=samples,
+            simulations=10, seed=1,
+            period_basis=dict.fromkeys(range(1, 19), "rest_of_season_assumption"))
+
+
+def test_a_recycled_sample_matrix_is_refused():
+    """Reusing one week's draws for another is the bug this replaces."""
+    samples = _period_samples(simulations=10)
+    samples[7] = {pid: vector[:4] for pid, vector in samples[7].items()}
+    with pytest.raises(LS.LeagueSimError, match="rows deep"):
+        LS.simulate_league(
+            _league(), rosters=_rosters(), period_samples=samples,
+            simulations=10, seed=1,
+            period_basis=dict.fromkeys(range(1, 19), "rest_of_season_assumption"))
+
+
+def test_a_rostered_player_with_no_samples_is_refused_not_scored_as_zero():
+    samples = _period_samples(simulations=10)
+    victim = sorted(samples[1])[0]
+    for period in samples:
+        samples[period].pop(victim)
+    with pytest.raises(LS.LeagueSimError, match="missing samples"):
+        LS.simulate_league(
+            _league(), rosters=_rosters(), period_samples=samples,
+            simulations=10, seed=1,
+            period_basis=dict.fromkeys(range(1, 19), "rest_of_season_assumption"))
+
+
+def test_championship_probabilities_are_withheld_by_default():
+    """The most-quoted number depends most on weeks nobody has projected."""
+    result = LS.simulate_league(
+        _league(), rosters=_rosters(), period_samples=_period_samples(simulations=12),
+        simulations=12, seed=3,
+        period_basis=dict.fromkeys(range(1, 19), "rest_of_season_assumption"))
+    assert all(team.championship_probability is None for team in result.teams.values())
+    assert any("withheld" in note for note in result.notes)
+    # everything that does not depend on the unprojected weeks still comes back
+    assert all(team.wins >= 0 for team in result.teams.values())
+
+
+def test_the_config_hash_moves_with_the_samples_not_just_their_label():
+    """A label is not an input. Two different draws must hash differently."""
+    common = dict(rosters=_rosters(), simulations=12, seed=3,
+                  period_basis=dict.fromkeys(range(1, 19), "rest_of_season_assumption"))
+    a = LS.simulate_league(_league(), period_samples=_period_samples(simulations=12, seed=1),
+                           **common)
+    b = LS.simulate_league(_league(), period_samples=_period_samples(simulations=12, seed=2),
+                           **common)
+    assert a.config_hash != b.config_hash
+
+
+def test_the_parametric_generator_is_not_reachable_from_the_simulator():
+    """It survives only as a diagnostic, and says so."""
+    assert "QUARANTINED" in LS._draw_team_week.__doc__
+    import inspect
+
+    source = inspect.getsource(LS.simulate_league)
+    assert "_draw_team_week" not in source
+    assert "rho" not in source

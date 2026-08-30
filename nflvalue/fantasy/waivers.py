@@ -31,6 +31,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Mapping, Sequence
 
+import numpy as np
+
 from . import waiver_rules as LC
 
 UTC = timezone.utc
@@ -38,6 +40,8 @@ UTC = timezone.utc
 NO_LEGAL_DROP = "no_legal_drop"
 DROP_NOT_REQUIRED = "not_required"
 DROP_SELECTED = "selected"
+#: A legal drop exists but cannot be valued, so none is nominated.
+NO_VALUED_DROP = "no_valued_drop"
 
 # A free-agent pool older than this cannot support an add recommendation.
 MAX_POOL_AGE_HOURS = 12
@@ -46,6 +50,21 @@ MAX_POOL_AGE_HOURS = 12
 SHADOW_POSITIONS = frozenset({"K", "D/ST", "DST"})
 
 OBJECTIVE = "own_optimal_lineup_delta"
+
+#: What a waiver row has to clear before it exists at all. Declared here, ahead
+#: of any run, so a thin result cannot be answered by moving the line.
+#:
+#: The planner used to emit a row for every legally addable player, ordered by
+#: ESPN player id, with `lineup_delta` hardcoded to None and a `distributions`
+#: argument it accepted and never read. That is a list of transactions the
+#: rules permit, presented where a recommendation belongs. A row now requires
+#: all four of: a legal claim or immediate add, an identified legal drop, a
+#: computed joint-sample delta, and that delta clearing the gate.
+WAIVER_GATE = {
+    "min_mean_lineup_delta": 0.5,
+    "min_prob_improves": 0.60,
+    "min_simulations": 200,
+}
 
 AVAILABLE_STATES = frozenset({"freeagent", "waivers"})
 
@@ -213,16 +232,105 @@ def slot_legal_after(contract: LC.WaiverRules, roster: Sequence[RosterEntry],
 # --------------------------------------------------------------------------- #
 # Planning
 # --------------------------------------------------------------------------- #
-def _drop_choice(contract, roster, now):
+def _lineup_delta(contract: LC.WaiverRules, roster: Sequence[RosterEntry],
+                  add: PoolEntry, drop: RosterEntry | None,
+                  samples: Mapping[int, Any] | None) -> dict | None:
+    """The paired per-simulation change in this roster's own optimal lineup.
+
+    Both lineups are solved on the same simulation row, so the difference is a
+    real distribution over weeks rather than a gap between two summaries. No
+    samples means no number: the planner reports that it cannot value the move
+    instead of ranking by player id and calling it a recommendation.
+    """
+    from . import lineup as lineup_engine
+
+    if not samples:
+        return None
+    before = [entry for entry in roster if not entry.on_ir]
+    after = [entry for entry in before if drop is None or entry.espn_id != drop.espn_id]
+
+    def matrix(entries, extra=None):
+        rows = list(entries) + ([extra] if extra is not None else [])
+        columns, players = [], []
+        for entry in rows:
+            draw = samples.get(int(entry.espn_id))
+            if draw is None:
+                return None, None
+            columns.append(np.asarray(draw, dtype=float))
+            players.append(lineup_engine.LineupPlayer(
+                player_id=int(entry.espn_id),
+                eligible_slots=frozenset(contract.eligible_slots(str(entry.position))),
+                position=str(entry.position)))
+        if not columns:
+            return None, None
+        widths = {column.shape for column in columns}
+        if len(widths) != 1:
+            return None, None
+        return np.column_stack(columns), tuple(players)
+
+    slots = {slot.label: slot.count for slot in contract.slots
+             if slot.label not in ("BE", "IR")}
+    base_matrix, base_players = matrix(before)
+    after_matrix, after_players = matrix(after, add)
+    if base_matrix is None or after_matrix is None:
+        return None
+    base = lineup_engine.optimize_matrix(base_matrix, base_players, slots)
+    moved = lineup_engine.optimize_matrix(after_matrix, after_players, slots)
+    delta = moved - base
+    return {
+        "own_optimal_lineup_delta": round(float(delta.mean()), 3),
+        "median": round(float(np.median(delta)), 3),
+        "p10": round(float(np.percentile(delta, 10)), 3),
+        "p90": round(float(np.percentile(delta, 90)), 3),
+        # Model-relative: the share of the model's own simulated weeks in which
+        # the move helps. Not a calibrated probability.
+        "model_relative_prob_improves": round(float((delta > 0).mean()), 4),
+        "simulations": int(delta.size),
+        "basis": "paired joint simulation rows, both lineups solved per row",
+    }
+
+
+def _clears_gate(delta: Mapping[str, Any] | None) -> tuple[bool, str]:
+    if delta is None:
+        return False, "no joint samples were supplied, so the move cannot be valued"
+    if int(delta["simulations"]) < WAIVER_GATE["min_simulations"]:
+        return False, (f"{delta['simulations']} simulation rows is below the declared minimum "
+                       f"of {WAIVER_GATE['min_simulations']}")
+    if delta["own_optimal_lineup_delta"] < WAIVER_GATE["min_mean_lineup_delta"]:
+        return False, (f"mean lineup gain {delta['own_optimal_lineup_delta']} is below the "
+                       f"declared gate of {WAIVER_GATE['min_mean_lineup_delta']}")
+    if delta["model_relative_prob_improves"] < WAIVER_GATE["min_prob_improves"]:
+        return False, (f"the move helps in {delta['model_relative_prob_improves']:.0%} of "
+                       f"simulated weeks, below the declared "
+                       f"{WAIVER_GATE['min_prob_improves']:.0%}")
+    return True, ""
+
+
+def _drop_choice(contract, roster, now, samples=None, add=None):
+    """The legal drop that costs the least, valued rather than picked by id.
+
+    This used to return the bench player with the highest ESPN player id, which
+    is deterministic and meaningless. With joint samples the drop is the one
+    whose removal costs this roster's own optimal lineup the least; without
+    them there is no defensible ranking and the planner says so rather than
+    dropping somebody arbitrary.
+    """
     legal = droppable(contract, roster, now=now)
     if not legal:
         return None, NO_LEGAL_DROP
     if not roster_is_full(contract, roster):
         return None, DROP_NOT_REQUIRED
-    # Without distributions there is no defensible ranking, so the choice is
-    # positional and deterministic, and the rationale says exactly that.
-    bench = [e for e in legal if e.slot == "BE"] or legal
-    return max(bench, key=lambda e: int(e.espn_id)), DROP_SELECTED
+    if not samples or add is None:
+        return None, NO_VALUED_DROP
+    scored = []
+    for candidate in legal:
+        delta = _lineup_delta(contract, roster, add, candidate, samples)
+        if delta is not None:
+            scored.append((delta["own_optimal_lineup_delta"], int(candidate.espn_id), candidate))
+    if not scored:
+        return None, NO_VALUED_DROP
+    scored.sort(key=lambda row: (-row[0], row[1]))
+    return scored[0][2], DROP_SELECTED
 
 
 def _degraded_record(contract, now, reason):
@@ -245,10 +353,17 @@ def _degraded_record(contract, now, reason):
 
 def plan(contract: LC.WaiverRules, *, roster: Sequence[RosterEntry] | None,
          pool: Sequence[PoolEntry] | None, now: datetime,
-         distributions: Any = None, my_team_id: int | None = None
+         distributions: Mapping[int, Any] | None = None, my_team_id: int | None = None
          ) -> list[Recommendation]:
-    """Produce recommendation-only add/drop options.  Executes nothing."""
+    """Add/drop options that clear the declared gate. Executes nothing.
 
+    Four things have to be true before a row exists: the add is legally
+    available now (as an immediate free agent or as a claim), a legal drop is
+    identified, the change in this roster's own optimal lineup is computable
+    from joint samples, and that change clears `WAIVER_GATE`. A row missing any
+    of them is not a weaker recommendation, it is not a recommendation, and the
+    planner returns the reason instead.
+    """
     if roster is None:
         raise PlannerError("roster state is required — refusing to guess a roster")
     if pool is None:
@@ -264,63 +379,113 @@ def plan(contract: LC.WaiverRules, *, roster: Sequence[RosterEntry] | None,
     if not candidates:
         return []
 
-    drop, drop_state = _drop_choice(contract, roster, now)
     my_priority = contract.priority_of(my_team_id) if my_team_id else None
-
-    records = []
+    records: list[Recommendation] = []
     for cand in sorted(candidates, key=lambda c: int(c.espn_id)):
         shadow = str(cand.position).upper() in SHADOW_POSITIONS
-        faab = None
-        if contract.uses_faab:
-            faab = {"bid": None, "budget_remaining": contract.faab_budget}
+        drop, drop_state = _drop_choice(contract, roster, now, distributions, cand)
+        delta = (None if drop_state in (NO_LEGAL_DROP, NO_VALUED_DROP)
+                 else _lineup_delta(contract, roster, cand, drop, distributions))
+        clears, blocked_reason = _clears_gate(delta)
+
+        if shadow:
+            status, reason = "shadow", (
+                f"{cand.position} projections are shadow-only and never enter the lineup "
+                "objective, so this add cannot be valued against it")
+        elif drop_state == NO_LEGAL_DROP:
+            status, reason = "no_current_pick", (
+                "no legal drop exists, so this add cannot be made at all")
+        elif drop_state == NO_VALUED_DROP:
+            status, reason = "no_current_pick", (
+                "a legal drop exists but cannot be valued without joint samples; "
+                "nominating one by roster position would be an arbitrary cut")
+        elif not clears:
+            status, reason = "no_current_pick", blocked_reason
+        else:
+            status, reason = "recommendation", None
+
+        if status != "recommendation":
+            # Kept visible rather than dropped: "we looked and it did not clear"
+            # is information, and an empty list is indistinguishable from an
+            # engine that never ran.
+            records.append(_no_pick_record(contract, now, cand, drop, drop_state,
+                                           status, reason, delta, my_priority,
+                                           shadow_reason=reason if shadow else None))
+            continue
 
         records.append(Recommendation(
-            add_espn_id=int(cand.espn_id),
-            add_name=cand.name,
-            add_position=cand.position,
+            add_espn_id=int(cand.espn_id), add_name=cand.name, add_position=cand.position,
             drop_espn_id=(int(drop.espn_id) if drop else None),
-            drop_name=(drop.name if drop else None),
-            drop_state=drop_state,
-            status=("shadow" if shadow else "recommendation"),
-            shadow_reason=(
-                f"{cand.position} projections are shadow-only and not promoted "
-                "into lineup optimization" if shadow else None),
+            drop_name=(drop.name if drop else None), drop_state=drop_state,
+            status="recommendation", shadow_reason=None,
             confidence="none",
             rationale=(
-                "legality verified against the live league contract; "
-                "no projection distribution supplied, so no value claim is made"
-                + ("; drop candidate chosen positionally, not by value"
-                   if drop_state == DROP_SELECTED else "")),
+                f"adding {cand.name} for {drop.name if drop else 'an open spot'} raises this "
+                f"roster's own optimal lineup by {delta['own_optimal_lineup_delta']} points on "
+                f"average, helping in {delta['model_relative_prob_improves']:.0%} of simulated "
+                "weeks; the drop is the legal cut that costs the lineup least"),
             invalidation_trigger=(
                 "roster, availability, lock state, or league settings change; "
                 f"contract payload hash {contract.payload_hash}"),
             priority_implications={
-                "mode": contract.waiver_mode,
-                "assumed": contract.waiver_mode_assumed,
-                "my_priority": my_priority,
-                "order": list(contract.priority_order),
+                "mode": contract.waiver_mode, "assumed": contract.waiver_mode_assumed,
+                "my_priority": my_priority, "order": list(contract.priority_order),
                 "tied_teams": sorted(contract.priority_tied_teams),
-                "competing_claims": list(
-                    contract.pending_claims_for(cand.espn_id)),
+                "competing_claims": list(contract.pending_claims_for(cand.espn_id)),
+                "acquisition_kind": acquisition_kind(cand),
             },
-            replacement_effect={
-                "status": "unavailable: requires weekly/ROS distributions",
-                "bye_coverage": "unavailable", "injury_coverage": "unavailable",
-            },
+            replacement_effect={"status": "unavailable: requires bye/injury coverage modelling",
+                                "bye_coverage": "unavailable", "injury_coverage": "unavailable"},
             opponent_opportunity_impact={
                 "status": "unavailable: requires opponent roster state",
-                "note": "secondary field; never the ranking objective",
-            },
-            lineup_delta=None,
-            lineup_delta_status=(
-                "unavailable: no weekly/rest-of-season distributions supplied"
-                if distributions is None else "unavailable: not yet wired"),
+                "note": "secondary field; never the ranking objective"},
+            lineup_delta=delta,
+            lineup_delta_status="ok",
             data_timestamps={
                 "contract_as_of": contract.as_of.isoformat(),
                 "pool_as_of": (cand.as_of.isoformat() if cand.as_of else "unknown"),
-                "evaluated_at": now.isoformat(),
-            },
+                "evaluated_at": now.isoformat()},
             degraded=False,
-            faab=faab,
+            faab=({"bid": None, "budget_remaining": contract.faab_budget}
+                  if contract.uses_faab else None),
         ))
-    return records
+
+    ranked = [r for r in records if r.status == "recommendation"]
+    rest = [r for r in records if r.status != "recommendation"]
+    ranked.sort(key=lambda r: (-(r.lineup_delta or {}).get("own_optimal_lineup_delta", 0.0),
+                               int(r.add_espn_id or 0)))
+    return ranked + rest
+
+
+def _no_pick_record(contract, now, cand, drop, drop_state, status, reason, delta,
+                    my_priority, *, shadow_reason=None) -> Recommendation:
+    """A candidate that was considered and did not clear, with the reason."""
+    return Recommendation(
+        add_espn_id=int(cand.espn_id), add_name=cand.name, add_position=cand.position,
+        drop_espn_id=(int(drop.espn_id) if drop else None),
+        drop_name=(drop.name if drop else None), drop_state=drop_state,
+        status=status, shadow_reason=shadow_reason, confidence="none",
+        rationale=reason or "did not clear the declared waiver gate",
+        invalidation_trigger=(
+            "roster, availability, lock state, or league settings change; "
+            f"contract payload hash {contract.payload_hash}"),
+        priority_implications={
+            "mode": contract.waiver_mode, "assumed": contract.waiver_mode_assumed,
+            "my_priority": my_priority, "order": list(contract.priority_order),
+            "tied_teams": sorted(contract.priority_tied_teams),
+            "competing_claims": list(contract.pending_claims_for(cand.espn_id)),
+            "acquisition_kind": acquisition_kind(cand)},
+        replacement_effect={"status": "unavailable", "bye_coverage": "unavailable",
+                            "injury_coverage": "unavailable"},
+        opponent_opportunity_impact={"status": "unavailable",
+                                     "note": "secondary field; never the ranking objective"},
+        lineup_delta=delta,
+        lineup_delta_status=("ok" if delta else "unavailable"),
+        data_timestamps={
+            "contract_as_of": contract.as_of.isoformat(),
+            "pool_as_of": (cand.as_of.isoformat() if cand.as_of else "unknown"),
+            "evaluated_at": now.isoformat()},
+        degraded=False,
+        faab=({"bid": None, "budget_remaining": contract.faab_budget}
+              if contract.uses_faab else None),
+    )

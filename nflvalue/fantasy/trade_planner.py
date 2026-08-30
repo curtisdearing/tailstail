@@ -198,63 +198,47 @@ def market_temperature(
 # ---------------------------------------------------------------------------
 
 class _FastLineup:
-    """Vectorized optimal-lineup mean for single-FLEX rules.
+    """Cached optimal-lineup mean over the one engine.
 
-    With exactly one FLEX slot the greedy optimum decomposes exactly: sum the
-    top ``k_p`` per base position, then add the best (k_p+1)-th-ranked player
-    across flex-eligible positions.  Verified against ``season.lineup_points``
-    in tests/test_draft_and_trades.py; falls back to the reference loop for
-    multi-FLEX rules.
+    The vectorised single-FLEX decomposition that used to live here was exact
+    only for one FLEX seat and only when slots were named after positions; it
+    fell back to a greedy reference otherwise and dropped composite seats
+    silently. It is gone: this is now a memo in front of
+    `lineup.optimize_matrix`, which is exact for any slot shape.
     """
 
     def __init__(self, season: SeasonSimulation, rules: LineupRules) -> None:
+        from . import lineup as lineup_engine
+
+        self._engine = lineup_engine
         self.season = season
         self.rules = rules
-        self.points = {c: season.points[c].to_numpy() for c in season.points.columns}
+        self.columns = list(season.points.columns)
+        self._index = {column: i for i, column in enumerate(self.columns)}
+        self._matrix = season.points.to_numpy(dtype=float)
         self.position = dict(zip(
             season.player_meta["player_id"], season.player_meta["position"]
         ))
         self.n = len(season.points)
-        self.fast = int(rules.starters.get("FLEX", 0)) <= 1
         self._cache: dict[frozenset, float] = {}
 
-    def mean(self, roster: Sequence[str]) -> float:
-        usable = frozenset(pid for pid in roster if pid in self.points)
+    def vector(self, roster: Sequence[str]) -> np.ndarray:
+        usable = sorted(pid for pid in set(roster) if pid in self._index)
         if not usable:
-            return 0.0
+            return np.zeros(self.n)
+        players = self._engine.from_positions(
+            [(pid, str(self.position.get(pid, ""))) for pid in usable],
+            self.rules.starters, flex_positions=self.rules.flex_positions)
+        columns = [self._index[pid] for pid in usable]
+        return self._engine.optimize_matrix(
+            self._matrix[:, columns], players, self.rules.starters)
+
+    def mean(self, roster: Sequence[str]) -> float:
+        usable = frozenset(pid for pid in roster if pid in self._index)
         cached = self._cache.get(usable)
         if cached is not None:
             return cached
-        if not self.fast:
-            value = float(lineup_points(self.season, sorted(usable), self.rules).mean())
-            self._cache[usable] = value
-            return value
-        total = np.zeros(self.n)
-        flex_pool: list[np.ndarray] = []
-        flex_positions = set(self.rules.flex_positions)
-        flex_count = int(self.rules.starters.get("FLEX", 0))
-        for position, count in self.rules.starters.items():
-            if position == "FLEX":
-                continue
-            candidates = [pid for pid in usable if self.position.get(pid) == position]
-            if not candidates:
-                continue
-            matrix = np.column_stack([self.points[pid] for pid in candidates])
-            matrix.sort(axis=1)  # ascending
-            k = min(int(count), matrix.shape[1])
-            if k:
-                total += matrix[:, -k:].sum(axis=1)
-            if position in flex_positions and matrix.shape[1] > int(count):
-                flex_pool.append(matrix[:, -(int(count) + 1)])  # (k+1)-th best
-        # Flex-eligible positions with no dedicated starter slot still feed FLEX.
-        for position in flex_positions - set(self.rules.starters):
-            candidates = [pid for pid in usable if self.position.get(pid) == position]
-            if candidates:
-                matrix = np.column_stack([self.points[pid] for pid in candidates])
-                flex_pool.append(matrix.max(axis=1))
-        if flex_count and flex_pool:
-            total += np.max(np.column_stack(flex_pool), axis=1)
-        value = float(total.mean())
+        value = float(self.vector(sorted(usable)).mean()) if usable else 0.0
         self._cache[usable] = value
         return value
 

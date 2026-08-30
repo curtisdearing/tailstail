@@ -28,6 +28,10 @@ def contract():
     return from_settings_payload(PAYLOAD)
 
 
+PROVENANCE = [{"source": "nflverse pbp", "retrieved_at": "2026-08-29T10:00:00Z",
+               "as_of": "2026-08-29T09:00:00Z"}]
+
+
 def _history(player="K1", team="BUF", weeks=8, season=2025):
     """A kicker with a real, boring workload."""
     return pd.DataFrame([{
@@ -115,7 +119,7 @@ def test_contract_bucket_edges_are_exact(contract):
 # --------------------------------------------------------------------- #
 def test_projection_is_a_distribution(contract):
     row = SK.project(_history(), "K1", contract, season=2026, week=1,
-                     simulations=2000, seed=7)
+                     simulations=2000, seed=7, active=True)
     dist = row["distribution"]
     for key in ("mean", "sd", "p05", "p25", "p50", "p75", "p95", "p_zero"):
         assert key in dist
@@ -126,12 +130,12 @@ def test_projection_is_a_distribution(contract):
 
 def test_same_seed_reproduces_the_same_numbers(contract):
     a = SK.project(_history(), "K1", contract, season=2026, week=1,
-                   simulations=1000, seed=11)
+                   simulations=1000, seed=11, active=True)
     b = SK.project(_history(), "K1", contract, season=2026, week=1,
-                   simulations=1000, seed=11)
+                   simulations=1000, seed=11, active=True)
     assert a["distribution"] == b["distribution"]
     c = SK.project(_history(), "K1", contract, season=2026, week=1,
-                   simulations=1000, seed=12)
+                   simulations=1000, seed=12, active=True)
     assert c["distribution"] != a["distribution"], "seed is not actually used"
 
 
@@ -171,7 +175,8 @@ def test_history_after_the_target_week_is_ignored(contract):
 def test_artifact_is_labelled_shadow_and_survives_json(tmp_path, contract):
     out = tmp_path / "k_weekly_2026_wk1.json"
     art = SK.build_artifact(_history(), ["K1"], contract, season=2026, week=1,
-                            simulations=500, seed=9, out_path=out)
+                            simulations=500, seed=9, out_path=out,
+                            active={"K1": True}, provenance=PROVENANCE)
     assert art["status"] == "shadow"
 
     loaded = json.loads(out.read_text())
@@ -179,7 +184,8 @@ def test_artifact_is_labelled_shadow_and_survives_json(tmp_path, contract):
     assert loaded["scoring_hash"] == contract.scoring_hash
     assert loaded["roster_slot_hash"] == contract.roster_slot_hash
     for key in ("model_run_at", "information_as_of", "simulations", "seed",
-                "provenance", "players", "model_version"):
+                "provenance", "players", "model_version", "content_sha256",
+                "promotion"):
         assert key in loaded, f"artifact missing {key}"
     assert loaded["players"], "empty artifact is not a candidate"
     assert loaded["promoted"] is False
@@ -187,6 +193,7 @@ def test_artifact_is_labelled_shadow_and_survives_json(tmp_path, contract):
 
 def test_artifact_never_carries_an_offensive_position(tmp_path, contract):
     art = SK.build_artifact(_history(), ["K1"], contract, season=2026, week=1,
-                            simulations=200, seed=9, out_path=tmp_path / "a.json")
+                            simulations=200, seed=9, out_path=tmp_path / "a.json",
+                            active={"K1": True}, provenance=PROVENANCE)
     for player in art["players"]:
         assert player["position"] == "K"

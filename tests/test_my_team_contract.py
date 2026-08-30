@@ -263,7 +263,10 @@ def test_optimal_lineup_is_legal_and_fills_flex_from_remaining_eligible():
     counts: dict[str, int] = {}
     for entry in lineup["starters"]:
         counts[entry["slot"]] = counts.get(entry["slot"], 0) + 1
-    assert counts == {"QB": 1, "RB": 2, "WR": 2, "TE": 1, "FLEX": 1, "D/ST": 1, "K": 1}
+    # K and D/ST are not here: they have no promoted distribution, so they are
+    # their own NO CURRENT PICK rather than seats this lineup pretends to fill.
+    assert counts == {"QB": 1, "RB": 2, "WR": 2, "TE": 1, "FLEX": 1}
+    assert lineup["shadow_slots"] == ["D/ST", "K"]
     flex = next(e for e in lineup["starters"] if e["slot"] == "FLEX")
     assert flex["position"] in {"RB", "WR", "TE"}
     started = [e["player_id"] for e in lineup["starters"]]
@@ -271,11 +274,34 @@ def test_optimal_lineup_is_legal_and_fills_flex_from_remaining_eligible():
 
 
 def test_illegal_roster_refuses_to_emit_a_lineup():
+    """Short at a MODELLED seat — the kind of gap that really is undecidable."""
     payload = built("illegal_roster")
     lineup = payload["optimal_lineup"]
     assert lineup["status"] == "no_current_pick"
     assert lineup["legal"] is False
     assert lineup["violations"], "an illegal roster must say what is wrong"
+    assert any("WR" in v or "FLEX" in v for v in lineup["violations"])
+
+
+def test_a_missing_kicker_does_not_take_the_offence_down_with_it():
+    """The old behaviour refused the whole lineup over an unfillable K seat.
+
+    Six offensive decisions were withheld to avoid one shadow seat nobody had a
+    promoted number for, which is the more misleading answer, not the safer one.
+    """
+    snapshot = fixture("post_draft")
+    snapshot["rosters"]["1"] = [p for p in snapshot["rosters"]["1"]
+                                if p["default_position"] != "K"]
+    side = model("post_draft")
+    payload = my_team.build(
+        snapshot, now=NOW, crosswalk={int(k): v for k, v in side["crosswalk"].items()},
+        projections=side["projections"], byes=side["byes"])
+
+    assert payload["optimal_lineup"]["status"] == "ok"
+    assert payload["optimal_lineup"]["legal"] is True
+    assert payload["kicker_shadow"]["status"] == "no_current_pick"
+    assert payload["kicker_shadow"]["promoted"] is False
+    assert "offensive lineup is unaffected" in payload["kicker_shadow"]["reason"]
 
 
 def test_bye_week_player_is_excluded_with_a_stated_reason():
@@ -307,16 +333,49 @@ def test_unmatched_player_is_surfaced_not_scored_as_zero():
 # --------------------------------------------------------------------------- #
 # Start/sit, waivers, trades, shadow positions
 # --------------------------------------------------------------------------- #
-def test_start_sit_carries_delta_and_uncertainty():
+def test_start_sit_says_so_when_no_joint_rows_were_supplied():
+    """Without paired draws there is no spread to report, and none is invented."""
     payload = built("post_draft")
     start_sit = payload["start_sit"]
     assert start_sit["status"] == "ok"
     for decision in start_sit["decisions"]:
         assert "projected_delta" in decision
-        assert "uncertainty" in decision
-        assert decision["uncertainty"]["p10_delta"] <= decision["uncertainty"]["p90_delta"]
-        assert decision["confidence"] in {"low", "medium", "high"}
+        uncertainty = decision["uncertainty"]
+        assert uncertainty["status"] == "unavailable"
+        assert "marginal percentiles" in uncertainty["reason"]
+        assert "p10_delta" not in uncertainty, (
+            "a spread built from separate marginal corners is not this swap's spread")
         assert decision["invalidation_trigger"]
+
+
+def test_start_sit_delta_comes_from_paired_joint_rows_when_they_exist():
+    """The same simulated week for both players, differenced row by row."""
+    import numpy as np
+
+    side = model("post_draft")
+    rng = np.random.default_rng(20260830)
+    shared = rng.normal(0.0, 1.0, 4000)
+    samples = {
+        pid: np.asarray(values["mean"], dtype=float) + 4.0 * shared + rng.normal(0, 1.5, 4000)
+        for pid, values in side["projections"].items()
+    }
+    payload = my_team.build(
+        fixture("post_draft"), now=NOW,
+        crosswalk={int(k): v for k, v in side["crosswalk"].items()},
+        projections=side["projections"], byes=side["byes"], samples=samples)
+
+    decisions = payload["start_sit"]["decisions"]
+    assert decisions, "the fixture should produce at least one start/sit row"
+    for decision in decisions:
+        uncertainty = decision["uncertainty"]
+        assert uncertainty["status"] == "ok"
+        assert uncertainty["basis"] == "paired joint simulation rows"
+        assert uncertainty["simulations"] == 4000
+        assert uncertainty["p10_delta"] <= uncertainty["median_delta"] <= uncertainty["p90_delta"]
+        probability = uncertainty["model_relative_prob_start_scores_more"]
+        assert 0.0 <= probability <= 1.0
+        assert "not a calibrated probability" in uncertainty["probability_note"]
+        assert "confidence" not in uncertainty
 
 
 def test_no_action_state_says_so_rather_than_inventing_a_move():

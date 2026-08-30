@@ -45,7 +45,7 @@ import pandas as pd
 
 from .config import LineupRules
 from .draft import normalize_name
-from .season import SeasonSimulation, lineup_points
+from .season import SeasonSimulation
 
 SCHEMA_VERSION = "trade-scan/2"
 
@@ -153,7 +153,7 @@ def map_identities(snapshot: Mapping[str, Any], board: pd.DataFrame, *,
     for player in _roster_players(snapshot):
         record = {"espn_id": player["espn_id"], "name": player["name"],
                   "position": player["position"], "team_id": player["team_id"],
-                  "pro_team": player["pro_team"]}
+                  "pro_team": player["pro_team"], "on_ir": bool(player.get("on_ir"))}
         if player["position"] in shadow_set:
             shadow.append({**record, "reason": "position carries no board projection"})
             continue
@@ -184,6 +184,31 @@ def map_identities(snapshot: Mapping[str, Any], board: pd.DataFrame, *,
         espn_to_board=dict(sorted(espn_to_board.items())),
         board_to_espn=dict(sorted(board_to_espn.items())),
         unmatched=tuple(unmatched), ambiguous=tuple(ambiguous), shadow=tuple(shadow))
+
+
+def blocked_teams(identity: IdentityMap) -> dict[int, tuple[str, ...]]:
+    """Teams whose lineup cannot be valued, because a player in it is unknown.
+
+    An unmatched or ambiguous player is not a footnote. Every lineup total on
+    that side is computed as though he does not exist, so a package can look
+    like a gain purely because the roster it is measured against is missing a
+    starter. A warning at the top of the scan does not travel with the package
+    a reader is about to act on, so the team is excluded instead and named.
+
+    Shadow positions are exempt: K and D/ST contribute nothing to a modelled
+    lineup by design, so being unable to price one cannot move a delta.
+    """
+    blocked: dict[int, list[str]] = {}
+    for row in list(identity.unmatched) + list(identity.ambiguous):
+        if row.get("on_ir"):
+            # An IR player cannot be seated, so not pricing him cannot move a
+            # lineup total. This is the only exemption: everything else on a
+            # roster is a player the optimizer might have started.
+            continue
+        team_id = int(row.get("team_id", 0))
+        blocked.setdefault(team_id, []).append(
+            f"{row.get('name')} ({row.get('position')}): {row.get('reason')}")
+    return {team_id: tuple(sorted(reasons)) for team_id, reasons in sorted(blocked.items())}
 
 
 # --------------------------------------------------------------------------- #
@@ -271,46 +296,14 @@ def locked_players(snapshot: Mapping[str, Any], *,
 # --------------------------------------------------------------------------- #
 def _can_fill_slots(players: Sequence[Mapping[str, Any]],
                     slots: Mapping[str, int]) -> bool:
-    """Exact bipartite feasibility: can these players fill every starting slot?
+    """Exact seatability, from the one engine (see `lineup.can_fill`)."""
+    from . import lineup as lineup_engine
 
-    Counting per position is not enough once FLEX exists -- a roster with three
-    RBs and no WR can look fine by totals and still be unable to field a lineup.
-    Slot instances and rosters are both tiny, so an augmenting-path matching is
-    both exact and instant.
-    """
-    slot_instances: list[str] = []
-    for slot, count in slots.items():
-        slot_instances.extend([slot] * int(count))
-    if not slot_instances:
-        return True
-    if len(players) < len(slot_instances):
+    try:
+        seated = lineup_engine.as_players(players)
+    except lineup_engine.LineupError:
         return False
-
-    eligible = [
-        {index for index, slot in enumerate(slot_instances)
-         if slot in set(player["eligible_slots"])}
-        for player in players
-    ]
-    assigned: dict[int, int] = {}
-
-    def augment(player_index: int, seen: set[int]) -> bool:
-        for slot_index in sorted(eligible[player_index]):
-            if slot_index in seen:
-                continue
-            seen.add(slot_index)
-            holder = assigned.get(slot_index)
-            if holder is None or augment(holder, seen):
-                assigned[slot_index] = player_index
-                return True
-        return False
-
-    filled = 0
-    for player_index in range(len(players)):
-        if augment(player_index, set()):
-            filled += 1
-        if filled == len(slot_instances):
-            return True
-    return len(assigned) == len(slot_instances)
+    return lineup_engine.can_fill(seated, slots)
 
 
 @dataclass(frozen=True)
@@ -342,64 +335,45 @@ def check_legality(roster_after: Sequence[Mapping[str, Any]], rules: LeagueRules
 # Lineup value, as a distribution
 # --------------------------------------------------------------------------- #
 class LineupEvaluator:
-    """Per-simulation optimal-lineup points for a roster.
+    """Per-simulation optimal-lineup points for a roster, from the one engine.
 
     Returns the whole vector, not its mean: a package whose average gain is
     +1.2 with a 45% chance of being negative is a different proposition from
     one that gains +1.2 almost surely, and the mean hides that. The
-    single-FLEX decomposition is the same one the existing planner uses and is
-    tested here against ``season.lineup_points`` for exactness.
+    single-FLEX decomposition that used to live here is gone -- it was exact
+    only for one FLEX seat, and it scored composite seats as zero.
     """
 
     def __init__(self, season: SeasonSimulation, rules: LineupRules) -> None:
+        from . import lineup as lineup_engine
+
+        self._engine = lineup_engine
         self.season = season
         self.rules = rules
-        self.points = {column: season.points[column].to_numpy() for column in season.points.columns}
+        self.columns = list(season.points.columns)
+        self._index = {column: i for i, column in enumerate(self.columns)}
+        self._matrix = season.points.to_numpy(dtype=float)
         self.position = dict(zip(season.player_meta["player_id"], season.player_meta["position"]))
         self.simulations = len(season.points)
-        self.fast = int(rules.starters.get("FLEX", 0)) <= 1
         self._cache: dict[frozenset, np.ndarray] = {}
 
     def vector(self, roster: Sequence[str]) -> np.ndarray:
-        usable = frozenset(pid for pid in roster if pid in self.points)
+        usable = frozenset(pid for pid in roster if pid in self._index)
         cached = self._cache.get(usable)
         if cached is not None:
             return cached
         if not usable:
             value = np.zeros(self.simulations)
-        elif not self.fast:
-            value = np.asarray(lineup_points(self.season, sorted(usable), self.rules), dtype=float)
         else:
-            value = self._fast_vector(usable)
+            ordered = sorted(usable)
+            players = self._engine.from_positions(
+                [(pid, str(self.position.get(pid, ""))) for pid in ordered],
+                self.rules.starters, flex_positions=self.rules.flex_positions)
+            columns = [self._index[pid] for pid in ordered]
+            value = self._engine.optimize_matrix(
+                self._matrix[:, columns], players, self.rules.starters)
         self._cache[usable] = value
         return value
-
-    def _fast_vector(self, usable: frozenset) -> np.ndarray:
-        total = np.zeros(self.simulations)
-        flex_pool: list[np.ndarray] = []
-        flex_positions = set(self.rules.flex_positions)
-        flex_count = int(self.rules.starters.get("FLEX", 0))
-        for position, count in self.rules.starters.items():
-            if position == "FLEX":
-                continue
-            candidates = [pid for pid in usable if self.position.get(pid) == position]
-            if not candidates:
-                continue
-            matrix = np.column_stack([self.points[pid] for pid in candidates])
-            matrix.sort(axis=1)
-            take = min(int(count), matrix.shape[1])
-            if take:
-                total += matrix[:, -take:].sum(axis=1)
-            if position in flex_positions and matrix.shape[1] > int(count):
-                flex_pool.append(matrix[:, -(int(count) + 1)])
-        for position in flex_positions - set(self.rules.starters):
-            candidates = [pid for pid in usable if self.position.get(pid) == position]
-            if candidates:
-                matrix = np.column_stack([self.points[pid] for pid in candidates])
-                flex_pool.append(matrix.max(axis=1))
-        if flex_count and flex_pool:
-            total += np.max(np.column_stack(flex_pool), axis=1)
-        return total
 
 
 @dataclass(frozen=True)
@@ -515,6 +489,48 @@ def _describe(player: Mapping[str, Any], identity: IdentityMap,
     return described
 
 
+#: How old a sample set may be and still describe *this* week. A draft board is
+#: a preseason artifact: using it in-season is not a smaller claim, it is a
+#: different one.
+MAX_SAMPLE_AGE_DAYS = 8
+
+
+def _require_current_inputs(snapshot: Mapping[str, Any], season: Any, *,
+                            on_demand: bool) -> None:
+    """Everything a trade scan needs to be about today, checked before it runs."""
+    if not on_demand:
+        raise TradeScanError(
+            "trade scans are on demand: pass on_demand=True. They are not part of the "
+            "weekly card, because the card runs on a schedule and a scan run on a "
+            "schedule will be run against whatever board happens to be on disk.")
+
+    basis = getattr(season, "metadata", {}) or {}
+    label = str(basis.get("basis") or basis.get("source") or "")
+    if label and "draft" in label.lower():
+        raise TradeScanError(
+            f"the supplied samples are labelled {label!r}: a draft-board valuation is a "
+            "preseason artifact and is not current weekly or rest-of-season advice")
+    generated = basis.get("generated_at") or basis.get("information_as_of")
+    retrieved = snapshot.get("retrieved_at")
+    if generated and retrieved:
+        from .espn_league import parse_timestamp
+
+        sampled_at, snapshot_at = parse_timestamp(generated), parse_timestamp(retrieved)
+        if sampled_at and snapshot_at:
+            age = abs((snapshot_at - sampled_at).total_seconds()) / 86400.0
+            if age > MAX_SAMPLE_AGE_DAYS:
+                raise TradeScanError(
+                    f"samples were generated {age:.1f} days from this snapshot, beyond the "
+                    f"{MAX_SAMPLE_AGE_DAYS}-day window; refresh them rather than trading on "
+                    "a stale projection")
+
+    playoffs = (snapshot.get("playoffs") or {})
+    if not playoffs.get("playoff_scoring_periods"):
+        raise TradeScanError(
+            "the snapshot publishes no playoff scoring periods, so a playoff-weighted "
+            "valuation would be scoring weeks nobody has identified")
+
+
 def scan_trades(snapshot: Mapping[str, Any], board: pd.DataFrame,
                 season: SeasonSimulation, *,
                 playoff_season: SeasonSimulation | None = None,
@@ -525,8 +541,18 @@ def scan_trades(snapshot: Mapping[str, Any], board: pd.DataFrame,
                 shadow_projections: Mapping[int, Any] | None = None,
                 max_package: int = 2, top_candidates: int = 12,
                 min_my_gain: float = 0.5, min_prob_not_worse: float = 0.55,
-                their_tolerance: float = 0.0, max_results: int = 12) -> TradeScan:
-    """Scan every opponent for packages that clear a two-sided gate."""
+                their_tolerance: float = 0.0, max_results: int = 12,
+                on_demand: bool = False) -> TradeScan:
+    """Scan every opponent for packages that clear a two-sided gate.
+
+    On demand only. This is not part of the weekly card, and `on_demand=True`
+    is a required acknowledgement rather than a default: a trade scan needs
+    current weekly or rest-of-season samples, complete identity coverage for
+    both teams involved, exact live rosters, current locks and the league's
+    real playoff weeks. A card that runs it on a schedule will eventually run
+    it against a stale draft board, and a draft-day valuation presented in
+    week 9 is not advice, it is an artifact of when the file was written.
+    """
     if snapshot.get("schema_version") != "espn-league/1":
         raise TradeScanError(
             f"unsupported snapshot schema {snapshot.get('schema_version')!r}; "
@@ -539,6 +565,7 @@ def scan_trades(snapshot: Mapping[str, Any], board: pd.DataFrame,
         raise TradeScanError(
             "promote_shadow requires shadow_projections: the board carries no K or D/ST "
             "distribution, and promoting them without one would value every kicker at zero.")
+    _require_current_inputs(snapshot, season, on_demand=on_demand)
 
     byes = dict(byes or {})
     rules = lineup_rules_from_snapshot(snapshot)
@@ -617,8 +644,33 @@ def scan_trades(snapshot: Mapping[str, Any], board: pd.DataFrame,
     rejected = {"my_gain": 0, "my_downside": 0, "their_gain": 0, "legality": 0}
     packages: list[tuple[float, Package]] = []
 
+    unresolved = blocked_teams(identity)
+    if my_team_id in unresolved:
+        return TradeScan(
+            schema_version=SCHEMA_VERSION, state="blocked",
+            generated_for={"team_id": my_team_id, "team_name": my_team_name},
+            league={"league_id": snapshot["league"]["league_id"],
+                    "season": snapshot["league"]["season"],
+                    "name": snapshot["league"]["name"],
+                    "snapshot_retrieved_at": snapshot.get("retrieved_at")},
+            rules={"modeled_slots": dict(rules.modeled_slots),
+                   "shadow_slots": dict(rules.shadow_slots)},
+            identity={"matched": len(identity.espn_to_board),
+                      "unmatched": [dict(row) for row in identity.unmatched],
+                      "ambiguous": [dict(row) for row in identity.ambiguous]},
+            locked=dict(locked), packages=(),
+            hold_reason=("your own roster carries a player this board cannot identify"),
+            gate={"blocked": True},
+            context={"blocked_teams": {str(my_team_id): list(unresolved[my_team_id])}},
+            warnings=(f"your own roster has {len(unresolved[my_team_id])} player(s) that cannot "
+                      "be identified; every lineup total here would be computed without them, "
+                      "so no package is offered",))
+
     for opponent_id, opponent_players in sorted(rostered.items()):
         if opponent_id == my_team_id:
+            continue
+        if opponent_id in unresolved:
+            rejected["unresolved_identity"] = rejected.get("unresolved_identity", 0) + 1
             continue
         their_board_ids = identity.matched(p["espn_id"] for p in opponent_players)
         their_base = evaluator.vector(their_board_ids)
@@ -765,6 +817,10 @@ def scan_trades(snapshot: Mapping[str, Any], board: pd.DataFrame,
     chosen = tuple(package for _, package in packages[:max_results])
 
     warnings: list[str] = []
+    if unresolved:
+        warnings.append(
+            f"{len(unresolved)} team(s) were excluded entirely because a rostered player "
+            "could not be identified; a lineup missing a starter is not a comparison")
     if identity.unmatched:
         warnings.append(f"{len(identity.unmatched)} rostered player(s) have no board projection")
     if identity.ambiguous:
@@ -812,6 +868,8 @@ def scan_trades(snapshot: Mapping[str, Any], board: pd.DataFrame,
               "top_candidates": top_candidates, "considered": considered,
               "rejected": dict(rejected)},
         context={"teams": {str(team_id): name for team_id, name in sorted(team_names.items())},
+                 "blocked_teams": {str(team_id): list(reasons)
+                                   for team_id, reasons in unresolved.items()},
                  "byes_source_teams": sorted(byes)},
         warnings=tuple(warnings))
 

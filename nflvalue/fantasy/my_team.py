@@ -241,6 +241,12 @@ def _blocked(reason: str, *, rationale: str, invalidation: str, **extra) -> dict
 #: named every slot; this is the inverse of `SLOT_NAMES`, not a second table.
 SLOT_IDS: Mapping[str, int] = {label: slot_id for slot_id, label in SLOT_NAMES.items()}
 
+#: Seats whose projections are a separate, unpromoted lane. A missing kicker
+#: distribution is a fact about the kicker lane, not about the offence: it must
+#: not take the QB/RB/WR/TE/FLEX lineup down with it, because the lineup those
+#: seats describe is decidable and useful on its own.
+SHADOW_SLOTS = frozenset({"K", "D/ST"})
+
 
 def _slot_counts(snapshot: Mapping[str, Any]) -> dict[str, int]:
     return {str(label): int(count)
@@ -289,7 +295,9 @@ def _split_identities(roster: Sequence[Mapping[str, Any]]) -> tuple[list[dict], 
 def _players_from_snapshot(snapshot: Mapping[str, Any], team_id: int, *,
                            crosswalk: Mapping[int, str] | None,
                            projections: Mapping[str, Mapping[str, Any]] | None,
-                           byes: Mapping[str, int] | None) -> tuple[list[dict], list[dict]]:
+                           byes: Mapping[str, int] | None,
+                           samples: Mapping[str, Any] | None = None
+                           ) -> tuple[list[dict], list[dict]]:
     """Canonical roster entries -> the shape the lineup logic reads.
 
     Identity goes through `identity.resolve`, which is the ESPN comparison
@@ -319,7 +327,9 @@ def _players_from_snapshot(snapshot: Mapping[str, Any], team_id: int, *,
             "injury_status": entry.get("injury_status"),
             "lineup_slot": entry.get("lineup_slot"),
             "bye_week": byes.get(model_id),
+            "eligible_slots": list(entry.get("eligible_slots") or []),
             "projection": projection,
+            "samples": None if samples is None else samples.get(model_id),
         })
 
     unresolved = [{"position": None, **dict(row)} for row in resolution.unresolved]
@@ -347,11 +357,31 @@ def _availability(player: Mapping[str, Any], scoring_period: int) -> str | None:
     return None
 
 
+def _split_slots(snapshot: Mapping[str, Any]) -> tuple[dict[str, int], dict[str, int]]:
+    """Modelled seats and shadow seats, from the league's own slot counts."""
+    counts = _slot_counts(snapshot)
+    modeled = {label: count for label, count in counts.items()
+               if label not in SHADOW_SLOTS and label not in {"BE", "IR"} and count > 0}
+    shadow = {label: count for label, count in counts.items()
+              if label in SHADOW_SLOTS and count > 0}
+    return modeled, shadow
+
+
 def _optimal_lineup(snapshot, resolved, unresolved, scoring_period) -> dict:
-    slots = _starting_slots(snapshot)
-    rationale = ("Highest total projected points over the legal slot assignment: dedicated "
-                 "slots take the best eligible player at each position, then FLEX takes the "
-                 "best remaining RB/WR/TE.")
+    """The best legal offensive lineup, solved exactly by the shared engine.
+
+    Only the modelled seats are decided here. A league with a K and a D/ST seat
+    still gets a QB/RB/WR/TE/FLEX answer even though neither shadow lane has a
+    promoted distribution -- those seats are reported separately as their own
+    NO CURRENT PICK, because refusing the whole lineup over a kicker withholds
+    six decisions that were never in doubt to avoid one that was.
+    """
+    from . import lineup as lineup_engine
+
+    modeled, shadow = _split_slots(snapshot)
+    rationale = ("Maximum-weight assignment of eligible players to the league's own "
+                 "starting slots — exact, not a greedy fill, and using each player's "
+                 "ESPN eligibility rather than his position name.")
     invalidation = ("Any inactive/injury designation change, a bye correction, or a projection "
                     "revision that reorders two players at the same slot.")
 
@@ -367,7 +397,7 @@ def _optimal_lineup(snapshot, resolved, unresolved, scoring_period) -> dict:
             available.append(player)
     for entry in unresolved:
         excluded.append({"player_id": None, "espn_player_id": entry["espn_player_id"],
-                         "name": entry["name"], "position": entry["position"],
+                         "name": entry.get("name"), "position": entry.get("position"),
                          "reason": entry["reason"]})
 
     violations = []
@@ -379,53 +409,48 @@ def _optimal_lineup(snapshot, resolved, unresolved, scoring_period) -> dict:
     if len(seen) != len(set(seen)):
         violations.append("the same player appears on the roster more than once")
 
-    pool = sorted(available, key=lambda p: (-_mean(p), str(p.get("name"))))
-    used: set[Any] = set()
-    starters: list[dict] = []
-    for slot_id, slot_name, count in slots:
-        if slot_id == FLEX_SLOT:
-            continue
-        picked = 0
-        for player in pool:
-            if player.get("espn_player_id") in used:
-                continue
-            if str(player.get("position")) != slot_name:
-                continue
-            starters.append(_starter(player, slot_name))
-            used.add(player.get("espn_player_id"))
-            picked += 1
-            if picked == count:
-                break
-        if picked < count:
-            violations.append(
-                f"cannot fill required slot {slot_name} ({picked}/{count} eligible "
-                f"{slot_name} available after injuries, byes and unresolved identities)")
-    for slot_id, slot_name, count in slots:
-        if slot_id != FLEX_SLOT:
-            continue
-        picked = 0
-        for player in pool:
-            if player.get("espn_player_id") in used:
-                continue
-            if str(player.get("position")) not in FLEX_POSITIONS:
-                continue
-            starters.append(_starter(player, slot_name))
-            used.add(player.get("espn_player_id"))
-            picked += 1
-            if picked == count:
-                break
-        if picked < count:
-            violations.append(f"cannot fill required slot FLEX ({picked}/{count})")
+    seatable, unseatable = [], []
+    for player in available:
+        eligible = {str(slot) for slot in (player.get("eligible_slots") or [])} & set(modeled)
+        if eligible:
+            seatable.append((player, frozenset(eligible)))
+        elif str(player.get("position")) not in SHADOW_SLOTS:
+            unseatable.append(player)
+
+    engine_players = tuple(
+        lineup_engine.LineupPlayer(player_id=player.get("espn_player_id"),
+                                   eligible_slots=eligible,
+                                   position=str(player.get("position")))
+        for player, eligible in seatable)
+    by_id = {player.get("espn_player_id"): player for player, _ in seatable}
+    points = {pid: _mean(player) for pid, player in by_id.items()}
+    points = {pid: (value if value != float("-inf") else 0.0) for pid, value in points.items()}
+
+    solved = lineup_engine.optimize(points, engine_players, modeled)
+    starters = [
+        _starter(by_id[pid], label)
+        for label in sorted(solved.assignment)
+        for pid in solved.assignment[label]
+    ]
+    for label in solved.empty_slots:
+        violations.append(f"cannot fill required slot {label} "
+                          "(no eligible, available, projected player remains)")
+    for player in unseatable:
+        excluded.append({"player_id": player.get("player_id"),
+                         "espn_player_id": player.get("espn_player_id"),
+                         "name": player.get("name"), "position": player.get("position"),
+                         "reason": "eligible for no modelled starting slot in this league"})
 
     if violations:
         return _blocked(
             "; ".join(violations),
             rationale=rationale, invalidation=invalidation,
             legal=False, violations=violations, starters=[], bench=[], excluded=excluded,
-            projected_total=None,
+            projected_total=None, shadow_slots=sorted(shadow),
         )
 
-    bench = [_starter(p, "BE") for p in pool if p.get("espn_player_id") not in used]
+    seated = {entry["espn_player_id"] for entry in starters}
+    bench = [_starter(p, "BE") for p in available if p.get("espn_player_id") not in seated]
     return {
         "status": "ok",
         "legal": True,
@@ -434,6 +459,7 @@ def _optimal_lineup(snapshot, resolved, unresolved, scoring_period) -> dict:
         "bench": sorted(bench, key=lambda e: -e["projected_mean"]),
         "excluded": excluded,
         "projected_total": round(sum(e["projected_mean"] for e in starters), 2),
+        "shadow_slots": sorted(shadow),
         "rationale": rationale,
         "confidence": "medium",
         "invalidation_trigger": invalidation,
@@ -456,15 +482,67 @@ def _starter(player: Mapping[str, Any], slot_name: str) -> dict:
     }
 
 
+def _delta_summary(start_samples, sit_samples, mean_delta: float) -> dict:
+    """The distribution of a swap's effect, from paired simulation rows.
+
+    Swapping one player for another in a fixed lineup changes the total by
+    exactly (start - sit) in every simulation, so the delta is read off the
+    same row for both players: the same latent week, the same game script.
+
+    The old summary subtracted one player's p90 from the other's p10. Those are
+    marginal corners of two separate distributions, and their difference is the
+    worst case under perfect negative dependence — a scenario the simulation
+    never draws. It systematically overstated the spread of a swap between two
+    players on the same offence, who rise and fall together.
+    """
+    if start_samples is None or sit_samples is None:
+        return {
+            "status": "unavailable",
+            "reason": ("no joint simulation rows were supplied for both players; a spread "
+                       "built from separate marginal percentiles is not this swap's spread"),
+            "mean_delta": round(mean_delta, 2),
+        }
+    import numpy as _np
+
+    left = _np.asarray(start_samples, dtype=float)
+    right = _np.asarray(sit_samples, dtype=float)
+    if left.shape != right.shape or left.size == 0:
+        return {
+            "status": "unavailable",
+            "reason": (f"sample rows do not align ({left.shape} vs {right.shape}); a delta "
+                       "across mismatched draws is not a paired comparison"),
+            "mean_delta": round(mean_delta, 2),
+        }
+    delta = left - right
+    p10, p50, p90 = (float(v) for v in _np.percentile(delta, [10, 50, 90]))
+    return {
+        "status": "ok",
+        "basis": "paired joint simulation rows",
+        "simulations": int(delta.size),
+        "mean_delta": round(float(delta.mean()), 2),
+        "median_delta": round(p50, 2),
+        "p10_delta": round(p10, 2),
+        "p90_delta": round(p90, 2),
+        # Deliberately not called confidence: this is the share of simulated
+        # weeks in which the model's own draws favour the start. It inherits
+        # every error in the model that produced them and has not been checked
+        # against what actually happened.
+        "model_relative_prob_start_scores_more": round(float((delta > 0).mean()), 4),
+        "probability_note": ("model-relative frequency over the model's own draws; not a "
+                             "calibrated probability and not validated against outcomes"),
+    }
+
+
 def _start_sit(lineup: Mapping[str, Any], resolved: Sequence[Mapping[str, Any]]) -> dict:
     rationale = ("Each row pairs the player the legal optimum starts with the player it "
-                 "benches at the same slot; the delta is projected points, not a guarantee.")
+                 "benches at the same slot; the delta is read from paired simulation rows.")
     invalidation = ("A projection revision smaller than the delta, or any status change to "
                     "either player, flips the row.")
     if lineup.get("status") != "ok":
         return _blocked("no legal lineup, so no start/sit comparison is possible",
                         rationale=rationale, invalidation=invalidation, decisions=[])
 
+    by_id = {p.get("espn_player_id"): p for p in resolved}
     current_by_slot: dict[str, list[Mapping[str, Any]]] = {}
     for player in resolved:
         slot = str(player.get("lineup_slot") or "BE")
@@ -484,12 +562,10 @@ def _start_sit(lineup: Mapping[str, Any], resolved: Sequence[Mapping[str, Any]])
                    {s["espn_player_id"] for s in lineup["starters"]}]
         out = min(benched, key=_mean) if benched else None
         out_mean = _mean(out) if out is not None else 0.0
-        out_projection = (out or {}).get("projection") or {}
         delta = entry["projected_mean"] - out_mean
-        p10_delta = entry["projected_p10"] - float(out_projection.get("p90", out_mean))
-        p90_delta = entry["projected_p90"] - float(out_projection.get("p10", out_mean))
-        spread = max(p90_delta - p10_delta, 1e-9)
-        confidence = "high" if delta > spread * 0.5 else ("medium" if delta > spread * 0.15 else "low")
+        incoming = by_id.get(entry["espn_player_id"]) or {}
+        summary = _delta_summary(incoming.get("samples"),
+                                 (out or {}).get("samples"), delta)
         decisions.append({
             "slot": slot,
             "start": {"name": entry["name"], "player_id": entry["player_id"],
@@ -500,10 +576,7 @@ def _start_sit(lineup: Mapping[str, Any], resolved: Sequence[Mapping[str, Any]])
                      "position": out.get("position"), "projected_mean": out_mean}
                     if out is not None else None),
             "projected_delta": round(delta, 2),
-            "uncertainty": {"p10_delta": round(min(p10_delta, p90_delta), 2),
-                            "p90_delta": round(max(p10_delta, p90_delta), 2),
-                            "basis": "independent p10/p90 corners; not a joint simulation"},
-            "confidence": confidence,
+            "uncertainty": summary,
             "rationale": (f"{entry['name']} projects {round(delta, 2)} points above "
                           f"{out.get('name') if out is not None else 'an empty slot'} at {slot}."),
             "invalidation_trigger": invalidation,
@@ -663,21 +736,30 @@ def _waivers(plan: Any | None) -> dict:
 
 
 def _shadow(position: str, lineup: Mapping[str, Any]) -> dict:
-    holders = [e for e in lineup.get("starters", []) if e["position"] == position] \
-        if lineup.get("status") == "ok" else []
+    """A shadow seat's own NO CURRENT PICK, stated separately from the offence.
+
+    K and D/ST have no promoted distribution, so this seat has no
+    recommendation — and that is the whole of the claim. It does not travel:
+    the offensive lineup above is decided from projections that did pass the
+    gate, and withholding six settled decisions to avoid one unsettled seat
+    would be the more misleading answer.
+    """
+    seats = int((lineup.get("shadow_slots") or []).count(position)) or (
+        1 if position in (lineup.get("shadow_slots") or []) else 0)
     return {
-        "status": "ok" if holders else "no_current_pick",
+        "status": "no_current_pick",
         "shadow": True,
         "promoted": False,
         "label": f"{position} shadow — research only, never promoted",
-        "reason": (None if holders else
-                   f"no legal {position} starter is available in this snapshot"),
-        "starters": holders,
-        "rationale": (f"{position} projections are new to tailstail and have not passed the 2026 "
-                      "protocol's promotion gate, so they are displayed and never scored."),
-        "confidence": "low",
-        "invalidation_trigger": ("Promotion of the position through the matched-control gate, "
-                                 "which would move it out of shadow."),
+        "reason": (f"{position} has no promoted projection, so this seat has no recommendation. "
+                   "The offensive lineup is unaffected and is shown above."),
+        "seats": seats,
+        "starters": [],
+        "rationale": (f"{position} projections have not passed the 2026 protocol's promotion "
+                      "gate, so they never enter the lineup objective."),
+        "confidence": "none",
+        "invalidation_trigger": ("A passing season-forward audit promoting the position out of "
+                                 "shadow."),
     }
 
 
@@ -720,7 +802,8 @@ def build(snapshot: Mapping[str, Any], *, now: str, contract: Any | None = None,
           waiver_plan: Any | None = None,
           crosswalk: Mapping[int, str] | None = None,
           projections: Mapping[str, Mapping[str, Any]] | None = None,
-          byes: Mapping[str, int] | None = None) -> dict:
+          byes: Mapping[str, int] | None = None,
+          samples: Mapping[str, Any] | None = None) -> dict:
     """Assemble the versioned ``my_team`` contract from a league snapshot.
 
     *contract* is an :class:`espn_contract.LeagueContract`; it is the only
@@ -746,7 +829,8 @@ def build(snapshot: Mapping[str, Any], *, now: str, contract: Any | None = None,
     usable = fresh["state"] in {"fresh", "aging"}
 
     resolved, unresolved = _players_from_snapshot(
-        snapshot, team_id, crosswalk=crosswalk, projections=projections, byes=byes)
+        snapshot, team_id, crosswalk=crosswalk, projections=projections, byes=byes,
+        samples=samples)
     roster = resolved
 
     draft = _draft(snapshot, team_id=team_id)

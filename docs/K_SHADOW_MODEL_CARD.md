@@ -2,7 +2,71 @@
 
 **Status:** `shadow` — research only. Not a lineup recommendation, not promoted,
 not wired into optimal-lineup decisions.
+**What is implemented:** a **historical-rate baseline**, not the model this card
+originally described. See §0a.
 **Written:** 2026-08-30, BEFORE any implementation code, as the pre-coding gate.
+**Revised:** 2026-08-30, after implementation, to say what was actually built.
+
+---
+
+## §0a. What the code is, as opposed to what this card designed
+
+This section was added because the rest of the card described a model, the
+repository contained a baseline, and nothing in between said so. A card that
+over-describes its implementation is worse than no card: it lends the output a
+provenance it has not got.
+
+`nflvalue/fantasy/shadow_kicker.py` is a **per-kicker empirical-rate baseline**:
+distance-bucket attempt rates and make rates, shrunk toward the league rate by
+fixed pseudo-counts, then Poisson attempts and Binomial makes, scored through
+the league contract. That is all it is.
+
+**Deliberately not implemented**, each of which §§3–8 below specify:
+
+| Designed in this card | Status in code |
+|---|---|
+| Team scoring opportunity (implied total, spread, drive model) | **not implemented** — bucket attempt rates are per-week averages, unconditioned on the game |
+| PAT linkage to offensive touchdowns | **not implemented** — PAT attempts are their own Poisson from a shrunk per-week rate |
+| Weather, roof state, altitude | **not implemented** — no input is read |
+| Blocked kicks as their own component | **not implemented** — folded into misses |
+| Replacement-kicker path (`replacement: true`) | **not implemented** — the flag is hardcoded `False` |
+| Parameter uncertainty on the shrunk rates | **not implemented** — point rates feed the draws |
+| Hierarchical shrinkage via `hierarchy.py` | **not implemented** — fixed pseudo-counts instead |
+
+Because attempt buckets are drawn independently and unconditioned, this
+baseline understates the correlation between a kicker's volume and his team's
+scoring, and its intervals are not the intervals §8 specifies.
+
+**Therefore this is a baseline, not a completed preregistered model, and the
+gates in §9 are UNRUN.** They now have code behind them
+(`nflvalue/fantasy/k_audit.py`) and a declared threshold set
+(`k_audit.GATES`), fixed before any run. Until `k_audit.gate()` returns a pass
+on a real season-forward evaluation:
+
+* `shadow_kicker.PROMOTION_STATUS["may_enter_lineup_objective"]` is `False`;
+* no kicker is ranked into any lineup, waiver or trade objective;
+* the K seat on the weekly card is its own `NO CURRENT PICK`, and it does not
+  block the offensive lineup.
+
+### Corrections to earlier claims in this card
+
+* **§9 "Determinism: same seed + same inputs ⇒ byte-identical artifact"** was
+  asserted and was false twice: the per-player seed came from Python's builtin
+  `hash()`, which `PYTHONHASHSEED` salts, so the stream differed in every
+  process; and `content_sha256` was taken over a dict including
+  `model_run_at`, so the digest moved with the wall clock. Both are fixed
+  (`stable_seed`, `NON_CONTENT_FIELDS`) and both now have tests, one of which
+  runs in subprocesses under three different salts.
+* **§2 "Fail closed: ... ⇒ `status: unavailable`"** was asserted and the code
+  failed open: `active.get(pid, True)` read "nobody told me" as "he is
+  playing". Unknown is now `unavailable`.
+* **§1 "Every input carries `{source, retrieved_at, as_of}` or it is not
+  used"** was asserted and never checked. It is enforced now, and
+  `information_as_of` is derived as the minimum `as_of` across inputs rather
+  than accepted on trust.
+* **§0 B1** ("the exact scoring rules do not exist in this repository") is
+  **stale**: `nflvalue/fantasy/espn_contract.py` now carries the live contract.
+
 **Isolation commitment:** K is never added to `ModelConfig.positions`
 (`nflvalue/fantasy/config.py:61`), never enters the frozen QB/RB/WR/TE training
 or projection path, and never appears in a `PlayerProjectionSnapshot`.

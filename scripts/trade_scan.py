@@ -92,7 +92,10 @@ def main(argv=None) -> int:
             playoff_season=_season_sim(playoff_outlook) if playoff_outlook else None,
             byes=byes, upcoming_weeks=tuple(range(week, min(week + 3, final_week + 1))),
             min_my_gain=args.min_gain, min_prob_not_worse=args.min_prob,
-            their_tolerance=args.their_tolerance)
+            their_tolerance=args.their_tolerance,
+            # This CLI *is* the on-demand path: a person ran it, now, against
+            # inputs they chose. The weekly card does not call it.
+            on_demand=True)
     except league_trades.TradeScanError as exc:
         print(f"[trade-scan] refused: {exc}", file=sys.stderr)
         return 1

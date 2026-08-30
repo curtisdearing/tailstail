@@ -141,10 +141,21 @@ def test_blocked_sections_show_the_banner_and_the_reason(tmp_path):
 
 
 def test_illegal_roster_lists_its_violations(tmp_path):
-    document = render(tmp_path, payload("illegal_roster"))
+    """A modelled seat that cannot be filled is named on the page."""
+    document = render(tmp_path, built("illegal_roster"))
+    assert "Roster legality violations" in document or "cannot fill required slot" in document
+    assert "cannot fill required slot WR" in document
+
+
+def test_a_missing_kicker_is_its_own_section_not_a_lineup_violation(tmp_path):
+    """The shadow seat says NO CURRENT PICK; the offence still renders."""
+    snapshot = json.loads((FIXTURES / "post_draft.json").read_text())
+    snapshot["rosters"]["1"] = [p for p in snapshot["rosters"]["1"]
+                                if p["default_position"] != "K"]
+    document = render(tmp_path, built("post_draft", snapshot=snapshot))
+    assert "cannot fill required slot K" not in document
     assert "NO CURRENT PICK" in document
-    assert "Roster legality violations" in document
-    assert "cannot fill required slot K" in document
+    assert "offensive lineup is unaffected" in document
 
 
 def test_pre_draft_targets_are_labelled_and_no_pick_is_claimed(tmp_path):

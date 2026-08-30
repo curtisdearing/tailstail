@@ -326,7 +326,9 @@ def test_k_and_dst_candidates_stay_labelled_shadow():
         assert d["shadow_reason"]
     plain = WV.plan(contract(), roster=FULL_ROSTER, pool=pool(_p(500, "WR")),
                     now=NOW, distributions=None)[0].to_dict()
-    assert plain["status"] == "recommendation"
+    # Without joint samples the add cannot be valued, so it is not a
+    # recommendation either -- see the gate tests below.
+    assert plain["status"] == "no_current_pick"
 
 
 def test_stale_free_agent_data_degrades_visibly_and_recommends_nothing():
@@ -416,3 +418,77 @@ def test_a_freeagent_flagged_pool_row_that_is_already_rostered_is_still_refused(
                    pool=pool(already_rostered_but_looks_free), now=NOW,
                    distributions=None)
     assert recs == [], "a rostered player may never surface as an add"
+
+
+# --------------------------------------------------------------------------- #
+# The gate: four conditions, all of them required
+# --------------------------------------------------------------------------- #
+def _samples(mapping, simulations=800, seed=11):
+    """Joint draws: one shared week factor so teammates move together."""
+    import numpy as np
+
+    rng = np.random.default_rng(seed)
+    shared = rng.normal(0.0, 1.0, simulations)
+    return {int(pid): mean + 3.0 * shared + rng.normal(0.0, 2.0, simulations)
+            for pid, mean in mapping.items()}
+
+
+def _roster_samples(extra=None, **over):
+    means = {int(e.espn_id): 9.0 for e in FULL_ROSTER}
+    means.update(over)
+    if extra:
+        means.update(extra)
+    return _samples(means)
+
+
+def test_a_row_exists_only_when_the_joint_delta_clears_the_declared_gate():
+    """An upgrade big enough to matter, valued from paired rows."""
+    star = _p(700, "WR")
+    draws = _roster_samples(extra={700: 22.0})
+    recs = WV.plan(contract(), roster=FULL_ROSTER, pool=pool(star), now=NOW,
+                   distributions=draws)
+    picked = [r for r in recs if r.status == "recommendation"]
+    assert picked, "a clear upgrade should clear the gate"
+    delta = picked[0].lineup_delta
+    assert delta["own_optimal_lineup_delta"] >= WV.WAIVER_GATE["min_mean_lineup_delta"]
+    assert delta["model_relative_prob_improves"] >= WV.WAIVER_GATE["min_prob_improves"]
+    assert delta["basis"] == "paired joint simulation rows, both lineups solved per row"
+    assert picked[0].drop_espn_id is not None, "a row must name the drop it requires"
+
+
+def test_a_marginal_add_does_not_become_a_recommendation():
+    """Legal, addable, and not worth doing — which is not a recommendation."""
+    spare = _p(701, "WR")
+    draws = _roster_samples(extra={701: 1.0})
+    recs = WV.plan(contract(), roster=FULL_ROSTER, pool=pool(spare), now=NOW,
+                   distributions=draws)
+    assert all(r.status != "recommendation" for r in recs)
+    assert any("below the declared gate" in r.rationale for r in recs)
+
+
+def test_the_drop_is_the_cheapest_legal_cut_not_the_highest_player_id():
+    """The drop used to be `max(bench, key=espn_id)`, which values nothing."""
+    star = _p(702, "WR")
+    weakest = min((e for e in FULL_ROSTER if e.slot == "BE"), key=lambda e: int(e.espn_id))
+    means = {int(e.espn_id): 14.0 for e in FULL_ROSTER}
+    means[int(weakest.espn_id)] = 0.5
+    draws = _samples({**means, 702: 21.0})
+    recs = WV.plan(contract(), roster=FULL_ROSTER, pool=pool(star), now=NOW,
+                   distributions=draws)
+    picked = [r for r in recs if r.status == "recommendation"]
+    assert picked
+    assert picked[0].drop_espn_id == int(weakest.espn_id), (
+        "the drop should be the player whose loss costs the lineup least")
+
+
+def test_without_samples_no_drop_is_nominated_at_all():
+    recs = WV.plan(contract(), roster=FULL_ROSTER, pool=pool(_p(703, "WR")), now=NOW,
+                   distributions=None)
+    assert recs[0].drop_state == WV.NO_VALUED_DROP
+    assert recs[0].drop_espn_id is None
+    assert "arbitrary cut" in recs[0].rationale
+
+
+def test_the_gate_is_declared_ahead_of_any_run():
+    for key in ("min_mean_lineup_delta", "min_prob_improves", "min_simulations"):
+        assert key in WV.WAIVER_GATE

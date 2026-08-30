@@ -83,7 +83,14 @@ def lineup_points(
     roster: Sequence[str],
     rules: LineupRules | None = None,
 ) -> np.ndarray:
-    """Optimize a fantasy lineup independently inside every simulation."""
+    """Optimal lineup total for every simulation row, from the one engine.
+
+    This used to fill base slots greedily and hand FLEX the leftovers, which is
+    not the optimum, and it matched players to slots by position name, so an
+    `RB/WR` or `OP` seat scored zero without saying so. Both are now the
+    engine's problem, and the engine solves the assignment exactly.
+    """
+    from . import lineup as lineup_engine
 
     lineup = rules or LineupRules()
     roster = [str(player_id) for player_id in roster]
@@ -91,24 +98,11 @@ def lineup_points(
     if missing:
         raise ValueError(f"roster players missing from season simulation: {missing}")
     meta = season.player_meta.set_index("player_id")
-    simulations = len(season.points)
-    output = np.zeros(simulations, dtype=float)
-    base_slots = {position: count for position, count in lineup.starters.items() if position != "FLEX"}
-    flex_count = int(lineup.starters.get("FLEX", 0))
-    for simulation in range(simulations):
-        selected: set[str] = set()
-        row = season.points.iloc[simulation]
-        for position, count in base_slots.items():
-            candidates = [pid for pid in roster if meta.loc[pid, "position"] == position]
-            best = sorted(candidates, key=lambda pid: float(row[pid]), reverse=True)[: int(count)]
-            selected.update(best)
-        flex_candidates = [
-            pid for pid in roster
-            if pid not in selected and meta.loc[pid, "position"] in lineup.flex_positions
-        ]
-        selected.update(sorted(flex_candidates, key=lambda pid: float(row[pid]), reverse=True)[:flex_count])
-        output[simulation] = float(row[list(selected)].sum()) if selected else 0.0
-    return output
+    positions = [(pid, str(meta.loc[pid, "position"])) for pid in roster]
+    players = lineup_engine.from_positions(
+        positions, lineup.starters, flex_positions=lineup.flex_positions)
+    matrix = season.points.loc[:, roster].to_numpy(dtype=float)
+    return lineup_engine.optimize_matrix(matrix, players, lineup.starters)
 
 
 def evaluate_trade(
