@@ -15,6 +15,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from nflvalue.fantasy import espn_compare
+from nflvalue.fantasy import my_team as my_team_mod
 from nflvalue.fantasy.config import ModelConfig, ScoringRules, SimulationConfig
 from nflvalue.fantasy.dashboard import render_fantasy_dashboard
 from nflvalue.fantasy.data import HistoricalData, fetch_historical, materialize_projection_week
@@ -159,6 +160,63 @@ def run_espn_comparison(
     )
 
 
+def run_my_team(
+    summaries: pd.DataFrame,
+    *,
+    generated_at: str,
+    snapshot_dir: str = "data/espn_league",
+    contract=None,
+    waiver_plan=None,
+    espn_crosswalk: dict | None = None,
+) -> dict:
+    """Build the Curtis-specific Monitor contract from the read-only snapshot.
+
+    Never raises and never fabricates: a missing, unreadable or unusable
+    snapshot produces a contract whose sections all say NO CURRENT PICK with the
+    reason, exactly as a stale one does.  ESPN is read-only here — this function
+    performs no write of any kind.
+    """
+    # Scoring/roster identity comes from espn_contract when a contract is
+    # supplied; with none, my_team emits null hashes and says why rather than
+    # computing a second-best local digest.
+    snapshot = my_team_mod.load_latest_snapshot(snapshot_dir, now=generated_at)
+    if snapshot is None:
+        return {
+            "schema_version": my_team_mod.SCHEMA_VERSION,
+            "generated_at": generated_at,
+            "status": "no_current_pick",
+            "reason": (f"no ESPN league snapshot found in {snapshot_dir}; the Monitor surface "
+                       "reports nothing rather than reusing a prior card"),
+            "league": {}, "sources": [],
+        }
+    projections: dict = {}
+    crosswalk: dict = dict(espn_crosswalk or {})
+    if len(summaries):
+        for row in summaries.to_dict("records"):
+            projections[str(row.get("player_id"))] = {
+                "mean": float(row.get("mean", 0.0)),
+                "p10": float(row.get("p10", row.get("mean", 0.0))),
+                "p90": float(row.get("p90", row.get("mean", 0.0))),
+            }
+    # Projections stay beside the snapshot rather than being spliced into it:
+    # the snapshot is a record of what ESPN said, and joining the model into it
+    # is what let the reader and the adapter drift into two schemas.
+    try:
+        return my_team_mod.build(
+            snapshot, now=generated_at, contract=contract, waiver_plan=waiver_plan,
+            crosswalk=crosswalk, projections=projections)
+    # A broken snapshot degrades this one section; it must not stop the publish.
+    except Exception as exc:
+        print(f"[my-team] contract unavailable this run: {type(exc).__name__}: {exc}")
+        return {
+            "schema_version": my_team_mod.SCHEMA_VERSION,
+            "generated_at": generated_at,
+            "status": "no_current_pick",
+            "reason": f"league snapshot could not be interpreted: {type(exc).__name__}: {exc}",
+            "league": {}, "sources": [],
+        }
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", default="historical/fantasy")
@@ -171,6 +229,7 @@ def main(argv=None) -> int:
     parser.add_argument("--no-fetch", action="store_true")
     parser.add_argument("--output", default="data/fantasy_latest.json")
     parser.add_argument("--dashboard", default="fantasy.html")
+    parser.add_argument("--league-snapshot-dir", default="data/espn_league")
     parser.add_argument("--model", default="data/fantasy_model.joblib")
     parser.add_argument("--projection-snapshot", default="data/player_projection_snapshot.json")
     parser.add_argument("--component-samples", default="data/player_projection_samples.parquet")
@@ -256,8 +315,12 @@ def main(argv=None) -> int:
         generated_at=generated,
         rules=rules,
     )
+    my_team_payload = run_my_team(
+        result.summaries, generated_at=generated, snapshot_dir=args.league_snapshot_dir,
+    )
     payload = {
         "espn_comparison": espn_comparison,
+        "my_team": my_team_payload,
         "generated_at": generated,
         "season": season,
         "week": week,
@@ -279,7 +342,7 @@ def main(argv=None) -> int:
     artifact.write_model_card("reports/fantasy_model_card.json")
     render_fantasy_dashboard(
         result.summaries, args.dashboard, season=season, week=week, generated_at=generated,
-        espn_comparison=espn_comparison,
+        espn_comparison=espn_comparison, my_team=my_team_payload,
     )
     print(f"projected {len(result.summaries)} players for {season} week {week}")
     return 0

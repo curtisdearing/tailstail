@@ -55,12 +55,14 @@ def score_components(
         + _value(components, "receptions") * r.reception
         + receiving_yards * r.receiving_yard
         + _value(components, "receiving_tds") * r.receiving_td
-        + (
-            _value(components, "passing_2pt_conversions")
-            + _value(components, "rushing_2pt_conversions")
-            + _value(components, "receiving_2pt_conversions")
-        )
-        * r.two_point
+        # Three separate categories, not one summed bucket: ESPN prices
+        # passing (statId 19), rushing (26) and receiving (44) conversions
+        # independently, and this league pays 4.0 for a receiving conversion
+        # against 2.0 for the other two. When all three are equal the
+        # arithmetic is identical to the previous single-multiplier form.
+        + _value(components, "passing_2pt_conversions") * r.passing_two_point_value
+        + _value(components, "rushing_2pt_conversions") * r.rushing_two_point_value
+        + _value(components, "receiving_2pt_conversions") * r.receiving_two_point_value
         + _value(components, "fumbles_lost") * r.fumble_lost
     )
     if r.passing_300_bonus:

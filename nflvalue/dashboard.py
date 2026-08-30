@@ -121,7 +121,12 @@ const DATA = __DATA_JSON__;
 
 const fmtPct = x => (x>=0?"+":"") + (x*100).toFixed(1) + "%";
 const fmtP = x => (x*100).toFixed(1) + "%";
-const esc = s => (s==null?"":String(s)).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const ESC_MAP={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;","`":"&#96;"};
+const esc = s => (s==null?"":String(s)).replace(/[&<>"'`]/g,c=>ESC_MAP[c]);
+// Every numeric slot below goes through num(): a JSON payload is data, and a
+// string where a number was expected either throws (.toFixed) or lands
+// unescaped in innerHTML. Coercing is both safer and more honest than either.
+const num = v => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
 
 function evClass(ev){return ev>0?"ev pos":"ev neg";}
 
@@ -137,7 +142,7 @@ function betRow(b){
     <td><div class="price">${esc(b.price_american)}</div><div class="book">${esc(b.best_book)}</div></td>
     <td><div class="sub">fair ${fmtP(b.p_consensus)}</div><div>proj ${fmtP(b.p_bet!=null?b.p_bet:b.p_model)}</div></td>
     <td class="${evClass(b.ev)}">${fmtPct(b.ev)}</td>
-    <td>${b.stake_units.toFixed(2)}u</td>
+    <td>${num(b.stake_units).toFixed(2)}u</td>
     <td>${whyPills(b.why)}</td>
   </tr>`;
 }
@@ -170,9 +175,9 @@ function renderLeans(){
   const kc=DATA.leans_killcheck||{};
   const pub = w.publish===false
     ? `<div class="box" style="border-color:var(--red)"><b>NOT PUBLISHED</b> — data gate failed: ${esc((w.publish_reasons||[]).join("; "))}</div>` : "";
-  const clvBox = `<div class="box"><b>Forward CLV</b> — resolved leans: ${clv.n||0}
+  const clvBox = `<div class="box"><b>Forward CLV</b> — resolved leans: ${num(clv.n)}
       ${clv.lifetime_mean!=null?` · lifetime avg ${fmtPct(clv.lifetime_mean)} prob`:""}
-      ${clv.rolling_mean!=null?` · rolling(${clv.window}) ${fmtPct(clv.rolling_mean)}`:""}
+      ${clv.rolling_mean!=null?` · rolling(${num(clv.window)}) ${fmtPct(clv.rolling_mean)}`:""}
       ${kc.verdict?` · kill-check: <b>${esc(kc.verdict)}</b>`:""}
       <div class="sub">${esc(kc.detail||"CLV accrues only once real prop lines are pulled live (Phase 3).")}</div></div>`;
   const sideLabel = l => l.market==="anytime_td" ? "YES" : (l.side||"").toUpperCase();
@@ -182,12 +187,12 @@ function renderLeans(){
       <td><div class="pick">${esc(l.name)}</div><div class="sub">${esc(l.pos)} · ${esc(l.team)}</div></td>
       <td>${esc(String(l.market||"").replace(/_/g," "))}</td>
       <td class="price">${esc(l.line)}${l.line_source==="odds_api"?"":"†"}</td>
-      <td><b>${sideLabel(l)}</b></td>
+      <td><b>${esc(sideLabel(l))}</b></td>
       <td>${esc(l.mean)}</td>
       <td>${l.edge!=null?fmtPct(l.edge):'<span class="sub">no_market</span>'}</td>
       <td class="price">${esc(l.composite)}</td></tr>`).join("");
     const ctxItems = ctx? ctx.entries.map(e=>e.items.map(i=>`<div class="sub">• <b>${esc(e.name)}</b> — ${esc(i)}</div>`).join("")).join("") : "";
-    return `<div class="box"><b>${esc(g.matchup)}</b> <span class="sub">top ${g.leans.length} of ${g.screened_n} screened</span>
+    return `<div class="box"><b>${esc(g.matchup)}</b> <span class="sub">top ${num(g.leans.length)} of ${num(g.screened_n)} screened</span>
       <table><thead><tr><th>Player</th><th>Market</th><th>Line</th><th>Side</th><th>Proj</th><th>Edge</th><th>Score</th></tr></thead>
       <tbody>${rows}</tbody></table>
       ${ctx?`<div class="note"><b>Context — display only, never scored:</b>${ctxItems}</div>`:""}</div>`;
@@ -226,31 +231,31 @@ function renderPerf(){
   const calRows=cal.map(c=>{
     const diff=Math.abs(c.predicted-c.actual);
     const col=diff<0.06?"var(--green)":diff<0.12?"var(--yellow)":"var(--red)";
-    return `<tr><td>${c.bucket}</td><td>${fmtP(c.predicted)}</td>
-      <td style="color:${col}">${fmtP(c.actual)}</td><td class="sub">${c.n}</td></tr>`;}).join("");
+    return `<tr><td>${esc(c.bucket)}</td><td>${fmtP(c.predicted)}</td>
+      <td style="color:${col}">${fmtP(c.actual)}</td><td class="sub">${num(c.n)}</td></tr>`;}).join("");
   const eq=m.equity_curve||[];
   const wkeys=Object.keys(w).sort((a,b)=>Math.abs(w[b])-Math.abs(w[a]));
   const wmax=Math.max(0.01,...wkeys.map(k=>Math.abs(w[k])));
   const wbars=wkeys.map(k=>{
     const pos=w[k]>=0, pct=(Math.abs(w[k])/wmax)*100;
     return `<div class="wbar"><div class="name">${esc(k.replace(/^[gtp]_/,''))}</div>
-      <div class="track"><div class="fill" style="width:${pct}%;background:${pos?'var(--green)':'var(--red)'}"></div></div>
-      <div class="num">${w[k].toFixed(2)}</div></div>`;}).join("");
+      <div class="track"><div class="fill" style="width:${num(pct)}%;background:${pos?'var(--green)':'var(--red)'}"></div></div>
+      <div class="num">${num(w[k]).toFixed(2)}</div></div>`;}).join("");
 
   document.getElementById("perf").innerHTML=`
     <div class="grid2">
       <div class="box"><h3>Betting performance (recommended picks)</h3>
         <div class="cards" style="margin:0">
-          <div class="card"><div class="k">Bets settled</div><div class="val">${m.bets_settled||0}</div></div>
-          <div class="card"><div class="k">Bet hit rate</div><div class="val">${fmtP(m.bets_win_rate||0)}</div></div>
-          <div class="card"><div class="k">Bet ROI</div><div class="val ${(m.bets_roi||0)>=0?'ev pos':'ev neg'}">${fmtPct(m.bets_roi||0)}</div></div>
-          <div class="card"><div class="k">Brier</div><div class="val">${(m.brier||0).toFixed(3)}</div></div>
+          <div class="card"><div class="k">Bets settled</div><div class="val">${num(m.bets_settled)}</div></div>
+          <div class="card"><div class="k">Bet hit rate</div><div class="val">${fmtP(num(m.bets_win_rate))}</div></div>
+          <div class="card"><div class="k">Bet ROI</div><div class="val ${(m.bets_roi||0)>=0?'ev pos':'ev neg'}">${fmtPct(num(m.bets_roi))}</div></div>
+          <div class="card"><div class="k">Brier</div><div class="val">${num(m.brier).toFixed(3)}</div></div>
         </div>
-        <div class="note">Hit rate &amp; ROI are for the picks that cleared the EV threshold (1u flat). Brier is calibration over <b>all</b> ${m.settled_total||0} graded predictions (lower is better; 0.25 = a coin flip).</div>
+        <div class="note">Hit rate &amp; ROI are for the picks that cleared the EV threshold (1u flat). Brier is calibration over <b>all</b> ${num(m.settled_total)} graded predictions (lower is better; 0.25 = a coin flip).</div>
       </div>
       <div class="box"><h3>Bankroll (recommended bets, fractional Kelly)</h3>
         ${eq.length>1?svgLine(eq,420,120,"var(--green)"):'<div class="empty">No settled bets yet — grade some games to populate.</div>'}
-        <div class="note">Start ${ (m.start_bankroll||100).toFixed(0)}u &rarr; now <b>${(m.bankroll||100).toFixed(1)}u</b> over ${m.bets_settled||0} bets.</div>
+        <div class="note">Start ${num(m.start_bankroll||100).toFixed(0)}u &rarr; now <b>${num(m.bankroll||100).toFixed(1)}u</b> over ${num(m.bets_settled)} bets.</div>
       </div>
     </div>
     <div class="grid2" style="margin-top:16px">
@@ -456,13 +461,32 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
 });
 renderWeekly();renderCards();renderBets();renderProps();renderLeans();renderMonteCarlo();renderGames();renderPerf();renderAudit();renderBacktest();
 
-let secs=DATA.refresh_seconds||90;
+let secs=num(DATA.refresh_seconds)||90;
 const cd=document.getElementById("count");cd.textContent=secs;
 setInterval(()=>{secs--;cd.textContent=Math.max(secs,0);if(secs<=0)location.reload();},1000);
 </script>
 </body>
 </html>
 """
+
+
+def _json_for_script(payload: Dict) -> str:
+    """JSON safe to paste inside a ``<script>`` element.
+
+    ``json.dumps`` is not: a string containing ``</script>`` closes the element
+    and everything after it becomes markup, so any field that ever carries
+    user- or feed-supplied text is an HTML-injection vector into the local
+    dashboard. Escaping the three characters that can start a tag or comment
+    (plus the two Unicode line terminators JSON allows raw and JavaScript does
+    not) keeps the value a valid JSON string literal while making the sequence
+    unrepresentable.
+    """
+    return (json.dumps(payload, default=str)
+            .replace("<", "\\u003c")
+            .replace(">", "\\u003e")
+            .replace("&", "\\u0026")
+            .replace("\u2028", "\\u2028")
+            .replace("\u2029", "\\u2029"))
 
 
 def write_dashboard(data: Dict, path: Optional[str] = None) -> str:
@@ -472,7 +496,7 @@ def write_dashboard(data: Dict, path: Optional[str] = None) -> str:
         config.ALL_DATA_FACTOR_AUDIT_PATH, None))
     payload.setdefault("nested_factor_projection", config.load_json(
         config.NESTED_FACTOR_PROJECTION_PATH, None))
-    html = TEMPLATE.replace("__DATA_JSON__", json.dumps(payload, default=str))
+    html = TEMPLATE.replace("__DATA_JSON__", _json_for_script(payload))
     with open(path, "w") as f:
         f.write(html)
     return path

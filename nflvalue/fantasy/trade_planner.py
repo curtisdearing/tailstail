@@ -67,6 +67,32 @@ def load_rosters_json(path: str | Path, my_team: str) -> LeagueRosters:
     return LeagueRosters(teams=teams, my_team=my_team)
 
 
+def load_rosters_from_snapshot(snapshot) -> LeagueRosters:
+    """Build rosters from a validated ESPN league snapshot.
+
+    This is the honest path. The snapshot has already proved it is the right
+    league, season and team, carries stable ESPN player ids, and knows whether
+    a draft has happened -- so a caller cannot silently plan trades against a
+    league that has not drafted, or against somebody else's league.
+
+    Names are produced here only because ``LeagueRosters`` is a name-keyed
+    structure the rest of the planner already speaks; the ids remain in
+    ``snapshot.rosters`` and should be preferred by anything new.
+    """
+
+    if snapshot.roster_state != "populated":
+        raise ValueError(
+            f"league {snapshot.league.league_id} is {snapshot.roster_state} "
+            f"(draft status {snapshot.draft.status}); there are no rosters to plan against. "
+            "A pre-draft league has intentions, not teams.")
+    id_to_name = {team.team_id: team.name for team in snapshot.teams}
+    teams = {
+        id_to_name[team_id]: [player.full_name for player in players]
+        for team_id, players in snapshot.rosters.items()
+    }
+    return LeagueRosters(teams=teams, my_team=snapshot.my_team.name)
+
+
 def load_rosters_espn(
     league_id: int,
     season: int,
@@ -75,13 +101,28 @@ def load_rosters_espn(
     espn_s2: str | None = None,
     swid: str | None = None,
 ) -> LeagueRosters:
-    """Pull all rosters from ESPN.  Requires the ``espn_api`` package."""
+    """Pull roster player NAMES from ESPN. **This is not a full league sync.**
+
+    A name-only loader, kept for the legacy ``espn_api`` path. It returns
+    player names and nothing else -- no player ids, no lineup slots, no
+    eligibility, no bench/IR split, no free agents, no schedule, no draft
+    state, and no identity check beyond "a team with this name exists". It
+    cannot tell a pre-draft league from a league whose rosters failed to load;
+    both come back as empty name lists.
+
+    For anything that matters, use :mod:`nflvalue.fantasy.espn_client` +
+    :mod:`nflvalue.fantasy.espn_league` to build a validated snapshot and pass
+    it to :func:`load_rosters_from_snapshot`, which fails closed on all of the
+    above. Credentials there come from the environment; the parameters here are
+    part of the legacy signature and should not be filled from a CLI argument.
+    """
 
     try:
         from espn_api.football import League
     except ImportError as exc:  # pragma: no cover - optional dependency
         raise RuntimeError(
-            "pip install espn_api for ESPN ingestion, or use load_rosters_json"
+            "pip install espn_api for the legacy name-only path, or build a snapshot with "
+            "nflvalue.fantasy.espn_client and use load_rosters_from_snapshot"
         ) from exc
     league = League(league_id=league_id, year=season, espn_s2=espn_s2, swid=swid)
     teams = {

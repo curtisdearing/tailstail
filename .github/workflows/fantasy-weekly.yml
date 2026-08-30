@@ -9,15 +9,15 @@ on:
   workflow_dispatch:
     inputs:
       season:
-        description: Optional NFL season override
+        description: Optional NFL season override (1999-2099). Makes the run DIAGNOSTIC.
         required: false
         type: string
       week:
-        description: Optional NFL week override
+        description: Optional NFL week override (1-22). Makes the run DIAGNOSTIC.
         required: false
         type: string
       fast:
-        description: Use reduced learners for a diagnostic run
+        description: Reduced learners for a diagnostic run. Publishes nothing.
         required: false
         default: false
         type: boolean
@@ -26,10 +26,10 @@ on:
     - cron: "35 23 * 9-12,1 3"
     - cron: "15 14 * 9-12,1 0"
 
+# Least privilege at the top: read-only. Each job asks for exactly the writes
+# it performs, and the two deploy jobs are the only holders of `pages: write`.
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
 
 concurrency:
   group: tailstail-fantasy-production
@@ -40,6 +40,10 @@ jobs:
     if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 75
+    permissions:
+      contents: write        # release assets holding the model-state archive
+    outputs:
+      production: ${{ steps.mode.outputs.production }}
     env:
       GH_TOKEN: ${{ github.token }}
       STATE_TAG: fantasy-model-state
@@ -50,6 +54,40 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: pip install -r requirements.txt
+
+      # Inputs reach the shell as environment variables and never as expression
+      # text spliced into a script. `${{ inputs.season }}` interpolated into a
+      # `run:` block is executed by bash before the script is parsed, so a
+      # dispatch value of `"; curl … | sh; #` would run with GH_TOKEN in scope.
+      # Validation is a separate, fail-fast step so a bad value cannot reach a
+      # command line at all.
+      - name: Validate dispatch inputs and classify the run
+        id: mode
+        shell: bash
+        env:
+          IN_SEASON: ${{ inputs.season }}
+          IN_WEEK: ${{ inputs.week }}
+          IN_FAST: ${{ inputs.fast }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${IN_SEASON:-}" ]]; then
+            [[ "$IN_SEASON" =~ ^[0-9]{4}$ ]] || { echo "::error::season must be a 4-digit year"; exit 1; }
+            (( IN_SEASON >= 1999 && IN_SEASON <= 2099 )) || { echo "::error::season out of range 1999-2099"; exit 1; }
+          fi
+          if [[ -n "${IN_WEEK:-}" ]]; then
+            [[ "$IN_WEEK" =~ ^[0-9]{1,2}$ ]] || { echo "::error::week must be 1-2 digits"; exit 1; }
+            (( IN_WEEK >= 1 && IN_WEEK <= 22 )) || { echo "::error::week out of range 1-22"; exit 1; }
+          fi
+          # A run is production only when it is the unmodified pipeline. Any
+          # override or reduced-learner run is diagnostic and must not be able
+          # to publish state or Pages: a --fast model writing the season ledger
+          # silently corrupts every later grading comparison.
+          production=true
+          if [[ "${IN_FAST:-false}" == "true" || -n "${IN_SEASON:-}" || -n "${IN_WEEK:-}" ]]; then
+            production=false
+          fi
+          echo "production=$production" >> "$GITHUB_OUTPUT"
+          echo "run mode: production=$production"
 
       - name: Restore rebuildable fantasy history
         uses: actions/cache/restore@v5
@@ -80,11 +118,16 @@ jobs:
 
       - name: Build current projections
         shell: bash
+        env:
+          IN_SEASON: ${{ inputs.season }}
+          IN_WEEK: ${{ inputs.week }}
+          IN_FAST: ${{ inputs.fast }}
         run: |
+          set -euo pipefail
           args=()
-          [[ -z "${{ inputs.season }}" ]] || args+=(--season "${{ inputs.season }}")
-          [[ -z "${{ inputs.week }}" ]] || args+=(--week "${{ inputs.week }}")
-          [[ "${{ inputs.fast }}" != "true" ]] || args+=(--fast)
+          [[ -z "${IN_SEASON:-}" ]] || args+=(--season "$IN_SEASON")
+          [[ -z "${IN_WEEK:-}" ]] || args+=(--week "$IN_WEEK")
+          [[ "${IN_FAST:-false}" != "true" ]] || args+=(--fast)
           python scripts/fantasy_weekly.py "${args[@]}"
 
       - name: Verify generated contracts
@@ -112,6 +155,7 @@ jobs:
           PY
 
       - name: Publish checksummed fantasy state
+        if: steps.mode.outputs.production == 'true'
         shell: bash
         run: |
           asset="fantasy-state-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.tar.gz"
@@ -125,6 +169,7 @@ jobs:
           gh release edit "$STATE_TAG" --notes-file "$RUNNER_TEMP/fantasy-state.json"
 
       - name: Keep the eight newest fantasy states
+        if: steps.mode.outputs.production == 'true'
         shell: bash
         run: |
           gh release view "$STATE_TAG" --json assets --jq '.assets | sort_by(.createdAt) | reverse | map(select(.name | test("^fantasy-state-[0-9]+-[0-9]+\\.tar\\.gz$"))) | .[8:] | .[].name' |
@@ -133,14 +178,18 @@ jobs:
           done
 
       - name: Save refreshed fantasy history
+        if: steps.mode.outputs.production == 'true'
         uses: actions/cache/save@v5
         with:
           path: historical/fantasy
           key: fantasy-history-${{ runner.os }}-${{ github.run_id }}
 
+      # The artifact carries model state and ESPN snapshots, so it is named by
+      # run mode: a diagnostic archive must never be mistaken for the season's
+      # real ledger when someone downloads one months later.
       - uses: actions/upload-artifact@v6
         with:
-          name: tailstail-fantasy-${{ github.run_id }}
+          name: tailstail-fantasy-${{ steps.mode.outputs.production == 'true' && 'production' || 'diagnostic' }}-${{ github.run_id }}
           retention-days: 30
           path: |
             data/fantasy_latest.json
@@ -153,21 +202,25 @@ jobs:
             fantasy.html
 
       - name: Prepare Tailstail Pages site
+        if: steps.mode.outputs.production == 'true'
         run: |
           mkdir -p _site
           cp fantasy.html _site/index.html
           cp data/fantasy_latest.json _site/fantasy_latest.json
           cp data/player_projection_snapshot.json _site/player_projection_snapshot.json
       - uses: actions/configure-pages@v5
+        if: steps.mode.outputs.production == 'true'
       - uses: actions/upload-pages-artifact@v4
+        if: steps.mode.outputs.production == 'true'
         with:
           path: _site
 
   deploy-dashboard:
-    if: github.event_name != 'push'
+    if: github.event_name != 'push' && needs.project.outputs.production == 'true'
     needs: project
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pages: write
       id-token: write
     environment:
@@ -182,6 +235,7 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pages: write
       id-token: write
     environment:

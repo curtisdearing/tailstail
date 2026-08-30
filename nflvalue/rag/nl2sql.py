@@ -10,6 +10,10 @@ later behind the same interface):
     and obviously no DDL/DML -- INSERT/UPDATE/DELETE/DROP/ALTER/CREATE/
     PRAGMA/ATTACH/VACUUM/REPLACE are rejected as words anywhere).
   * single statement, no comments (comment syntax is how injections hide).
+  * AUTHORIZER: execution installs a SQLite read-only authorizer, so the
+    table whitelist is enforced by the engine on what it actually resolved
+    -- not only by a regex over the statement text, which a quoted or
+    schema-qualified identifier can walk straight past.
   * ROW CAP: execution wraps the query as ``SELECT * FROM (<sql>) LIMIT cap``
     so no generator mistake can dump the warehouse.
   * the ANSWER is composed ONLY from returned rows (deterministic summarizer
@@ -25,6 +29,7 @@ CLI:  python3 -m nflvalue.rag.nl2sql "average CLV so far"
 from __future__ import annotations
 
 import re
+import sqlite3
 import sys
 from typing import Dict, List, Optional, Protocol
 
@@ -88,11 +93,57 @@ def validate_sql(sql: str) -> str:
     return s
 
 
+# Functions a read-only warehouse question legitimately needs. Anything not
+# named here -- `load_extension`, `readfile`, `writefile`, `edit`, a
+# user-registered function -- is refused by the authorizer below.
+ALLOWED_FUNCTIONS = frozenset({
+    "abs", "avg", "coalesce", "count", "date", "datetime", "group_concat",
+    "ifnull", "instr", "julianday", "length", "lower", "ltrim", "max", "min",
+    "nullif", "printf", "replace", "round", "rtrim", "strftime", "substr",
+    "sum", "total", "trim", "typeof", "upper",
+})
+
+
+def _read_only_authorizer(action, arg1, arg2, db_name, trigger):
+    """SQLite's own opinion about what this statement may touch.
+
+    The regex in :func:`validate_sql` is a *parser* guess about a string; this
+    is the engine reporting what it actually resolved. A quoted identifier
+    (``FROM "sqlite_master"``), a schema-qualified name (``FROM main.leans``),
+    or a table reached through a construct the regex never modelled all arrive
+    here as a plain SQLITE_READ on a named table, so the whitelist is enforced
+    where it cannot be spelled around. Writes, DDL, ATTACH, PRAGMA and
+    extension loading have no allowed action at all.
+    """
+    if action == sqlite3.SQLITE_SELECT:
+        return sqlite3.SQLITE_OK
+    if action == sqlite3.SQLITE_READ:
+        return sqlite3.SQLITE_OK if str(arg1).lower() in WHITELIST_TABLES else sqlite3.SQLITE_DENY
+    if action == sqlite3.SQLITE_FUNCTION:
+        return sqlite3.SQLITE_OK if str(arg2).lower() in ALLOWED_FUNCTIONS else sqlite3.SQLITE_DENY
+    return sqlite3.SQLITE_DENY
+
+
 def execute(conn, sql: str, row_cap: int = DEFAULT_ROW_CAP) -> List[Dict]:
-    """Validate, hard-cap, run. The cap is structural (outer LIMIT), not advisory."""
+    """Validate, hard-cap, run under a read-only authorizer.
+
+    Three independent limits, because one of them being wrong should not be
+    enough: the regex contract, the structural outer LIMIT, and SQLite's
+    authorizer -- which is the only one that sees what the engine resolved
+    rather than what the string looked like.
+    """
     clean = validate_sql(sql)
     capped = f"SELECT * FROM ({clean}) LIMIT {int(row_cap)}"
-    df = dbmod.query_df(conn, capped)
+    guarded = hasattr(conn, "set_authorizer")
+    if guarded:
+        conn.set_authorizer(_read_only_authorizer)
+    try:
+        df = dbmod.query_df(conn, capped)
+    except sqlite3.DatabaseError as exc:
+        raise SQLValidationError(f"query refused by the read-only authorizer: {exc}") from exc
+    finally:
+        if guarded:
+            conn.set_authorizer(None)
     return df.to_dict("records")
 
 

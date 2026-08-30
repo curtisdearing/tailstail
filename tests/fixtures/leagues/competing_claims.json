@@ -1,0 +1,141 @@
+{
+ "id": 424242,
+ "pendingTransactions": [
+  {
+   "id": "tx1",
+   "items": [
+    {
+     "playerId": 9001,
+     "type": "ADD"
+    }
+   ],
+   "status": "PENDING",
+   "teamId": 2,
+   "type": "WAIVER"
+  },
+  {
+   "id": "tx2",
+   "items": [
+    {
+     "playerId": 9001,
+     "type": "ADD"
+    }
+   ],
+   "status": "PENDING",
+   "teamId": 3,
+   "type": "WAIVER"
+  }
+ ],
+ "scoringPeriodId": 3,
+ "seasonId": 2026,
+ "settings": {
+  "acquisitionSettings": {
+   "acquisitionBudget": 0,
+   "acquisitionLimit": -1,
+   "isUsingAcquisitionBudget": false,
+   "waiverHours": 11,
+   "waiverOrderReset": true,
+   "waiverProcessDays": [
+    "WEDNESDAY"
+   ]
+  },
+  "name": "Amplified",
+  "rosterSettings": {
+   "isBenchUnlimited": false,
+   "lineupSlotCounts": {
+    "0": 1,
+    "16": 1,
+    "17": 1,
+    "2": 2,
+    "20": 4,
+    "21": 1,
+    "23": 1,
+    "4": 2,
+    "6": 1
+   }
+  },
+  "scoringSettings": {
+   "scoringItems": [
+    {
+     "points": 0.04,
+     "statId": 3
+    },
+    {
+     "points": 4.0,
+     "statId": 4
+    },
+    {
+     "points": 0.1,
+     "statId": 24
+    },
+    {
+     "points": 6.0,
+     "statId": 25
+    },
+    {
+     "points": 0.1,
+     "statId": 42
+    },
+    {
+     "points": 6.0,
+     "statId": 43
+    },
+    {
+     "points": 1.0,
+     "statId": 53
+    },
+    {
+     "points": -2.0,
+     "statId": 20
+    }
+   ]
+  }
+ },
+ "status": {
+  "currentMatchupPeriod": 3,
+  "isActive": true,
+  "transactionDeadline": "2026-12-23T18:00:00Z",
+  "waiverLastExecutionDate": "2026-09-16T11:00:00Z"
+ },
+ "teams": [
+  {
+   "id": 1,
+   "name": "Curtis",
+   "playoffSeed": 8,
+   "record": {
+    "overall": {
+     "losses": 2,
+     "pointsFor": 180.2,
+     "wins": 0
+    }
+   },
+   "waiverRank": 1
+  },
+  {
+   "id": 2,
+   "name": "Rival",
+   "playoffSeed": 2,
+   "record": {
+    "overall": {
+     "losses": 0,
+     "pointsFor": 240.0,
+     "wins": 2
+    }
+   },
+   "waiverRank": 8
+  },
+  {
+   "id": 3,
+   "name": "Third",
+   "playoffSeed": 5,
+   "record": {
+    "overall": {
+     "losses": 1,
+     "pointsFor": 200.0,
+     "wins": 1
+    }
+   },
+   "waiverRank": 4
+  }
+ ]
+}

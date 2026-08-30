@@ -1,0 +1,4773 @@
+{
+ "currentMatchupPeriod": 6,
+ "draftDetail": {
+  "drafted": true,
+  "inProgress": false,
+  "picks": []
+ },
+ "finalScoringPeriod": 17,
+ "firstScoringPeriod": 1,
+ "id": 1111111111,
+ "members": [
+  {
+   "displayName": "manager_one",
+   "firstName": "Manager",
+   "id": "{AAAAAAAA-1111-4000-8000-000000000001}",
+   "isLeagueManager": true,
+   "lastName": "One"
+  },
+  {
+   "displayName": "manager_two",
+   "firstName": "Manager",
+   "id": "{BBBBBBBB-2222-4000-8000-000000000002}",
+   "isLeagueManager": false,
+   "lastName": "Two"
+  },
+  {
+   "displayName": "manager_three",
+   "id": "{CCCCCCCC-3333-4000-8000-000000000003}",
+   "isLeagueManager": false
+  },
+  {
+   "displayName": "manager_four",
+   "id": "{DDDDDDDD-4444-4000-8000-000000000004}",
+   "isLeagueManager": false
+  },
+  {
+   "displayName": "manager_five",
+   "id": "{EEEEEEEE-5555-4000-8000-000000000005}",
+   "isLeagueManager": false
+  },
+  {
+   "displayName": "manager_six",
+   "id": "{FFFFFFFF-6666-4000-8000-000000000006}",
+   "isLeagueManager": false
+  },
+  {
+   "displayName": "manager_seven",
+   "id": "{11111111-7777-4000-8000-000000000007}",
+   "isLeagueManager": false
+  },
+  {
+   "displayName": "manager_eight",
+   "id": "{22222222-8888-4000-8000-000000000008}",
+   "isLeagueManager": false
+  }
+ ],
+ "pendingTransactions": [
+  {
+   "bidAmount": 0,
+   "id": "tx-pending-0001",
+   "isLeagueManager": false,
+   "isPending": true,
+   "items": [
+    {
+     "fromTeamId": 0,
+     "playerId": 999001,
+     "toTeamId": 1,
+     "type": "ADD"
+    },
+    {
+     "fromTeamId": 1,
+     "playerId": 4100005,
+     "toTeamId": 0,
+     "type": "DROP"
+    }
+   ],
+   "proposedDate": 1758100000000,
+   "scoringPeriodId": 6,
+   "status": "PENDING",
+   "teamId": 1,
+   "type": "WAIVER"
+  }
+ ],
+ "schedule": [
+  {
+   "away": {
+    "teamId": 2,
+    "totalPoints": 106.7
+   },
+   "home": {
+    "teamId": 1,
+    "totalPoints": 119.2
+   },
+   "id": 101,
+   "matchupPeriodId": 1,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 8,
+    "totalPoints": 112.7
+   },
+   "home": {
+    "teamId": 3,
+    "totalPoints": 121.2
+   },
+   "id": 102,
+   "matchupPeriodId": 1,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 7,
+    "totalPoints": 111.7
+   },
+   "home": {
+    "teamId": 4,
+    "totalPoints": 122.2
+   },
+   "id": 103,
+   "matchupPeriodId": 1,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 6,
+    "totalPoints": 110.7
+   },
+   "home": {
+    "teamId": 5,
+    "totalPoints": 123.2
+   },
+   "id": 104,
+   "matchupPeriodId": 1,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 8,
+    "totalPoints": 112.7
+   },
+   "home": {
+    "teamId": 1,
+    "totalPoints": 119.2
+   },
+   "id": 201,
+   "matchupPeriodId": 2,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 7,
+    "totalPoints": 111.7
+   },
+   "home": {
+    "teamId": 2,
+    "totalPoints": 120.2
+   },
+   "id": 202,
+   "matchupPeriodId": 2,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 6,
+    "totalPoints": 110.7
+   },
+   "home": {
+    "teamId": 3,
+    "totalPoints": 121.2
+   },
+   "id": 203,
+   "matchupPeriodId": 2,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 5,
+    "totalPoints": 109.7
+   },
+   "home": {
+    "teamId": 4,
+    "totalPoints": 122.2
+   },
+   "id": 204,
+   "matchupPeriodId": 2,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 7,
+    "totalPoints": 111.7
+   },
+   "home": {
+    "teamId": 1,
+    "totalPoints": 119.2
+   },
+   "id": 301,
+   "matchupPeriodId": 3,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 6,
+    "totalPoints": 110.7
+   },
+   "home": {
+    "teamId": 8,
+    "totalPoints": 126.2
+   },
+   "id": 302,
+   "matchupPeriodId": 3,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 5,
+    "totalPoints": 109.7
+   },
+   "home": {
+    "teamId": 2,
+    "totalPoints": 120.2
+   },
+   "id": 303,
+   "matchupPeriodId": 3,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 4,
+    "totalPoints": 108.7
+   },
+   "home": {
+    "teamId": 3,
+    "totalPoints": 121.2
+   },
+   "id": 304,
+   "matchupPeriodId": 3,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 6,
+    "totalPoints": 110.7
+   },
+   "home": {
+    "teamId": 1,
+    "totalPoints": 119.2
+   },
+   "id": 401,
+   "matchupPeriodId": 4,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 5,
+    "totalPoints": 109.7
+   },
+   "home": {
+    "teamId": 7,
+    "totalPoints": 125.2
+   },
+   "id": 402,
+   "matchupPeriodId": 4,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 4,
+    "totalPoints": 108.7
+   },
+   "home": {
+    "teamId": 8,
+    "totalPoints": 126.2
+   },
+   "id": 403,
+   "matchupPeriodId": 4,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 3,
+    "totalPoints": 107.7
+   },
+   "home": {
+    "teamId": 2,
+    "totalPoints": 120.2
+   },
+   "id": 404,
+   "matchupPeriodId": 4,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 5,
+    "totalPoints": 109.7
+   },
+   "home": {
+    "teamId": 1,
+    "totalPoints": 119.2
+   },
+   "id": 501,
+   "matchupPeriodId": 5,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 4,
+    "totalPoints": 108.7
+   },
+   "home": {
+    "teamId": 6,
+    "totalPoints": 124.2
+   },
+   "id": 502,
+   "matchupPeriodId": 5,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 3,
+    "totalPoints": 107.7
+   },
+   "home": {
+    "teamId": 7,
+    "totalPoints": 125.2
+   },
+   "id": 503,
+   "matchupPeriodId": 5,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 2,
+    "totalPoints": 106.7
+   },
+   "home": {
+    "teamId": 8,
+    "totalPoints": 126.2
+   },
+   "id": 504,
+   "matchupPeriodId": 5,
+   "playoffTierType": "NONE",
+   "winner": "HOME"
+  },
+  {
+   "away": {
+    "teamId": 4
+   },
+   "home": {
+    "teamId": 1
+   },
+   "id": 601,
+   "matchupPeriodId": 6,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 3
+   },
+   "home": {
+    "teamId": 5
+   },
+   "id": 602,
+   "matchupPeriodId": 6,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 2
+   },
+   "home": {
+    "teamId": 6
+   },
+   "id": 603,
+   "matchupPeriodId": 6,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 8
+   },
+   "home": {
+    "teamId": 7
+   },
+   "id": 604,
+   "matchupPeriodId": 6,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 3
+   },
+   "home": {
+    "teamId": 1
+   },
+   "id": 701,
+   "matchupPeriodId": 7,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 2
+   },
+   "home": {
+    "teamId": 4
+   },
+   "id": 702,
+   "matchupPeriodId": 7,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 8
+   },
+   "home": {
+    "teamId": 5
+   },
+   "id": 703,
+   "matchupPeriodId": 7,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 7
+   },
+   "home": {
+    "teamId": 6
+   },
+   "id": 704,
+   "matchupPeriodId": 7,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 2
+   },
+   "home": {
+    "teamId": 1
+   },
+   "id": 801,
+   "matchupPeriodId": 8,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 8
+   },
+   "home": {
+    "teamId": 3
+   },
+   "id": 802,
+   "matchupPeriodId": 8,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 7
+   },
+   "home": {
+    "teamId": 4
+   },
+   "id": 803,
+   "matchupPeriodId": 8,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 6
+   },
+   "home": {
+    "teamId": 5
+   },
+   "id": 804,
+   "matchupPeriodId": 8,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 8
+   },
+   "home": {
+    "teamId": 1
+   },
+   "id": 901,
+   "matchupPeriodId": 9,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 7
+   },
+   "home": {
+    "teamId": 2
+   },
+   "id": 902,
+   "matchupPeriodId": 9,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 6
+   },
+   "home": {
+    "teamId": 3
+   },
+   "id": 903,
+   "matchupPeriodId": 9,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 5
+   },
+   "home": {
+    "teamId": 4
+   },
+   "id": 904,
+   "matchupPeriodId": 9,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 7
+   },
+   "home": {
+    "teamId": 1
+   },
+   "id": 1001,
+   "matchupPeriodId": 10,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 6
+   },
+   "home": {
+    "teamId": 8
+   },
+   "id": 1002,
+   "matchupPeriodId": 10,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 5
+   },
+   "home": {
+    "teamId": 2
+   },
+   "id": 1003,
+   "matchupPeriodId": 10,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 4
+   },
+   "home": {
+    "teamId": 3
+   },
+   "id": 1004,
+   "matchupPeriodId": 10,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 6
+   },
+   "home": {
+    "teamId": 1
+   },
+   "id": 1101,
+   "matchupPeriodId": 11,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 5
+   },
+   "home": {
+    "teamId": 7
+   },
+   "id": 1102,
+   "matchupPeriodId": 11,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 4
+   },
+   "home": {
+    "teamId": 8
+   },
+   "id": 1103,
+   "matchupPeriodId": 11,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 3
+   },
+   "home": {
+    "teamId": 2
+   },
+   "id": 1104,
+   "matchupPeriodId": 11,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 5
+   },
+   "home": {
+    "teamId": 1
+   },
+   "id": 1201,
+   "matchupPeriodId": 12,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 4
+   },
+   "home": {
+    "teamId": 6
+   },
+   "id": 1202,
+   "matchupPeriodId": 12,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 3
+   },
+   "home": {
+    "teamId": 7
+   },
+   "id": 1203,
+   "matchupPeriodId": 12,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 2
+   },
+   "home": {
+    "teamId": 8
+   },
+   "id": 1204,
+   "matchupPeriodId": 12,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 4
+   },
+   "home": {
+    "teamId": 1
+   },
+   "id": 1301,
+   "matchupPeriodId": 13,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 3
+   },
+   "home": {
+    "teamId": 5
+   },
+   "id": 1302,
+   "matchupPeriodId": 13,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 2
+   },
+   "home": {
+    "teamId": 6
+   },
+   "id": 1303,
+   "matchupPeriodId": 13,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 8
+   },
+   "home": {
+    "teamId": 7
+   },
+   "id": 1304,
+   "matchupPeriodId": 13,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 3
+   },
+   "home": {
+    "teamId": 1
+   },
+   "id": 1401,
+   "matchupPeriodId": 14,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 2
+   },
+   "home": {
+    "teamId": 4
+   },
+   "id": 1402,
+   "matchupPeriodId": 14,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 8
+   },
+   "home": {
+    "teamId": 5
+   },
+   "id": 1403,
+   "matchupPeriodId": 14,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  },
+  {
+   "away": {
+    "teamId": 7
+   },
+   "home": {
+    "teamId": 6
+   },
+   "id": 1404,
+   "matchupPeriodId": 14,
+   "playoffTierType": "NONE",
+   "winner": "UNDECIDED"
+  }
+ ],
+ "scoringPeriodId": 6,
+ "seasonId": 2026,
+ "segmentId": 0,
+ "settings": {
+  "acquisitionSettings": {
+   "acquisitionBudget": 100,
+   "acquisitionLimit": -1,
+   "acquisitionType": "WAIVERS_TRADITIONAL",
+   "finalPlaceTransactionEligible": 0,
+   "isUsingAcquisitionBudget": false,
+   "waiverHours": 3,
+   "waiverOrderReset": true,
+   "waiverProcessDays": [
+    "WEDNESDAY"
+   ]
+  },
+  "draftSettings": {
+   "date": 1788636600000,
+   "isTradingEnabled": false,
+   "keeperCount": 0,
+   "pickOrder": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "timePerSelection": 90,
+   "type": "SNAKE"
+  },
+  "financeSettings": {},
+  "isPublic": true,
+  "name": "Test League",
+  "rosterSettings": {
+   "isBenchUnlimited": false,
+   "isUsingUndroppableList": true,
+   "lineupSlotCounts": {
+    "0": 1,
+    "16": 1,
+    "17": 1,
+    "2": 2,
+    "20": 7,
+    "21": 1,
+    "23": 1,
+    "4": 2,
+    "6": 1
+   },
+   "positionLimits": {}
+  },
+  "scheduleSettings": {
+   "divisions": [
+    {
+     "id": 0,
+     "name": "Division 1",
+     "size": 8
+    }
+   ],
+   "matchupPeriodCount": 14,
+   "matchupPeriodLength": 1,
+   "playoffMatchupPeriodLength": 1,
+   "playoffReseed": false,
+   "playoffSeedingRule": "TOTAL_POINTS_SCORED",
+   "playoffTeamCount": 4
+  },
+  "scoringSettings": {
+   "homeTeamBonus": 0,
+   "matchupTieRule": "NONE",
+   "playoffHomeTeamBonus": 0,
+   "playoffMatchupTieRule": "NONE",
+   "scoringItems": [
+    {
+     "points": 0.04,
+     "pointsOverrides": {
+      "16": 0.04
+     },
+     "statId": 3
+    },
+    {
+     "points": 4.0,
+     "statId": 4
+    },
+    {
+     "points": -2.0,
+     "statId": 20
+    },
+    {
+     "points": 0.1,
+     "statId": 24
+    },
+    {
+     "points": 6.0,
+     "statId": 25
+    },
+    {
+     "points": 0.1,
+     "statId": 42
+    },
+    {
+     "points": 6.0,
+     "statId": 43
+    },
+    {
+     "points": 1.0,
+     "statId": 53
+    },
+    {
+     "points": -2.0,
+     "statId": 72
+    }
+   ],
+   "scoringType": "H2H_POINTS"
+  },
+  "size": 8,
+  "tradeSettings": {
+   "deadlineDate": 0,
+   "max": -1,
+   "revisionHours": 24,
+   "vetoVotesRequired": 4
+  }
+ },
+ "status": {
+  "currentMatchupPeriod": 6,
+  "finalScoringPeriod": 17,
+  "firstScoringPeriod": 1,
+  "isActive": true,
+  "isExpired": false,
+  "isFull": true,
+  "isViewable": true,
+  "latestScoringPeriod": 6,
+  "previousSeasons": [
+   2025
+  ],
+  "standingsUpdateDate": 1758000000000,
+  "teamsJoined": 8,
+  "transactionScoringPeriod": 6,
+  "waiverLastExecutionDate": 1758000000000
+ },
+ "teams": [
+  {
+   "abbrev": "T1",
+   "divisionId": 0,
+   "id": 1,
+   "name": "Team One",
+   "owners": [
+    "{AAAAAAAA-0001-4000-8000-000000000001}"
+   ],
+   "playoffSeed": 1,
+   "rankCalculatedFinal": 0,
+   "record": {
+    "overall": {
+     "gamesBack": 0.0,
+     "losses": 2,
+     "percentage": 0.6,
+     "pointsAgainst": 501.0,
+     "pointsFor": 521.0,
+     "streakLength": 1,
+     "streakType": "WIN",
+     "ties": 0,
+     "wins": 3
+    }
+   },
+   "roster": {
+    "appliedStatTotal": 521.0,
+    "entries": [
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 0,
+      "playerId": 4100001,
+      "playerPoolEntry": {
+       "id": 4100001,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Josh Allen",
+        "id": 4100001,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 2
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100002,
+      "playerPoolEntry": {
+       "id": 4100002,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Puka Nacua",
+        "id": 4100002,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 0
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100003,
+      "playerPoolEntry": {
+       "id": 4100003,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Jahmyr Gibbs",
+        "id": 4100003,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 8
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 6,
+      "playerId": 4100004,
+      "playerPoolEntry": {
+       "id": 4100004,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 4,
+        "droppable": true,
+        "eligibleSlots": [
+         6,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Trey McBride",
+        "id": 4100004,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 22
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100005,
+      "playerPoolEntry": {
+       "id": 4100005,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Bryce Young",
+        "id": 4100005,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 29
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100006,
+      "playerPoolEntry": {
+       "id": 4100006,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "CeeDee Lamb",
+        "id": 4100006,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 6
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100007,
+      "playerPoolEntry": {
+       "id": 4100007,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "TreVeyon Henderson",
+        "id": 4100007,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 17
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 23,
+      "playerId": 4100008,
+      "playerPoolEntry": {
+       "id": 4100008,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Tetairoa McMillan",
+        "id": 4100008,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 29
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100009,
+      "playerPoolEntry": {
+       "id": 4100009,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "D'Andre Swift",
+        "id": 4100009,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 3
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100010,
+      "playerPoolEntry": {
+       "id": 4100010,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "David Montgomery",
+        "id": 4100010,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 34
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100011,
+      "playerPoolEntry": {
+       "id": 4100011,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Jacory Croskey-Merritt",
+        "id": 4100011,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 28
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100012,
+      "playerPoolEntry": {
+       "id": 4100012,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Bucky Irving",
+        "id": 4100012,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 27
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100013,
+      "playerPoolEntry": {
+       "id": 4100013,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Chuba Hubbard",
+        "id": 4100013,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 29
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 17,
+      "playerId": 4100014,
+      "playerPoolEntry": {
+       "id": 4100014,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 5,
+        "droppable": true,
+        "eligibleSlots": [
+         17,
+         20
+        ],
+        "fullName": "Harrison Butker",
+        "id": 4100014,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 12
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 16,
+      "playerId": 4100015,
+      "playerPoolEntry": {
+       "id": 4100015,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 16,
+        "droppable": true,
+        "eligibleSlots": [
+         16,
+         20
+        ],
+        "fullName": "Ravens D/ST",
+        "id": 4100015,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 33
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "ADD",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100016,
+      "playerPoolEntry": {
+       "id": 4100016,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Dontae Whitfield",
+        "id": 4100016,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 26
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "INJURY_RESERVE",
+      "lineupSlotId": 21,
+      "playerId": 4100017,
+      "playerPoolEntry": {
+       "id": 4100017,
+       "onTeamId": 1,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Isaiah Davis",
+        "id": 4100017,
+        "injured": true,
+        "injuryStatus": "INJURY_RESERVE",
+        "proTeamId": 20
+       },
+       "status": "ONTEAM"
+      }
+     }
+    ]
+   },
+   "transactionCounter": {
+    "acquisitionBudgetSpent": 0,
+    "acquisitions": 0,
+    "drops": 0,
+    "moveToActive": 0,
+    "trades": 0
+   },
+   "waiverRank": 1
+  },
+  {
+   "abbrev": "T2",
+   "divisionId": 0,
+   "id": 2,
+   "name": "Chubb Rub",
+   "owners": [
+    "{BBBBBBBB-0002-4000-8000-000000000002}"
+   ],
+   "playoffSeed": 2,
+   "rankCalculatedFinal": 0,
+   "record": {
+    "overall": {
+     "gamesBack": 0.0,
+     "losses": 2,
+     "percentage": 0.6,
+     "pointsAgainst": 502.0,
+     "pointsFor": 522.0,
+     "streakLength": 1,
+     "streakType": "WIN",
+     "ties": 0,
+     "wins": 3
+    }
+   },
+   "roster": {
+    "appliedStatTotal": 522.0,
+    "entries": [
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 0,
+      "playerId": 4100018,
+      "playerPoolEntry": {
+       "id": 4100018,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Drake Maye",
+        "id": 4100018,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 17
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100019,
+      "playerPoolEntry": {
+       "id": 4100019,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Bijan Robinson",
+        "id": 4100019,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 1
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100020,
+      "playerPoolEntry": {
+       "id": 4100020,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Amon-Ra St. Brown",
+        "id": 4100020,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 8
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100021,
+      "playerPoolEntry": {
+       "id": 4100021,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Lamar Jackson",
+        "id": 4100021,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 33
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100022,
+      "playerPoolEntry": {
+       "id": 4100022,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Breece Hall",
+        "id": 4100022,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 20
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100023,
+      "playerPoolEntry": {
+       "id": 4100023,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Wan'Dale Robinson",
+        "id": 4100023,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 10
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 23,
+      "playerId": 4100024,
+      "playerPoolEntry": {
+       "id": 4100024,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Michael Pittman",
+        "id": 4100024,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 23
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100025,
+      "playerPoolEntry": {
+       "id": 4100025,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Rico Dowdle",
+        "id": 4100025,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 23
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 6,
+      "playerId": 4100026,
+      "playerPoolEntry": {
+       "id": 4100026,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 4,
+        "droppable": true,
+        "eligibleSlots": [
+         6,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Kyle Pitts",
+        "id": 4100026,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 1
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100027,
+      "playerPoolEntry": {
+       "id": 4100027,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Deebo Samuel Sr.",
+        "id": 4100027,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 28
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100028,
+      "playerPoolEntry": {
+       "id": 4100028,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Troy Franklin",
+        "id": 4100028,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 7
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100029,
+      "playerPoolEntry": {
+       "id": 4100029,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Tyrone Tracy Jr.",
+        "id": 4100029,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 19
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100030,
+      "playerPoolEntry": {
+       "id": 4100030,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Kyle Monangai",
+        "id": 4100030,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 3
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100031,
+      "playerPoolEntry": {
+       "id": 4100031,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 4,
+        "droppable": true,
+        "eligibleSlots": [
+         6,
+         5,
+         23,
+         20
+        ],
+        "fullName": "George Kittle",
+        "id": 4100031,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 25
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 17,
+      "playerId": 4100032,
+      "playerPoolEntry": {
+       "id": 4100032,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 5,
+        "droppable": true,
+        "eligibleSlots": [
+         17,
+         20
+        ],
+        "fullName": "Justin Tucker",
+        "id": 4100032,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 33
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 16,
+      "playerId": 4100033,
+      "playerPoolEntry": {
+       "id": 4100033,
+       "onTeamId": 2,
+       "player": {
+        "active": true,
+        "defaultPositionId": 16,
+        "droppable": true,
+        "eligibleSlots": [
+         16,
+         20
+        ],
+        "fullName": "Broncos D/ST",
+        "id": 4100033,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 7
+       },
+       "status": "ONTEAM"
+      }
+     }
+    ]
+   },
+   "transactionCounter": {
+    "acquisitionBudgetSpent": 0,
+    "acquisitions": 0,
+    "drops": 0,
+    "moveToActive": 0,
+    "trades": 0
+   },
+   "waiverRank": 2
+  },
+  {
+   "abbrev": "T3",
+   "divisionId": 0,
+   "id": 3,
+   "name": "Kupp of Joe",
+   "owners": [
+    "{CCCCCCCC-0003-4000-8000-000000000003}"
+   ],
+   "playoffSeed": 3,
+   "rankCalculatedFinal": 0,
+   "record": {
+    "overall": {
+     "gamesBack": 0.0,
+     "losses": 2,
+     "percentage": 0.6,
+     "pointsAgainst": 503.0,
+     "pointsFor": 523.0,
+     "streakLength": 1,
+     "streakType": "WIN",
+     "ties": 0,
+     "wins": 3
+    }
+   },
+   "roster": {
+    "appliedStatTotal": 523.0,
+    "entries": [
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 0,
+      "playerId": 4100034,
+      "playerPoolEntry": {
+       "id": 4100034,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Matthew Stafford",
+        "id": 4100034,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 0
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100035,
+      "playerPoolEntry": {
+       "id": 4100035,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Jonathan Taylor",
+        "id": 4100035,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 11
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100036,
+      "playerPoolEntry": {
+       "id": 4100036,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Jaxon Smith-Njigba",
+        "id": 4100036,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 26
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100037,
+      "playerPoolEntry": {
+       "id": 4100037,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Jordan Love",
+        "id": 4100037,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 9
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100038,
+      "playerPoolEntry": {
+       "id": 4100038,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Josh Jacobs",
+        "id": 4100038,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 9
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100039,
+      "playerPoolEntry": {
+       "id": 4100039,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Courtland Sutton",
+        "id": 4100039,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 7
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 23,
+      "playerId": 4100040,
+      "playerPoolEntry": {
+       "id": 4100040,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Davante Adams",
+        "id": 4100040,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 0
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100041,
+      "playerPoolEntry": {
+       "id": 4100041,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Kenneth Walker III",
+        "id": 4100041,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 12
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 6,
+      "playerId": 4100042,
+      "playerPoolEntry": {
+       "id": 4100042,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 4,
+        "droppable": true,
+        "eligibleSlots": [
+         6,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Tyler Warren",
+        "id": 4100042,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 11
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100043,
+      "playerPoolEntry": {
+       "id": 4100043,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Tre Tucker",
+        "id": 4100043,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 13
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100044,
+      "playerPoolEntry": {
+       "id": 4100044,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Brian Thomas Jr.",
+        "id": 4100044,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 30
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100045,
+      "playerPoolEntry": {
+       "id": 4100045,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Woody Marks",
+        "id": 4100045,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 34
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100046,
+      "playerPoolEntry": {
+       "id": 4100046,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Jadarian Price",
+        "id": 4100046,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 26
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 17,
+      "playerId": 4100047,
+      "playerPoolEntry": {
+       "id": 4100047,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 5,
+        "droppable": true,
+        "eligibleSlots": [
+         17,
+         20
+        ],
+        "fullName": "Brandon Aubrey",
+        "id": 4100047,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 6
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 16,
+      "playerId": 4100048,
+      "playerPoolEntry": {
+       "id": 4100048,
+       "onTeamId": 3,
+       "player": {
+        "active": true,
+        "defaultPositionId": 16,
+        "droppable": true,
+        "eligibleSlots": [
+         16,
+         20
+        ],
+        "fullName": "Eagles D/ST",
+        "id": 4100048,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 21
+       },
+       "status": "ONTEAM"
+      }
+     }
+    ]
+   },
+   "transactionCounter": {
+    "acquisitionBudgetSpent": 0,
+    "acquisitions": 0,
+    "drops": 0,
+    "moveToActive": 0,
+    "trades": 0
+   },
+   "waiverRank": 3
+  },
+  {
+   "abbrev": "T4",
+   "divisionId": 0,
+   "id": 4,
+   "name": "Hurts So Good",
+   "owners": [
+    "{DDDDDDDD-0004-4000-8000-000000000004}"
+   ],
+   "playoffSeed": 4,
+   "rankCalculatedFinal": 0,
+   "record": {
+    "overall": {
+     "gamesBack": 0.0,
+     "losses": 2,
+     "percentage": 0.6,
+     "pointsAgainst": 504.0,
+     "pointsFor": 524.0,
+     "streakLength": 1,
+     "streakType": "WIN",
+     "ties": 0,
+     "wins": 3
+    }
+   },
+   "roster": {
+    "appliedStatTotal": 524.0,
+    "entries": [
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 0,
+      "playerId": 4100049,
+      "playerPoolEntry": {
+       "id": 4100049,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Trevor Lawrence",
+        "id": 4100049,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 30
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100050,
+      "playerPoolEntry": {
+       "id": 4100050,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Christian McCaffrey",
+        "id": 4100050,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 25
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100051,
+      "playerPoolEntry": {
+       "id": 4100051,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Ja'Marr Chase",
+        "id": 4100051,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 4
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100052,
+      "playerPoolEntry": {
+       "id": 4100052,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Sam Darnold",
+        "id": 4100052,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 26
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100053,
+      "playerPoolEntry": {
+       "id": 4100053,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Javonte Williams",
+        "id": 4100053,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 6
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100054,
+      "playerPoolEntry": {
+       "id": 4100054,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Emeka Egbuka",
+        "id": 4100054,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 27
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 23,
+      "playerId": 4100055,
+      "playerPoolEntry": {
+       "id": 4100055,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Ladd McConkey",
+        "id": 4100055,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 24
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100056,
+      "playerPoolEntry": {
+       "id": 4100056,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "RJ Harvey",
+        "id": 4100056,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 7
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 6,
+      "playerId": 4100057,
+      "playerPoolEntry": {
+       "id": 4100057,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 4,
+        "droppable": true,
+        "eligibleSlots": [
+         6,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Travis Kelce",
+        "id": 4100057,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 12
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100058,
+      "playerPoolEntry": {
+       "id": 4100058,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Jakobi Meyers",
+        "id": 4100058,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 30
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100059,
+      "playerPoolEntry": {
+       "id": 4100059,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Khalil Shakir",
+        "id": 4100059,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 2
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100060,
+      "playerPoolEntry": {
+       "id": 4100060,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Rhamondre Stevenson",
+        "id": 4100060,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 17
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100061,
+      "playerPoolEntry": {
+       "id": 4100061,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 4,
+        "droppable": true,
+        "eligibleSlots": [
+         6,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Colston Loveland",
+        "id": 4100061,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 3
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100062,
+      "playerPoolEntry": {
+       "id": 4100062,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Kareem Hunt",
+        "id": 4100062,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 12
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 17,
+      "playerId": 4100063,
+      "playerPoolEntry": {
+       "id": 4100063,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 5,
+        "droppable": true,
+        "eligibleSlots": [
+         17,
+         20
+        ],
+        "fullName": "Jake Bates",
+        "id": 4100063,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 8
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 16,
+      "playerId": 4100064,
+      "playerPoolEntry": {
+       "id": 4100064,
+       "onTeamId": 4,
+       "player": {
+        "active": true,
+        "defaultPositionId": 16,
+        "droppable": true,
+        "eligibleSlots": [
+         16,
+         20
+        ],
+        "fullName": "Steelers D/ST",
+        "id": 4100064,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 23
+       },
+       "status": "ONTEAM"
+      }
+     }
+    ]
+   },
+   "transactionCounter": {
+    "acquisitionBudgetSpent": 0,
+    "acquisitions": 0,
+    "drops": 0,
+    "moveToActive": 0,
+    "trades": 0
+   },
+   "waiverRank": 4
+  },
+  {
+   "abbrev": "T5",
+   "divisionId": 0,
+   "id": 5,
+   "name": "Nacua Matata",
+   "owners": [
+    "{EEEEEEEE-0005-4000-8000-000000000005}"
+   ],
+   "playoffSeed": 5,
+   "rankCalculatedFinal": 0,
+   "record": {
+    "overall": {
+     "gamesBack": 0.0,
+     "losses": 2,
+     "percentage": 0.6,
+     "pointsAgainst": 505.0,
+     "pointsFor": 525.0,
+     "streakLength": 1,
+     "streakType": "WIN",
+     "ties": 0,
+     "wins": 3
+    }
+   },
+   "roster": {
+    "appliedStatTotal": 525.0,
+    "entries": [
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 0,
+      "playerId": 4100065,
+      "playerPoolEntry": {
+       "id": 4100065,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Dak Prescott",
+        "id": 4100065,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 6
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100066,
+      "playerPoolEntry": {
+       "id": 4100066,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "De'Von Achane",
+        "id": 4100066,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 15
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100067,
+      "playerPoolEntry": {
+       "id": 4100067,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Patrick Mahomes",
+        "id": 4100067,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 12
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100068,
+      "playerPoolEntry": {
+       "id": 4100068,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "George Pickens",
+        "id": 4100068,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 6
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100069,
+      "playerPoolEntry": {
+       "id": 4100069,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Travis Etienne",
+        "id": 4100069,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 18
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100070,
+      "playerPoolEntry": {
+       "id": 4100070,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Nico Collins",
+        "id": 4100070,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 34
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 23,
+      "playerId": 4100071,
+      "playerPoolEntry": {
+       "id": 4100071,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Jaylen Waddle",
+        "id": 4100071,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 7
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100072,
+      "playerPoolEntry": {
+       "id": 4100072,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Kenneth Gainwell",
+        "id": 4100072,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 23
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100073,
+      "playerPoolEntry": {
+       "id": 4100073,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Stefon Diggs",
+        "id": 4100073,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 17
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 6,
+      "playerId": 4100074,
+      "playerPoolEntry": {
+       "id": 4100074,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 4,
+        "droppable": true,
+        "eligibleSlots": [
+         6,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Jake Ferguson",
+        "id": 4100074,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 6
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100075,
+      "playerPoolEntry": {
+       "id": 4100075,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Romeo Doubs",
+        "id": 4100075,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 17
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100076,
+      "playerPoolEntry": {
+       "id": 4100076,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Alec Pierce",
+        "id": 4100076,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 11
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100077,
+      "playerPoolEntry": {
+       "id": 4100077,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Quentin Johnston",
+        "id": 4100077,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 24
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100078,
+      "playerPoolEntry": {
+       "id": 4100078,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 4,
+        "droppable": true,
+        "eligibleSlots": [
+         6,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Mark Andrews",
+        "id": 4100078,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 33
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 17,
+      "playerId": 4100079,
+      "playerPoolEntry": {
+       "id": 4100079,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 5,
+        "droppable": true,
+        "eligibleSlots": [
+         17,
+         20
+        ],
+        "fullName": "Cameron Dicker",
+        "id": 4100079,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 24
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 16,
+      "playerId": 4100080,
+      "playerPoolEntry": {
+       "id": 4100080,
+       "onTeamId": 5,
+       "player": {
+        "active": true,
+        "defaultPositionId": 16,
+        "droppable": true,
+        "eligibleSlots": [
+         16,
+         20
+        ],
+        "fullName": "Vikings D/ST",
+        "id": 4100080,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 16
+       },
+       "status": "ONTEAM"
+      }
+     }
+    ]
+   },
+   "transactionCounter": {
+    "acquisitionBudgetSpent": 0,
+    "acquisitions": 0,
+    "drops": 0,
+    "moveToActive": 0,
+    "trades": 0
+   },
+   "waiverRank": 5
+  },
+  {
+   "abbrev": "T6",
+   "divisionId": 0,
+   "id": 6,
+   "name": "The Lamar Show",
+   "owners": [
+    "{FFFFFFFF-0006-4000-8000-000000000006}"
+   ],
+   "playoffSeed": 6,
+   "rankCalculatedFinal": 0,
+   "record": {
+    "overall": {
+     "gamesBack": 0.0,
+     "losses": 2,
+     "percentage": 0.6,
+     "pointsAgainst": 506.0,
+     "pointsFor": 526.0,
+     "streakLength": 1,
+     "streakType": "WIN",
+     "ties": 0,
+     "wins": 3
+    }
+   },
+   "roster": {
+    "appliedStatTotal": 526.0,
+    "entries": [
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 0,
+      "playerId": 4100081,
+      "playerPoolEntry": {
+       "id": 4100081,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Bo Nix",
+        "id": 4100081,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 7
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100082,
+      "playerPoolEntry": {
+       "id": 4100082,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Baker Mayfield",
+        "id": 4100082,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 27
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100083,
+      "playerPoolEntry": {
+       "id": 4100083,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "James Cook",
+        "id": 4100083,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 2
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100084,
+      "playerPoolEntry": {
+       "id": 4100084,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Zay Flowers",
+        "id": 4100084,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 33
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100085,
+      "playerPoolEntry": {
+       "id": 4100085,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Saquon Barkley",
+        "id": 4100085,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 21
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100086,
+      "playerPoolEntry": {
+       "id": 4100086,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "A.J. Brown",
+        "id": 4100086,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 17
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 23,
+      "playerId": 4100087,
+      "playerPoolEntry": {
+       "id": 4100087,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Tee Higgins",
+        "id": 4100087,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 4
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100088,
+      "playerPoolEntry": {
+       "id": 4100088,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Jaylen Warren",
+        "id": 4100088,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 23
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100089,
+      "playerPoolEntry": {
+       "id": 4100089,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "DJ Moore",
+        "id": 4100089,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 2
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 6,
+      "playerId": 4100090,
+      "playerPoolEntry": {
+       "id": 4100090,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 4,
+        "droppable": true,
+        "eligibleSlots": [
+         6,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Harold Fannin Jr.",
+        "id": 4100090,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 5
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100091,
+      "playerPoolEntry": {
+       "id": 4100091,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Quinshon Judkins",
+        "id": 4100091,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 5
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100092,
+      "playerPoolEntry": {
+       "id": 4100092,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 4,
+        "droppable": true,
+        "eligibleSlots": [
+         6,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Dallas Goedert",
+        "id": 4100092,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 21
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100093,
+      "playerPoolEntry": {
+       "id": 4100093,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Parker Washington",
+        "id": 4100093,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 30
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100094,
+      "playerPoolEntry": {
+       "id": 4100094,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Blake Corum",
+        "id": 4100094,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 0
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 17,
+      "playerId": 4100095,
+      "playerPoolEntry": {
+       "id": 4100095,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 5,
+        "droppable": true,
+        "eligibleSlots": [
+         17,
+         20
+        ],
+        "fullName": "Chris Boswell",
+        "id": 4100095,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 23
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 16,
+      "playerId": 4100096,
+      "playerPoolEntry": {
+       "id": 4100096,
+       "onTeamId": 6,
+       "player": {
+        "active": true,
+        "defaultPositionId": 16,
+        "droppable": true,
+        "eligibleSlots": [
+         16,
+         20
+        ],
+        "fullName": "Texans D/ST",
+        "id": 4100096,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 34
+       },
+       "status": "ONTEAM"
+      }
+     }
+    ]
+   },
+   "transactionCounter": {
+    "acquisitionBudgetSpent": 0,
+    "acquisitions": 0,
+    "drops": 0,
+    "moveToActive": 0,
+    "trades": 0
+   },
+   "waiverRank": 6
+  },
+  {
+   "abbrev": "T7",
+   "divisionId": 0,
+   "id": 7,
+   "name": "Bijan Mustard",
+   "owners": [
+    "{00000000-0007-4000-8000-000000000007}"
+   ],
+   "playoffSeed": 7,
+   "rankCalculatedFinal": 0,
+   "record": {
+    "overall": {
+     "gamesBack": 0.0,
+     "losses": 2,
+     "percentage": 0.6,
+     "pointsAgainst": 507.0,
+     "pointsFor": 527.0,
+     "streakLength": 1,
+     "streakType": "WIN",
+     "ties": 0,
+     "wins": 3
+    }
+   },
+   "roster": {
+    "appliedStatTotal": 527.0,
+    "entries": [
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 0,
+      "playerId": 4100097,
+      "playerPoolEntry": {
+       "id": 4100097,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Caleb Williams",
+        "id": 4100097,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 3
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100098,
+      "playerPoolEntry": {
+       "id": 4100098,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Justin Herbert",
+        "id": 4100098,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 24
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100099,
+      "playerPoolEntry": {
+       "id": 4100099,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Kyren Williams",
+        "id": 4100099,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 0
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100100,
+      "playerPoolEntry": {
+       "id": 4100100,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Derrick Henry",
+        "id": 4100100,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 33
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100101,
+      "playerPoolEntry": {
+       "id": 4100101,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Chris Olave",
+        "id": 4100101,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 18
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100102,
+      "playerPoolEntry": {
+       "id": 4100102,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "DeVonta Smith",
+        "id": 4100102,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 21
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 23,
+      "playerId": 4100103,
+      "playerPoolEntry": {
+       "id": 4100103,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Michael Wilson",
+        "id": 4100103,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 22
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100104,
+      "playerPoolEntry": {
+       "id": 4100104,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Jeremiyah Love",
+        "id": 4100104,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 22
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100105,
+      "playerPoolEntry": {
+       "id": 4100105,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "DK Metcalf",
+        "id": 4100105,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 23
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 6,
+      "playerId": 4100106,
+      "playerPoolEntry": {
+       "id": 4100106,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 4,
+        "droppable": true,
+        "eligibleSlots": [
+         6,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Hunter Henry",
+        "id": 4100106,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 17
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100107,
+      "playerPoolEntry": {
+       "id": 4100107,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Tony Pollard",
+        "id": 4100107,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 10
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100108,
+      "playerPoolEntry": {
+       "id": 4100108,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 4,
+        "droppable": true,
+        "eligibleSlots": [
+         6,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Juwan Johnson",
+        "id": 4100108,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 18
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100109,
+      "playerPoolEntry": {
+       "id": 4100109,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Rome Odunze",
+        "id": 4100109,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 3
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100110,
+      "playerPoolEntry": {
+       "id": 4100110,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Jordan Mason",
+        "id": 4100110,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 16
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 17,
+      "playerId": 4100111,
+      "playerPoolEntry": {
+       "id": 4100111,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 5,
+        "droppable": true,
+        "eligibleSlots": [
+         17,
+         20
+        ],
+        "fullName": "Ka'imi Fairbairn",
+        "id": 4100111,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 34
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 16,
+      "playerId": 4100112,
+      "playerPoolEntry": {
+       "id": 4100112,
+       "onTeamId": 7,
+       "player": {
+        "active": true,
+        "defaultPositionId": 16,
+        "droppable": true,
+        "eligibleSlots": [
+         16,
+         20
+        ],
+        "fullName": "Bills D/ST",
+        "id": 4100112,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 2
+       },
+       "status": "ONTEAM"
+      }
+     }
+    ]
+   },
+   "transactionCounter": {
+    "acquisitionBudgetSpent": 0,
+    "acquisitions": 0,
+    "drops": 0,
+    "moveToActive": 0,
+    "trades": 0
+   },
+   "waiverRank": 7
+  },
+  {
+   "abbrev": "T8",
+   "divisionId": 0,
+   "id": 8,
+   "name": "Puka Shell Necklace",
+   "owners": [
+    "{11111111-0008-4000-8000-000000000008}"
+   ],
+   "playoffSeed": 8,
+   "rankCalculatedFinal": 0,
+   "record": {
+    "overall": {
+     "gamesBack": 0.0,
+     "losses": 2,
+     "percentage": 0.6,
+     "pointsAgainst": 508.0,
+     "pointsFor": 528.0,
+     "streakLength": 1,
+     "streakType": "WIN",
+     "ties": 0,
+     "wins": 3
+    }
+   },
+   "roster": {
+    "appliedStatTotal": 528.0,
+    "entries": [
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 0,
+      "playerId": 4100113,
+      "playerPoolEntry": {
+       "id": 4100113,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Jalen Hurts",
+        "id": 4100113,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 21
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100114,
+      "playerPoolEntry": {
+       "id": 4100114,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 1,
+        "droppable": true,
+        "eligibleSlots": [
+         0,
+         7,
+         20
+        ],
+        "fullName": "Jared Goff",
+        "id": 4100114,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 8
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100115,
+      "playerPoolEntry": {
+       "id": 4100115,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Chase Brown",
+        "id": 4100115,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 4
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 2,
+      "playerId": 4100116,
+      "playerPoolEntry": {
+       "id": 4100116,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Ashton Jeanty",
+        "id": 4100116,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 13
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100117,
+      "playerPoolEntry": {
+       "id": 4100117,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Justin Jefferson",
+        "id": 4100117,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 16
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 4,
+      "playerId": 4100118,
+      "playerPoolEntry": {
+       "id": 4100118,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Jameson Williams",
+        "id": 4100118,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 8
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 23,
+      "playerId": 4100119,
+      "playerPoolEntry": {
+       "id": 4100119,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Drake London",
+        "id": 4100119,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 1
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100120,
+      "playerPoolEntry": {
+       "id": 4100120,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Keenan Allen",
+        "id": 4100120,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 24
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100121,
+      "playerPoolEntry": {
+       "id": 4100121,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Zach Charbonnet",
+        "id": 4100121,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 26
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100122,
+      "playerPoolEntry": {
+       "id": 4100122,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Rachaad White",
+        "id": 4100122,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 28
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 6,
+      "playerId": 4100123,
+      "playerPoolEntry": {
+       "id": 4100123,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 4,
+        "droppable": true,
+        "eligibleSlots": [
+         6,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Brock Bowers",
+        "id": 4100123,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 13
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100124,
+      "playerPoolEntry": {
+       "id": 4100124,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 4,
+        "droppable": true,
+        "eligibleSlots": [
+         6,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Dalton Schultz",
+        "id": 4100124,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 34
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100125,
+      "playerPoolEntry": {
+       "id": 4100125,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "droppable": true,
+        "eligibleSlots": [
+         4,
+         5,
+         23,
+         20
+        ],
+        "fullName": "Jauan Jennings",
+        "id": 4100125,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 16
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 20,
+      "playerId": 4100126,
+      "playerPoolEntry": {
+       "id": 4100126,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 2,
+        "droppable": true,
+        "eligibleSlots": [
+         2,
+         3,
+         23,
+         20
+        ],
+        "fullName": "Kimani Vidal",
+        "id": 4100126,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 24
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 17,
+      "playerId": 4100127,
+      "playerPoolEntry": {
+       "id": 4100127,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 5,
+        "droppable": true,
+        "eligibleSlots": [
+         17,
+         20
+        ],
+        "fullName": "Younghoe Koo",
+        "id": 4100127,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 1
+       },
+       "status": "ONTEAM"
+      }
+     },
+     {
+      "acquisitionDate": 1757000000000,
+      "acquisitionType": "DRAFT",
+      "injuryStatus": "ACTIVE",
+      "lineupSlotId": 16,
+      "playerId": 4100128,
+      "playerPoolEntry": {
+       "id": 4100128,
+       "onTeamId": 8,
+       "player": {
+        "active": true,
+        "defaultPositionId": 16,
+        "droppable": true,
+        "eligibleSlots": [
+         16,
+         20
+        ],
+        "fullName": "Packers D/ST",
+        "id": 4100128,
+        "injured": false,
+        "injuryStatus": "ACTIVE",
+        "proTeamId": 9
+       },
+       "status": "ONTEAM"
+      }
+     }
+    ]
+   },
+   "transactionCounter": {
+    "acquisitionBudgetSpent": 0,
+    "acquisitions": 0,
+    "drops": 0,
+    "moveToActive": 0,
+    "trades": 0
+   },
+   "waiverRank": 8
+  }
+ ],
+ "transactions": []
+}
