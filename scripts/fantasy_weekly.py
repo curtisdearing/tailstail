@@ -14,17 +14,20 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from nflvalue.fantasy import espn_compare
 from nflvalue.fantasy.config import ModelConfig, ScoringRules, SimulationConfig
 from nflvalue.fantasy.dashboard import render_fantasy_dashboard
 from nflvalue.fantasy.data import HistoricalData, fetch_historical, materialize_projection_week
 from nflvalue.fantasy.features import build_feature_frame, frame_quality_report
 from nflvalue.fantasy.models import fit_ensemble
+from nflvalue.fantasy.scoring import add_fantasy_points
 from nflvalue.fantasy.simulation import simulate_week
 from nflvalue.projection_snapshot import (
     build_projection_snapshot,
     write_component_samples,
     write_projection_snapshot,
 )
+from nflvalue.sources import espn_projections
 
 
 def current_nfl_season() -> int:
@@ -51,6 +54,109 @@ def select_week(schedules: pd.DataFrame, season: int | None, week: int | None) -
         return int(latest["season"]), int(latest["week"])
     next_game = future.iloc[0]
     return int(next_game["season"]), int(next_game["week"])
+
+
+def _actual_ppr_points(stats: pd.DataFrame, season: int, week: int, rules: ScoringRules) -> dict:
+    """gsis player_id -> actual points, scored with the SAME rules as both projections."""
+    rows = stats[
+        pd.to_numeric(stats["season"], errors="coerce").eq(season)
+        & pd.to_numeric(stats["week"], errors="coerce").eq(week)
+    ].copy()
+    if rows.empty:
+        return {}
+    scored = add_fantasy_points(rows, rules, output="_actual_ppr")
+    scored["player_id"] = scored["player_id"].astype(str)
+    return dict(zip(scored["player_id"], scored["_actual_ppr"].astype(float)))
+
+
+def _week_is_complete(schedules: pd.DataFrame, season: int, week: int) -> bool:
+    """Grade only finished weeks: every kickoff at least 12 hours in the past."""
+    kickoffs = espn_compare.game_kickoffs_utc(schedules, season, week)
+    if not kickoffs:
+        return False
+    now = datetime.now(timezone.utc)
+    latest = max(datetime.fromisoformat(value) for value in kickoffs.values())
+    return (now - latest) >= timedelta(hours=12)
+
+
+def run_espn_comparison(
+    data: HistoricalData,
+    summaries: pd.DataFrame,
+    player_games: dict,
+    *,
+    season: int,
+    week: int,
+    generated_at: str,
+    rules: ScoringRules,
+    ledger_path: str = "data/espn_comparison_ledger.json",
+    snapshot_dir: str = "data/espn_snapshots",
+) -> dict:
+    """Snapshot ESPN, refresh the prospective ledger, grade finished weeks.
+
+    Display and grading ONLY (2026 freeze: the market blend is a separately
+    registered lever). ESPN being unreachable degrades to an explicit,
+    labelled failure — never a silent empty comparison, never a crash of the
+    model publish.
+    """
+    ledger = espn_compare.load_ledger(ledger_path, season)
+
+    # 1) Grade any recorded, ungraded, finished weeks (prospective rows only).
+    for week_key in sorted(ledger["weeks"], key=int):
+        entry = ledger["weeks"][week_key]
+        if entry.get("grading") is None and _week_is_complete(data.schedules, season, int(week_key)):
+            actuals = _actual_ppr_points(data.stats, season, int(week_key), rules)
+            if actuals:
+                espn_compare.grade_week(ledger, week=int(week_key), actual_points=actuals)
+                print(f"[espn-compare] graded week {week_key} against actual PPR points")
+
+    # 2) Snapshot ESPN for the upcoming week and refresh pre-kickoff rows.
+    status, error = "ok", None
+    provenance = None
+    identity_report = None
+    try:
+        snapshot = espn_projections.fetch_week_snapshot(season, week, rules=rules)
+        espn_projections.write_snapshot(snapshot, snapshot_dir)
+        identity = espn_compare.build_identity_map(data.rosters, season)
+        model_points = dict(
+            zip(summaries["player_id"].astype(str), summaries["mean"].astype(float))
+        )
+        model_meta = {
+            str(row["player_id"]): {"team": str(row["team"])}
+            for row in summaries.to_dict("records")
+        }
+        matched, identity_report = espn_compare.match_players(
+            snapshot["players"], identity, set(model_points)
+        )
+        espn_compare.record_week(
+            ledger,
+            week=week,
+            espn_players=snapshot["players"],
+            espn_retrieved_at=snapshot["retrieved_at"],
+            espn_snapshot_sha256=snapshot["players_sha256"],
+            matched=matched,
+            model_points=model_points,
+            model_meta=model_meta,
+            model_generated_at=generated_at,
+            player_games=player_games,
+            kickoffs_utc=espn_compare.game_kickoffs_utc(data.schedules, season, week),
+        )
+        provenance = {key: snapshot[key] for key in (
+            "retrieved_at", "source", "scoring", "coverage",
+            "redistribution_rights", "players_sha256",
+        )}
+    except Exception as exc:
+        status, error = "espn_unavailable", f"{type(exc).__name__}: {exc}"
+        print(f"[espn-compare] ESPN comparison unavailable this run: {error}")
+
+    espn_compare.save_ledger(ledger, ledger_path)
+    return espn_compare.build_payload(
+        ledger,
+        current_week=week,
+        espn_provenance=provenance,
+        identity_report=identity_report,
+        status=status,
+        error=error,
+    )
 
 
 def main(argv=None) -> int:
@@ -136,7 +242,22 @@ def main(argv=None) -> int:
         component_validation=component_validation,
     )
     write_projection_snapshot(projection_snapshot, args.projection_snapshot)
+    player_games = (
+        dict(zip(projected["player_id"].astype(str), projected["game_id"].astype(str)))
+        if "game_id" in projected.columns
+        else {}
+    )
+    espn_comparison = run_espn_comparison(
+        data,
+        result.summaries,
+        player_games,
+        season=season,
+        week=week,
+        generated_at=generated,
+        rules=rules,
+    )
     payload = {
+        "espn_comparison": espn_comparison,
         "generated_at": generated,
         "season": season,
         "week": week,
@@ -157,7 +278,8 @@ def main(argv=None) -> int:
     artifact.save(args.model)
     artifact.write_model_card("reports/fantasy_model_card.json")
     render_fantasy_dashboard(
-        result.summaries, args.dashboard, season=season, week=week, generated_at=generated
+        result.summaries, args.dashboard, season=season, week=week, generated_at=generated,
+        espn_comparison=espn_comparison,
     )
     print(f"projected {len(result.summaries)} players for {season} week {week}")
     return 0

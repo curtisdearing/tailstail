@@ -21,6 +21,7 @@ equivalent from play-by-play or say plainly that we don't have it.
 | Player DOBs | nflverse | all | A | Birthday weeks, age |
 | Weather forecasts (kickoff-hour wind/temp/precip) | Open-Meteo | live, keyless | B+ | Live weather features + writeup (historical = observed values from schedules; small train/serve gap, documented) |
 | Sleeper projections | Sleeper API | current | B− | Divergence cross-check only — never a target (H5) |
+| ESPN fantasy projections | ESPN fantasy API (`lm-api-reads`, `leaguedefaults/3`, undocumented) | current week, in season | C+ | **External challenger only**: displayed + graded vs the model (`espn_comparison` in `fantasy_latest.json`). Raw stat lines re-scored with our own full-PPR scorer; every snapshot records source, retrieval timestamp, scoring rules, coverage, redistribution rights + content hash. NEVER a model input — the market blend is a separately registered 2026 lever. |
 | Prop lines + prices | The Odds API (free tier, 500 credits/mo) | live only | A for quotes | Edge vs consensus, line shopping, CLV. Hard-stopped at 450/mo |
 
 ## The paywall boundary (what we genuinely don't have)

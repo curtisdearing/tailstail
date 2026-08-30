@@ -58,6 +58,26 @@ jobs:
           key: fantasy-history-${{ runner.os }}-${{ github.run_id }}
           restore-keys: fantasy-history-${{ runner.os }}-
 
+      - name: Restore prior fantasy state (ESPN comparison ledger + snapshots)
+        shell: bash
+        run: |
+          if gh release view "$STATE_TAG" --json body --jq .body > "$RUNNER_TEMP/fantasy-pointer.json" 2>/dev/null; then
+            asset=$(jq -r '.asset // empty' "$RUNNER_TEMP/fantasy-pointer.json" 2>/dev/null || true)
+            sha=$(jq -r '.sha256 // empty' "$RUNNER_TEMP/fantasy-pointer.json" 2>/dev/null || true)
+            if [[ -n "$asset" && -n "$sha" ]]; then
+              if gh release download "$STATE_TAG" --pattern "$asset" --dir "$RUNNER_TEMP" &&
+                 python scripts/state_store.py restore --archive "$RUNNER_TEMP/$asset" --sha "$sha" --profile fantasy; then
+                echo "restored prior fantasy state from $asset"
+              else
+                echo "::warning::prior fantasy state restore failed; season ESPN grading series may reset"
+              fi
+            else
+              echo "no prior state pointer recorded; starting fresh"
+            fi
+          else
+            echo "no prior fantasy state release; starting fresh"
+          fi
+
       - name: Build current projections
         shell: bash
         run: |
@@ -79,6 +99,14 @@ jobs:
           assert fantasy["simulation"]["simulations"] >= 1000
           assert snapshot["schema_version"] == 1
           assert snapshot["players"], "shared projection snapshot contains no players"
+          comparison = fantasy["espn_comparison"]
+          assert comparison["status"] in {"ok", "espn_unavailable"}
+          if comparison["status"] == "ok":
+              assert comparison["espn_provenance"]["retrieved_at"]
+              assert comparison["espn_provenance"]["redistribution_rights"]
+              assert comparison["identity"]["espn_players"] > 0
+          else:
+              assert comparison["error"], "an unavailable ESPN pull must carry its error"
           assert Path("data/player_projection_samples.parquet").stat().st_size > 1000
           assert Path("fantasy.html").stat().st_size > 1000
           PY
@@ -119,6 +147,8 @@ jobs:
             data/fantasy_model.joblib
             data/player_projection_snapshot.json
             data/player_projection_samples.parquet
+            data/espn_comparison_ledger.json
+            data/espn_snapshots/
             reports/fantasy_model_card.json
             fantasy.html
 
