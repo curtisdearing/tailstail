@@ -82,8 +82,10 @@ or fetched · **[BLOCKED]** cannot proceed without a decision from Curtis.
 `ScoringRules` (`nflvalue/fantasy/config.py:9-45`) has **no kicker fields at
 all**: no field goal, no distance bucket, no PAT, no miss, no block. The league
 is recorded as *"full PPR plus retained **custom** K and D/ST scoring"*
-(`reports/espn_watchlist_2026_1111111111.json`, league 1111111111, "Dearing
-fantasy football"). Custom means the values are held in ESPN's league settings
+(`reports/espn_watchlist_2026_1111111111.json`, league 1111111111 -- the
+league id is anonymised throughout this repo; the descriptive league name
+recorded alongside it is not repeated here for the same reason). Custom
+means the values are held in ESPN's league settings
 and nowhere on disk. There is no versioned live league contract file: the only
 ESPN-league code path is `nflvalue/fantasy/trade_planner.py:71-86`, which
 constructs `espn_api.football.League` at runtime to pull **rosters** and never

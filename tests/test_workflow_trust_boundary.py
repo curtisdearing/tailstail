@@ -238,6 +238,36 @@ def test_no_file_still_claims_an_actions_cache_is_private(relative):
 
 
 # --------------------------------------------------------------------------- #
+# C6. No real personal/league identity in a committed public doc
+# --------------------------------------------------------------------------- #
+#: The league id is deliberately anonymised elsewhere (`ANONYMISED_LEAGUE_ID`
+#: in tests/test_espn_league_contract.py) precisely so a real league is never
+#: nameable from tracked content. A doc citing the real league descriptor
+#: alongside it defeats that anonymisation on a public repository.
+PERSONAL_LEAGUE_STRINGS = ("dearing fantasy football",)
+
+DOC_FILES = ("README.md", "docs/DATA_SOURCES.md", "docs/DECISION_CARD.md",
+            "docs/K_SHADOW_MODEL_CARD.md", "docs/PROTOCOL_FREEZE_2026.md")
+
+
+@pytest.mark.parametrize("relative", DOC_FILES)
+def test_no_public_doc_names_a_real_league_or_person(relative):
+    path = ROOT / relative
+    if not path.exists():
+        pytest.skip(f"{relative} not present")
+    # Markdown wraps prose at ~80 columns, so a phrase that reads as one
+    # sentence on the page can be split across a literal newline in the
+    # source -- collapse all whitespace runs before matching, or a wrapped
+    # occurrence silently passes.
+    text = " ".join(path.read_text().lower().split())
+    for phrase in PERSONAL_LEAGUE_STRINGS:
+        assert phrase not in text, (
+            f"{relative} names a real league/person ({phrase!r}); this repo "
+            "is public and the league id next to it is otherwise anonymised "
+            "on purpose")
+
+
+# --------------------------------------------------------------------------- #
 # D. The frozen forecast centre is untouched by any of this
 # --------------------------------------------------------------------------- #
 #: The 2026 freeze's forecast centre. None of the public/private split, the
@@ -450,3 +480,74 @@ def test_the_private_restore_step_cannot_fail_the_run(workflow):
     restore = next(block for block in private_steps(workflow)
                    if "actions/checkout@v6" in block and "tailstail-state" in block)
     assert "continue-on-error: true" in restore
+
+
+def _run_script(block: str) -> str:
+    """The `run: |` script body of one step block, dedented to column 0.
+
+    Mirrors GitHub Actions' own extraction: everything more indented than the
+    `run: |` marker, until a line at or below that indentation ends the block.
+    """
+    lines = block.splitlines()
+    marker = next(i for i, line in enumerate(lines) if line.strip() == "run: |")
+    base = len(lines[marker]) - len(lines[marker].lstrip())
+    body = []
+    for line in lines[marker + 1:]:
+        if line.strip() and len(line) - len(line.lstrip()) <= base:
+            break
+        body.append(line[base + 2:] if line.strip() else "")
+    return "\n".join(body)
+
+
+def test_a_refused_private_restore_cannot_fail_the_worktree_copy_step(
+        workflow, tmp_path):
+    """`private_state.py restore` exits 2 (`EXIT_REFUSED`, see
+    `nflvalue/fantasy/private_state.py`'s own comment on the code) when the
+    private store's content is malformed or unsafe -- a deliberate, real exit
+    code, not a crash. `test_the_private_restore_step_cannot_fail_the_run`
+    only proved the CHECKOUT step (`actions/checkout@v6`) cannot fail the
+    job; it says nothing about the very next step, which actually calls
+    `private_state.py restore` and is a distinct block with no
+    `continue-on-error:` of its own.
+
+    Executed for real, with GitHub Actions' own default invocation for an
+    explicit `shell: bash` step (`-eo pipefail`) — a text-pattern check on
+    the YAML cannot prove a shell script's actual exit-code behaviour, only
+    running it can. A corrupt or tampered private repo must degrade this
+    run's raw-state restore and let the job continue into "Build current
+    projections"; it may never fail the job before projections are built.
+    """
+    block = next(b for b in private_steps(workflow)
+                if "private_state.py restore" in b
+                and "actions/checkout@v6" not in b)
+    script = _run_script(block)
+    assert "private_state.py restore" in script, \
+        "step body did not parse as expected; re-check this test"
+
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    fake_python = fake_bin / "python"
+    fake_python.write_text("#!/bin/bash\n"
+                           "# Stands in for `scripts/private_state.py restore`\n"
+                           "# refusing malformed/unsafe content in the private\n"
+                           "# store: EXIT_REFUSED (2), the module's own code.\n"
+                           "echo '::error::private state restore refused: fake"
+                           " tampered content' >&2\n"
+                           "exit 2\n")
+    fake_python.chmod(0o755)
+    script_path = tmp_path / "step.sh"
+    script_path.write_text(script)
+
+    proc = subprocess.run(
+        ["bash", "--noprofile", "--norc", "-eo", "pipefail", str(script_path)],
+        cwd=tmp_path,
+        env={"PATH": f"{fake_bin}:/usr/bin:/bin",
+            "PRIVATE_CHECKOUT_OUTCOME": "success"},
+        capture_output=True, text=True, timeout=30)
+
+    assert proc.returncode == 0, (
+        "the step must exit 0 even when private_state.py restore is refused "
+        "(exit 2); a nonzero exit here fails the job and skips 'Build "
+        "current projections' -- blocking projections on a comparison-state "
+        f"failure. actual exit={proc.returncode} "
+        f"stdout={proc.stdout!r} stderr={proc.stderr!r}")

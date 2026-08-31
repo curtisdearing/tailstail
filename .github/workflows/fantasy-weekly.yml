@@ -122,7 +122,10 @@ jobs:
             echo "::warning::private state checkout did not succeed (${PRIVATE_CHECKOUT_OUTCOME}); this run has no raw ESPN state and the season grading history is unchanged"
             exit 0
           fi
-          python scripts/private_state.py restore --store .tailstail-state
+          if ! python scripts/private_state.py restore --store .tailstail-state; then
+            echo "::warning::private state restore was refused (malformed or unsafe content in the private store; see the ::error:: above); this run has no raw ESPN state and the season grading history is unchanged. Projections are not affected."
+            exit 0
+          fi
         env:
           PRIVATE_CHECKOUT_OUTCOME: ${{ steps.private_checkout.outcome }}
 
