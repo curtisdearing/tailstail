@@ -27,6 +27,9 @@ fantasy.html
 data/espn_league/
 data/espn_snapshots/
 data/espn_comparison_ledger.json
+# public-safe aggregate grading history: generated, and carried between runs
+# by the checksummed public state release rather than by the repository
+data/espn_comparison_history.json
 data/my_team*.json
 data/my_team*.html
 my_team.html
@@ -37,6 +40,8 @@ reports/team_intel_latest.md
 data/team_intel_latest.json
 # the decision card: the personalised page, and the contract behind it
 private/
+# checkout of the private raw-state repository (curtisdearing/tailstail-state)
+.tailstail-state/
 
 # generated locally by a run; rebuildable, and large
 data/fantasy_public.json

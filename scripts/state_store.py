@@ -24,20 +24,33 @@ STATE_PROFILES = {
         "data/weights.json",
     ),
     # A release asset on a public repository is published material. This
-    # profile therefore carries only Tailstail's own outputs.
+    # profile therefore carries only material that may be published.
     #
-    # The ESPN external-challenger ledger and the immutable pre-kickoff ESPN
-    # snapshots used to travel here too, and they must still survive between
-    # weekly runs or the season grading series can never accumulate -- but the
-    # terms recorded on every one of those snapshots
+    # `data/espn_comparison_history.json` is the aggregate grading history
+    # (`espn-comparison-history/1`): one immutable row per graded week, counts
+    # and MAEs and a sha256, and nothing that could be a player. It lives here
+    # because the published season series has to survive between runs on its
+    # own -- if it could only be rebuilt from the private row-level ledger, a
+    # run that could not reach that ledger would publish an empty season.
+    #
+    # The row-level ledger and the pre-kickoff ESPN captures are NOT here and
+    # must never be. They are ESPN's per-player projections, and the terms
+    # recorded on every capture
     # (nflvalue/sources/espn_projections.REDISTRIBUTION_RIGHTS) grant no
-    # redistribution right and say in terms that raw snapshots are "retained
-    # for audit, not republication". They are carried between runs by the
-    # workflow's actions/cache instead, which is scoped to the repository and
-    # published to nobody.
+    # redistribution right and say raw snapshots are "retained for audit, not
+    # republication". They travel between runs through the private state
+    # repository instead (nflvalue/fantasy/private_state.py); they are not put
+    # in an Actions cache either, because a cache is restorable from
+    # pull-request workflows against the default branch and GitHub documents it
+    # as unsuitable for sensitive material.
     "fantasy": (
         "data/fantasy_model.joblib",
         "data/player_projection_snapshot.json",
+        "data/espn_comparison_history.json",
+        # Prior seasons, archived by `espn_compare.load_history` at the first
+        # run of a new one. Same contract, same guarantees; they travel here
+        # because this file is gitignored and the release is its only copy.
+        "data/espn_comparison_history.*.json",
     ),
 }
 

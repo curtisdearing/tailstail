@@ -28,11 +28,42 @@ The ESPN external-challenger comparison is split the same way. Its per-player
 rows were fetched under terms that grant no redistribution right — the snapshots
 themselves record that they are "retained for audit, not republication" — so the
 public payload carries the week-by-week aggregate grading and says, in the file,
-that the rows were withheld and why. For the same reason the raw captures and
-the comparison ledger left the `fantasy-model-state` release asset (a release on
-a public repository is published material) and are carried between runs by the
-workflow's `actions/cache`, which is repository-scoped. A cache miss costs the
-grading series its history and the run says so; it never costs the projections.
+that the rows were withheld and why.
+
+Where those rows live between runs took two attempts. They came out of the
+`fantasy-model-state` release asset, because a release on a public repository is
+published material — and went into an `actions/cache`, described at the time as
+private. **That was wrong.** GitHub documents that a workflow triggered by a
+pull request can restore caches created on the default branch, and says in terms
+not to store sensitive information in one
+([dependency caching](https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching)).
+An Actions cache is not a security boundary.
+
+The split that replaced it does not make the public history depend on the
+private rows at all:
+
+* **`data/espn_comparison_history.json`** (`espn-comparison-history/1`) is the
+  public, durable aggregate grading history — one immutable entry per graded
+  week, counts, MAEs, closer/tie tallies, by-position aggregates and the
+  ledger's own `projections_sha256` as non-reversible audit linkage. It carries
+  nothing that could be a player. It is loaded and validated independently of
+  the raw ledger, and it rides in the checksummed public state release, so a run
+  that never reaches the private store still republishes every week already
+  graded. Weeks are immutable: a conflicting rewrite raises rather than
+  overwriting.
+* **The row-level ledger and the raw captures** live in a separate private
+  repository (`curtisdearing/tailstail-state`), reached with a write-scoped
+  deploy key that only a trusted production run is given.
+  `nflvalue/fantasy/private_state.py` is the only thing that copies between it
+  and the worktree: two allow-listed paths, symlinks and path traversal refused
+  outright, files carrying league identity, a personalised contract, roster or
+  member data or anything credential-shaped refused outright, the restored
+  ledger's own row hashes verified, and never a file's contents in a log line.
+  An unavailable store is a `::warning::` and a run without raw state — never a
+  cache, a release, an artifact or Pages.
+
+A private-store miss can therefore cost this week's raw rows. It cannot reset a
+single previously graded aggregate week, and it never touches the projections.
 
 ## What the card is
 

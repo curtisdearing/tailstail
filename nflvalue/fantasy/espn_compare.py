@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -173,7 +174,18 @@ def load_ledger(path: str | Path, season: int) -> dict[str, Any]:
         # A new season starts a fresh ledger; the old one is archived by the
         # caller if wanted. Never mix seasons in one prospective record.
         return new_ledger(season)
-    for week_key, entry in ledger.get("weeks", {}).items():
+    verify_ledger_integrity(ledger)
+    return ledger
+
+
+def verify_ledger_integrity(ledger: dict[str, Any]) -> None:
+    """Every recorded week's rows still hash to what was stored, or raise.
+
+    Split out of `load_ledger` so the private-state boundary can run the same
+    check on a ledger arriving from the private store. A second implementation
+    of "are these the rows we recorded" would be a second answer to it.
+    """
+    for week_key, entry in (ledger.get("weeks") or {}).items():
         stored = entry.get("projections_sha256")
         actual = _rows_sha256(entry.get("rows", []))
         if stored != actual:
@@ -181,7 +193,6 @@ def load_ledger(path: str | Path, season: int) -> dict[str, Any]:
                 f"ledger week {week_key} failed its projections hash "
                 f"(stored {stored}, recomputed {actual}); stored projections are immutable"
             )
-    return ledger
 
 
 def save_ledger(ledger: dict[str, Any], path: str | Path) -> None:
@@ -360,6 +371,288 @@ def grade_week(
 
 
 # ---------------------------------------------------------------------------
+# Public grading history — aggregates only, and durable on its own
+# ---------------------------------------------------------------------------
+# The season series used to be re-derived from the ledger on every run. The
+# ledger holds one row per player per week with both sides' projections and the
+# actual points, so it is exactly the file that may not be published -- which
+# left the published history depending on a private file staying reachable from
+# a public job. This contract breaks that dependency: one immutable aggregate
+# per graded week, carrying nothing that could be a player, loaded and validated
+# independently of the raw ledger and carried between runs in the checksummed
+# public state archive.
+#
+# The guard is a POSITIVE allow-list. A blocklist would have to anticipate the
+# next field somebody adds to `_aggregate`; an allow-list drops it until it is
+# deliberately named here, which is the right default for a file that is
+# published.
+HISTORY_SCHEMA_VERSION = 1
+HISTORY_KIND = "espn-comparison-history/1"
+
+#: Aggregate scalars a published week may carry.
+HISTORY_AGGREGATE_FIELDS = (
+    "n", "n_played", "n_dnp",
+    "mae_espn", "mae_model", "mae_espn_incl_dnp", "mae_model_incl_dnp",
+    "model_closer", "espn_closer", "ties",
+)
+#: Per-position aggregate scalars.
+HISTORY_POSITION_FIELDS = ("n", "mae_espn", "mae_model")
+#: Everything else a week entry may carry: its index, when it was graded, the
+#: by-position block, and the ledger's own projections digest as non-reversible
+#: audit linkage back to the private rows.
+HISTORY_WEEK_FIELDS = HISTORY_AGGREGATE_FIELDS + (
+    "week", "graded_at", "by_position", "projections_sha256",
+)
+HISTORY_TOP_FIELDS = ("schema_version", "kind", "season", "weeks")
+
+#: A position label, not a player. Restricting the key shape is what stops a
+#: name being smuggled in as a grouping key.
+_POSITION_KEY_RE = re.compile(r"^[A-Z][A-Z/]{0,4}$")
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+
+
+class HistoryRejected(ValueError):
+    """The public grading history broke its contract. Never repaired, refused."""
+
+
+class HistoryConflict(HistoryRejected):
+    """A graded week was rewritten with different numbers. Immutable means no."""
+
+
+def public_aggregate(aggregate: dict[str, Any]) -> dict[str, Any]:
+    """The allow-listed projection of `_aggregate` output -- and only that."""
+    out: dict[str, Any] = {key: aggregate.get(key) for key in HISTORY_AGGREGATE_FIELDS}
+    by_position = aggregate.get("by_position") or {}
+    out["by_position"] = {
+        str(position): {key: values.get(key) for key in HISTORY_POSITION_FIELDS}
+        for position, values in sorted(by_position.items())
+    }
+    return out
+
+
+def new_history(season: int) -> dict[str, Any]:
+    return {
+        "schema_version": HISTORY_SCHEMA_VERSION,
+        "kind": HISTORY_KIND,
+        "season": int(season),
+        "weeks": {},
+    }
+
+
+def _reject(message: str) -> None:
+    raise HistoryRejected(message)
+
+
+def validate_history(history: Any) -> None:
+    """Refuse anything outside the allow-list, by key name and by value shape.
+
+    Error messages name the offending KEY and never its value: this contract
+    exists because the values on the other side of it are private, and a
+    validator that quotes what it rejected is a validator that leaks.
+    """
+    if not isinstance(history, dict):
+        _reject(f"grading history is not an object ({type(history).__name__})")
+    unknown = sorted(set(history) - set(HISTORY_TOP_FIELDS))
+    if unknown:
+        _reject(f"grading history carries unexpected top-level keys: {unknown}")
+    if history.get("kind") != HISTORY_KIND:
+        _reject(f"grading history claims kind {history.get('kind')!r}")
+    if history.get("schema_version") != HISTORY_SCHEMA_VERSION:
+        _reject(f"grading history claims schema {history.get('schema_version')!r}")
+    if not isinstance(history.get("season"), int) or isinstance(history.get("season"), bool):
+        _reject("grading history carries no integer season")
+    weeks = history.get("weeks")
+    if not isinstance(weeks, dict):
+        _reject("grading history carries no weeks object")
+
+    for week_key, entry in weeks.items():
+        where = f"grading history week {week_key!r}"
+        if not str(week_key).isdigit():
+            _reject(f"{where} is not a week number")
+        if not isinstance(entry, dict):
+            _reject(f"{where} is not an object")
+        extra = sorted(set(entry) - set(HISTORY_WEEK_FIELDS))
+        if extra:
+            _reject(f"{where} carries unexpected keys: {extra}")
+        missing = sorted(set(HISTORY_WEEK_FIELDS) - set(entry))
+        if missing:
+            _reject(f"{where} is missing {missing}")
+        if entry.get("week") != int(week_key):
+            _reject(f"{where} disagrees with its own week number")
+        if not isinstance(entry.get("graded_at"), str) or not entry["graded_at"].strip():
+            _reject(f"{where} carries no graded_at")
+        digest = entry.get("projections_sha256")
+        if not isinstance(digest, str) or not _SHA256_RE.match(digest):
+            _reject(f"{where} carries no sha256 audit digest")
+        for key in ("n", "n_played", "n_dnp", "model_closer", "espn_closer", "ties"):
+            value = entry.get(key)
+            if not isinstance(value, int) or isinstance(value, bool):
+                _reject(f"{where} field {key!r} is not a count")
+        for key in ("mae_espn", "mae_model", "mae_espn_incl_dnp", "mae_model_incl_dnp"):
+            value = entry.get(key)
+            if value is not None and (isinstance(value, bool)
+                                      or not isinstance(value, (int, float))):
+                _reject(f"{where} field {key!r} is not a number")
+        by_position = entry.get("by_position")
+        if not isinstance(by_position, dict):
+            _reject(f"{where} carries no by_position object")
+        for position, values in by_position.items():
+            if not _POSITION_KEY_RE.match(str(position)):
+                _reject(f"{where} groups by something that is not a position label")
+            if not isinstance(values, dict):
+                _reject(f"{where} position group is not an object")
+            odd = sorted(set(values) - set(HISTORY_POSITION_FIELDS))
+            if odd:
+                _reject(f"{where} position group carries unexpected keys: {odd}")
+            # The key names were checked above; without this the VALUES are
+            # unconstrained, and an arbitrary string under a legal key passes
+            # both this validator and the public boundary guard.
+            count = values.get("n")
+            if not isinstance(count, int) or isinstance(count, bool):
+                _reject(f"{where} position group field 'n' is not a count")
+            for key in ("mae_espn", "mae_model"):
+                value = values.get(key)
+                if value is not None and (isinstance(value, bool)
+                                          or not isinstance(value, (int, float))):
+                    _reject(f"{where} position group field {key!r} is not a number")
+
+
+def load_history(path: str | Path, season: int) -> dict[str, Any]:
+    """The published grading history, validated, or a fresh one.
+
+    Absent means a first run: an empty history. Malformed does NOT mean a first
+    run -- it fails closed, because quietly starting over would erase a season
+    of published grading and read on the site as a model that had never been
+    checked.
+
+    This function never touches the raw ledger. That independence is the point:
+    a run whose private raw state is unreachable still loads, publishes and
+    re-saves every week already graded.
+    """
+    path = Path(path)
+    if not path.exists():
+        return new_history(season)
+    try:
+        history = json.loads(path.read_text())
+    except json.JSONDecodeError as exc:
+        raise HistoryRejected(f"{path} is not readable JSON: {exc}") from exc
+    validate_history(history)
+    stored_season = int(history.get("season", -1))
+    if stored_season != int(season):
+        # A new season starts a fresh series -- but this file is gitignored and
+        # its only durable copy is the public state release, so returning an
+        # empty history and letting the caller write it back is how a whole
+        # prior season disappears at the first run of the next one. Archive it
+        # beside itself first; the archive travels in the same release.
+        archive = path.with_name(f"{path.stem}.{stored_season}{path.suffix}")
+        if not archive.exists():
+            archive.write_text(path.read_text())
+        return new_history(season)
+    return history
+
+
+def save_history(history: dict[str, Any], path: str | Path) -> None:
+    """Validate, refuse to shrink a published season, then write atomically.
+
+    The floor is the important half. This file is gitignored and travels in the
+    public state release, so if a restore fails, the run loads an empty history,
+    saves it, and the release pointer moves to the empty archive -- one
+    transient network error, and a season of published grading is gone. A save
+    that would publish fewer weeks than the file already holds is refused.
+    """
+    validate_history(history)
+    path = Path(path)
+    if path.exists():
+        try:
+            existing = json.loads(path.read_text())
+        except json.JSONDecodeError:
+            existing = None
+        if isinstance(existing, dict) and int(existing.get("season", -1)) == int(
+                history.get("season", -2)):
+            lost = sorted(set(existing.get("weeks") or {}) - set(history.get("weeks") or {}),
+                          key=int)
+            if lost:
+                raise HistoryConflict(
+                    f"refusing to publish a {history['season']} grading history that drops "
+                    f"week(s) {lost} already on disk; a published week is never withdrawn")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(history, indent=2, sort_keys=True) + "\n")
+    tmp.replace(path)
+
+
+def record_graded_week(history: dict[str, Any], *, week: int, aggregate: dict[str, Any],
+                       graded_at: str, projections_sha256: str) -> dict[str, Any]:
+    """Append one graded week's aggregate. A published week is immutable.
+
+    Re-recording the identical week is a no-op, so a rerun of the same data is
+    safe. Re-recording it with *different* numbers raises: a published grading
+    that can be rewritten is not a record of what the model did, it is a record
+    of what the last run said it did. The numbers and the audit digest are what
+    is frozen; `graded_at` is metadata and the first one is kept.
+    """
+    week_key = str(int(week))
+    entry = {
+        **public_aggregate(aggregate),
+        "week": int(week),
+        "graded_at": str(graded_at),
+        "projections_sha256": str(projections_sha256),
+    }
+    existing = history["weeks"].get(week_key)
+    if existing is not None:
+        frozen = {key: value for key, value in existing.items() if key != "graded_at"}
+        proposed = {key: value for key, value in entry.items() if key != "graded_at"}
+        if frozen != proposed:
+            # The message names the week and nothing else on purpose: the values
+            # either side of this comparison are the private ones.
+            raise HistoryConflict(
+                f"grading history week {week_key} is already published with different "
+                "numbers; a graded week is immutable and is not rewritten")
+        return existing
+    # Validated as a candidate, then assigned. Inserting first and validating
+    # after leaves the rejected week in the caller's object when the raise is
+    # caught, which is a poisoned history that only fails later.
+    candidate = {**history, "weeks": {**history["weeks"], week_key: entry}}
+    validate_history(candidate)
+    history["weeks"][week_key] = entry
+    return entry
+
+
+def sync_history_from_ledger(history: dict[str, Any], ledger: dict[str, Any]) -> list[int]:
+    """Copy every graded ledger week that is not already public. Returns the weeks added.
+
+    One direction only. The ledger is the private record and the history is the
+    published one; nothing here reads the history back into the ledger, and an
+    ungraded week simply has nothing to copy yet.
+    """
+    added: list[int] = []
+    for week_key in sorted(ledger.get("weeks", {}), key=int):
+        entry = ledger["weeks"][week_key]
+        grading = entry.get("grading")
+        if grading is None:
+            continue
+        if not isinstance(grading.get("aggregate"), dict) or not grading.get("graded_at"):
+            raise HistoryRejected(
+                f"ledger week {week_key} is marked graded but carries no usable aggregate")
+        already_published = week_key in history["weeks"]
+        # A week already published is still passed through `record_graded_week`
+        # rather than skipped, so a ledger that has been re-graded into
+        # different numbers raises instead of being quietly ignored.
+        record_graded_week(
+            history, week=int(week_key), aggregate=grading["aggregate"],
+            graded_at=grading["graded_at"],
+            projections_sha256=entry.get("projections_sha256", ""))
+        if not already_published:
+            added.append(int(week_key))
+    return added
+
+
+def history_series(history: dict[str, Any]) -> list[dict[str, Any]]:
+    """Ordered per-week aggregates -- the published 'watch it improve' view."""
+    return [dict(history["weeks"][key]) for key in sorted(history.get("weeks", {}), key=int)]
+
+
+# ---------------------------------------------------------------------------
 # Dashboard payload
 # ---------------------------------------------------------------------------
 
@@ -377,7 +670,11 @@ def comparison_rows(entry: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def season_series(ledger: dict[str, Any]) -> list[dict[str, Any]]:
-    """Ordered per-week aggregates — the 'watch it improve' view."""
+    """Ordered per-week aggregates read out of the PRIVATE ledger.
+
+    Kept for diagnostics and for seeding the public history; it is no longer
+    what gets published. `history_series` is.
+    """
     series = []
     for week_key in sorted(ledger.get("weeks", {}), key=int):
         entry = ledger["weeks"][week_key]
@@ -393,12 +690,21 @@ def build_payload(
     current_week: int,
     espn_provenance: dict[str, Any] | None,
     identity_report: dict[str, Any] | None,
+    history: dict[str, Any],
     status: str = "ok",
     error: str | None = None,
 ) -> dict[str, Any]:
-    """The ``espn_comparison`` object embedded in data/fantasy_latest.json."""
+    """The ``espn_comparison`` object embedded in data/fantasy_latest.json.
+
+    *history* is required and is where the published season series comes from.
+    Defaulting it to ``season_series(ledger)`` would restore exactly the
+    coupling this contract exists to break: the published history would once
+    again be readable only from the private row-level file, and a run that
+    could not reach that file would publish an empty series as though the model
+    had never been graded.
+    """
     entry = ledger.get("weeks", {}).get(str(int(current_week)), {})
-    series = season_series(ledger)
+    series = history_series(history)
     latest_graded = series[-1] if series else None
     return {
         "status": status,

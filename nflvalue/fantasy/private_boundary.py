@@ -66,6 +66,14 @@ PRIVATE_KEY_NAMES = frozenset({
 #: Schema strings that identify a private contract wherever they appear.
 PRIVATE_SCHEMA_MARKERS = ("decision-card/", "my_team/", "espn-league/")
 
+#: Markup that only a per-player ESPN comparison table produces. Structure is
+#: gone by the time a page is a string, so the guard has to know the shape of
+#: the leak it is looking for -- and this one leaked for weeks inside a file the
+#: workflow publishes on purpose, which no path-literal check could see.
+PRIVATE_MARKUP_MARKERS = (
+    "<th>ESPN (PPR)</th>", "<th>Model (PPR)</th>", "Model \u2212 ESPN", "<th>\u0394 rank</th>",
+)
+
 WITHHELD_NOTE = (
     "This file carries Tailstail's own projections and the aggregate model grading only. "
     "The league this project is pointed at is private, so its rosters, team names, league id "
@@ -149,6 +157,11 @@ def assert_public_text_safe(text: str, *, what: str = "artifact", league_id: Any
     for marker in PRIVATE_SCHEMA_MARKERS:
         if marker in text:
             raise PrivateDataLeak(f"{what}: carries the private contract marker {marker!r}")
+    for marker in PRIVATE_MARKUP_MARKERS:
+        if marker in text:
+            raise PrivateDataLeak(
+                f"{what}: carries a per-player ESPN comparison table, whose rows are not "
+                "redistributable")
     for needle in _private_strings(league_id, names):
         if needle in text:
             raise PrivateDataLeak(f"{what}: carries a private string")

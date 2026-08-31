@@ -65,7 +65,16 @@ from an allow-list and checked before they are written. The league this project
 is pointed at is private, so its snapshot, rosters, team names and league id —
 and the personalised `decision-card/1` page built from them — are written to the
 gitignored `private/` directory and are never published, never uploaded as a
-workflow artifact, and never packed into a release asset. See
+workflow artifact, and never packed into a release asset.
+
+The ESPN external-challenger comparison is split the same way. The public season
+grading series is a durable aggregate history
+(`data/espn_comparison_history.json`) that carries counts, MAEs and hashes and
+nothing that could be a player; the per-player rows it was once derived from
+live in a separate private repository reached only by a trusted production run.
+They are deliberately **not** in an Actions cache: GitHub documents that a
+pull-request workflow can restore default-branch caches, so a cache is not a
+place for restricted material. See
 [docs/DECISION_CARD.md](docs/DECISION_CARD.md).
 
 ## Validation

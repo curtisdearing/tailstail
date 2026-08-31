@@ -80,6 +80,24 @@ def _week_is_complete(schedules: pd.DataFrame, season: int, week: int) -> bool:
     return (now - latest) >= timedelta(hours=12)
 
 
+def load_history_or_degrade(history_path, season: int) -> tuple[dict, bool, str | None]:
+    """The public grading history, or an empty one and a stated reason.
+
+    A corrupt history has to fail closed on the WRITE side -- silently starting
+    over would erase a published season. It must not fail closed on the whole
+    publish: the projections, the page and the site have nothing to do with the
+    ESPN scoreboard's bookkeeping. So a rejected history degrades this one
+    section, and the file on disk is left exactly as it was for the next run to
+    restore over.
+    """
+    try:
+        return espn_compare.load_history(history_path, season), True, None
+    except Exception as exc:
+        reason = f"grading history unavailable: {type(exc).__name__}: {exc}"
+        print(f"[espn-compare] {reason}")
+        return espn_compare.new_history(season), False, reason
+
+
 def run_espn_comparison(
     data: HistoricalData,
     summaries: pd.DataFrame,
@@ -91,6 +109,7 @@ def run_espn_comparison(
     rules: ScoringRules,
     ledger_path: str = "data/espn_comparison_ledger.json",
     snapshot_dir: str = "data/espn_snapshots",
+    history_path: str = "data/espn_comparison_history.json",
 ) -> dict:
     """Snapshot ESPN, refresh the prospective ledger, grade finished weeks.
 
@@ -98,7 +117,14 @@ def run_espn_comparison(
     registered lever). ESPN being unreachable degrades to an explicit,
     labelled failure — never a silent empty comparison, never a crash of the
     model publish.
+
+    Two files, two visibilities. The ledger holds one row per player per week
+    with both sides' projections and is PRIVATE. The history holds one
+    aggregate per graded week, is public-safe, and is loaded first and saved
+    last so that a run whose private raw state never arrived still republishes
+    every week already graded rather than an empty season.
     """
+    history, history_available, history_reason = load_history_or_degrade(history_path, season)
     ledger = espn_compare.load_ledger(ledger_path, season)
 
     # 1) Grade any recorded, ungraded, finished weeks (prospective rows only).
@@ -150,11 +176,27 @@ def run_espn_comparison(
         print(f"[espn-compare] ESPN comparison unavailable this run: {error}")
 
     espn_compare.save_ledger(ledger, ledger_path)
+    # Every week the ledger has graded and the public history has not yet
+    # published. A conflicting regrade, or a history that could not be read,
+    # degrades this section and writes nothing -- it never overwrites a
+    # published season and never stops the projections publishing.
+    if history_available:
+        try:
+            added = espn_compare.sync_history_from_ledger(history, ledger)
+            if added:
+                print(f"[espn-compare] published aggregate grading for week(s) {added}")
+            espn_compare.save_history(history, history_path)
+        except espn_compare.HistoryRejected as exc:
+            history_reason = f"grading history not updated: {type(exc).__name__}: {exc}"
+            print(f"[espn-compare] {history_reason}")
+    if history_reason and status == "ok":
+        status, error = "grading_history_unavailable", history_reason
     return espn_compare.build_payload(
         ledger,
         current_week=week,
         espn_provenance=provenance,
         identity_report=identity_report,
+        history=history,
         status=status,
         error=error,
     )
@@ -395,9 +437,14 @@ def main(argv=None) -> int:
 
     artifact.save(args.model)
     artifact.write_model_card("reports/fantasy_model_card.json")
+    # The page gets the SAME redacted object the published JSON gets. It is
+    # copied verbatim to the public site, so handing it the raw comparison put
+    # every matched player's ESPN and model projection on the internet -- which
+    # is what happened, inside the page, after the raw payload had already been
+    # taken out of `_site`.
     render_fantasy_dashboard(
         result.summaries, args.dashboard, season=season, week=week, generated_at=generated,
-        espn_comparison=espn_comparison,
+        espn_comparison=public_payload["espn_comparison"],
     )
     private_boundary.assert_public_text_safe(
         Path(args.dashboard).read_text(), what=str(args.dashboard),

@@ -180,8 +180,14 @@ def test_grading_does_not_rewrite_the_stored_model_projection():
 
 def test_the_payload_labels_espn_as_an_external_reference():
     ledger = _record(1.0, "e" * 64)
+    # The published season series comes from the public aggregate history, not
+    # from this private row-level ledger; `history` is required so that no
+    # caller can silently fall back to the coupling that change removed.
+    history = espn_compare.new_history(int(ledger["season"]))
+    espn_compare.sync_history_from_ledger(history, ledger)
     payload = espn_compare.build_payload(
-        ledger, current_week=1, espn_provenance=None, identity_report=None
+        ledger, current_week=1, espn_provenance=None, identity_report=None,
+        history=history,
     )
     assert payload["disclaimer"], "an ESPN comparison must ship its disclaimer"
     assert "prospective_rule" in payload
