@@ -1,0 +1,414 @@
+{
+  "environment": {
+    "canonical_csv_version": 1,
+    "implementation": "CPython",
+    "machine": "arm64",
+    "packages": {
+      "joblib": "1.5.3",
+      "nflreadpy": "0.1.5",
+      "numpy": "2.4.6",
+      "pandas": "3.0.5",
+      "polars": "1.44.1",
+      "pyarrow": "25.0.1",
+      "scikit-learn": "1.9.0",
+      "scipy": "1.17.1"
+    },
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.15"
+  },
+  "failures": [],
+  "feeds": {
+    "expected_points": {
+      "columns": 159,
+      "missing_seasons": [],
+      "path": "expected_points.parquet",
+      "present": true,
+      "reason": "pre_expected_points_ewm4, the published expected-points baseline",
+      "rows": 41696,
+      "rows_by_season": {
+        "2019": 5633,
+        "2020": 5820,
+        "2021": 6065,
+        "2022": 6038,
+        "2023": 6081,
+        "2024": 6005,
+        "2025": 6054
+      },
+      "sha256": "55e08dd2e116e0fd59f19bad2b7a317de751b139d8ad8c80e081b3e6c7cc64ff",
+      "short_seasons": []
+    },
+    "injuries": {
+      "columns": 17,
+      "missing_seasons": [],
+      "path": "injuries.parquet",
+      "present": true,
+      "reason": "injury_out / injury_questionable / practice_dnp features",
+      "rows": 40204,
+      "rows_by_season": {
+        "2019": 5392,
+        "2020": 5661,
+        "2021": 5587,
+        "2022": 5682,
+        "2023": 5599,
+        "2024": 6215,
+        "2025": 6068
+      },
+      "sha256": "1bd91ce8f999a9d48e7ba3ba7c6c003baa66e08189c97571bb399781e131fe58",
+      "short_seasons": []
+    },
+    "rosters": {
+      "columns": 36,
+      "missing_seasons": [],
+      "path": "weekly_rosters.parquet",
+      "present": true,
+      "reason": "roster-first row universe, position, team, age, draft_number",
+      "rows": 327704,
+      "rows_by_season": {
+        "2019": 51632,
+        "2020": 44130,
+        "2021": 46696,
+        "2022": 46163,
+        "2023": 45655,
+        "2024": 46579,
+        "2025": 46849
+      },
+      "sha256": "a251fb2d5848937174c37abb5056dea91ea5cc54e00503a8da77fa16024be075",
+      "short_seasons": []
+    },
+    "schedules": {
+      "columns": 46,
+      "missing_seasons": [],
+      "path": "schedules.parquet",
+      "present": true,
+      "reason": "game context: spread, total, rest, roof, surface, referee",
+      "rows": 1960,
+      "rows_by_season": {
+        "2019": 267,
+        "2020": 269,
+        "2021": 285,
+        "2022": 284,
+        "2023": 285,
+        "2024": 285,
+        "2025": 285
+      },
+      "sha256": "493fede2280b2a6cc4d2e1357fc863cb45393235e98ee350b2d238b43fd82d36",
+      "short_seasons": []
+    },
+    "snaps": {
+      "columns": 16,
+      "missing_seasons": [],
+      "path": "snap_counts.parquet",
+      "present": true,
+      "reason": "pre_offense_pct_ewm4 and the snaps_missing indicator",
+      "rows": 181477,
+      "rows_by_season": {
+        "2019": 23862,
+        "2020": 24999,
+        "2021": 26468,
+        "2022": 26381,
+        "2023": 26540,
+        "2024": 26615,
+        "2025": 26612
+      },
+      "sha256": "ed5fc5bb8a68043ea4ac324678490ef04d2aee17e15af59747764e24eecfc62a",
+      "short_seasons": []
+    },
+    "stats": {
+      "columns": 150,
+      "missing_seasons": [],
+      "path": "player_stats.parquet",
+      "present": true,
+      "reason": "fantasy_points label and every pre_* rolling history feature",
+      "rows": 129812,
+      "rows_by_season": {
+        "2019": 17362,
+        "2020": 17602,
+        "2021": 18969,
+        "2022": 18831,
+        "2023": 18643,
+        "2024": 18983,
+        "2025": 19422
+      },
+      "sha256": "aaf5af469401803ddf3e4c4686f2096b71c577dc7416f5d127227518ad755c69",
+      "short_seasons": []
+    }
+  },
+  "fetch": {
+    "nflreadpy_version": "0.1.5",
+    "quality": {
+      "errors": [],
+      "roster_duplicate_keys": 26,
+      "tables": {
+        "expected_points": {
+          "columns": 159,
+          "present": true,
+          "rows": 41696,
+          "seasons": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ]
+        },
+        "injuries": {
+          "columns": 17,
+          "present": true,
+          "rows": 40204,
+          "seasons": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ]
+        },
+        "rosters": {
+          "columns": 36,
+          "present": true,
+          "rows": 327704,
+          "seasons": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ]
+        },
+        "schedules": {
+          "columns": 46,
+          "present": true,
+          "rows": 1960,
+          "seasons": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ]
+        },
+        "snaps": {
+          "columns": 16,
+          "present": true,
+          "rows": 181477,
+          "seasons": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ]
+        },
+        "stats": {
+          "columns": 150,
+          "present": true,
+          "rows": 129812,
+          "seasons": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ]
+        }
+      },
+      "valid": true
+    },
+    "retrieved_at": "2026-08-30T19:24:04.781303+00:00",
+    "seasons": [
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "tables": {
+      "expected_points": {
+        "columns": 159,
+        "path": "expected_points.parquet",
+        "reused_cache": false,
+        "rows": 41696,
+        "sha256": "55e08dd2e116e0fd59f19bad2b7a317de751b139d8ad8c80e081b3e6c7cc64ff"
+      },
+      "injuries": {
+        "columns": 17,
+        "path": "injuries.parquet",
+        "reused_cache": false,
+        "rows": 40204,
+        "sha256": "1bd91ce8f999a9d48e7ba3ba7c6c003baa66e08189c97571bb399781e131fe58"
+      },
+      "rosters": {
+        "columns": 36,
+        "path": "weekly_rosters.parquet",
+        "reused_cache": false,
+        "rows": 327704,
+        "sha256": "a251fb2d5848937174c37abb5056dea91ea5cc54e00503a8da77fa16024be075"
+      },
+      "schedules": {
+        "columns": 46,
+        "path": "schedules.parquet",
+        "reused_cache": false,
+        "rows": 1960,
+        "sha256": "493fede2280b2a6cc4d2e1357fc863cb45393235e98ee350b2d238b43fd82d36"
+      },
+      "snaps": {
+        "columns": 16,
+        "path": "snap_counts.parquet",
+        "reused_cache": false,
+        "rows": 181477,
+        "sha256": "ed5fc5bb8a68043ea4ac324678490ef04d2aee17e15af59747764e24eecfc62a"
+      },
+      "stats": {
+        "columns": 150,
+        "path": "player_stats.parquet",
+        "reused_cache": false,
+        "rows": 129812,
+        "sha256": "aaf5af469401803ddf3e4c4686f2096b71c577dc7416f5d127227518ad755c69"
+      }
+    }
+  },
+  "finished_at": "2026-08-30T19:25:13.025139+00:00",
+  "frame": {
+    "columns": 277,
+    "content_sha256": "449d769b3f61cf31db758e41f4e8abca476ab96e9768dc75ff79cae26b5948de",
+    "eligible_rows": 26727,
+    "eligible_rows_by_season": {
+      "2019": 3732,
+      "2020": 3805,
+      "2021": 3898,
+      "2022": 3810,
+      "2023": 3858,
+      "2024": 3807,
+      "2025": 3817
+    },
+    "feature_content_sha256": "9ec9585c93590eb10d95b933d4a673ed55d9b72143078609736a28a564106a8a",
+    "feature_count": 122,
+    "parquet_sha256": "c9a4f7efa031f16fc265c0c8923a1f29d5168850b56f1c70414402c392597e84",
+    "path": "historical/fantasy/feature_frame.parquet",
+    "rows": 96999,
+    "rows_by_season": {
+      "2019": 15710,
+      "2020": 13213,
+      "2021": 13922,
+      "2022": 13583,
+      "2023": 13409,
+      "2024": 13469,
+      "2025": 13693
+    },
+    "seasons": [
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  "git_commit": "2a9be554135a4ba4edcfc16dcd5b81bc8b5fb0bf",
+  "kind": "canonical-history-rebuild",
+  "min_rows_per_season": 100,
+  "ok": true,
+  "quality_summary": {
+    "active_participant_rows": 36405,
+    "eligible_rows": 26727,
+    "positions": {
+      "QB": 13320,
+      "RB": 23948,
+      "TE": 21008,
+      "WR": 38723
+    },
+    "rows": 96999,
+    "worst_missing_features": [
+      [
+        "pre_yards_per_attempt_ewm8",
+        0.84572005896968
+      ],
+      [
+        "pre_yards_per_carry_ewm8",
+        0.5206651614965103
+      ],
+      [
+        "pre_yards_per_target_ewm8",
+        0.3654779946185012
+      ],
+      [
+        "pre_catch_rate_ewm8",
+        0.3654779946185012
+      ],
+      [
+        "pre_td_per_opportunity_ewm8",
+        0.27742554046948936
+      ],
+      [
+        "pre_fantasy_points_sd8",
+        0.04527881730739492
+      ],
+      [
+        "pre_coach_pass_rate_ewm8",
+        0.02450540727223992
+      ],
+      [
+        "pre_coach_pace_ewm8",
+        0.02450540727223992
+      ],
+      [
+        "pre_coach_rb_target_share_ewm8",
+        0.02450540727223992
+      ],
+      [
+        "pre_coach_wr_target_share_ewm8",
+        0.02450540727223992
+      ]
+    ]
+  },
+  "required_feeds": {
+    "expected_points": "pre_expected_points_ewm4, the published expected-points baseline",
+    "injuries": "injury_out / injury_questionable / practice_dnp features",
+    "rosters": "roster-first row universe, position, team, age, draft_number",
+    "schedules": "game context: spread, total, rest, roof, surface, referee",
+    "snaps": "pre_offense_pct_ewm4 and the snaps_missing indicator",
+    "stats": "fantasy_points label and every pre_* rolling history feature"
+  },
+  "required_seasons": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "schema_version": 1,
+  "scoring": {
+    "fumble_lost": -2.0,
+    "interception": -2.0,
+    "passing_300_bonus": 0.0,
+    "passing_td": 4.0,
+    "passing_yard": 0.04,
+    "receiving_100_bonus": 0.0,
+    "receiving_td": 6.0,
+    "receiving_yard": 0.1,
+    "reception": 1.0,
+    "rushing_100_bonus": 0.0,
+    "rushing_td": 6.0,
+    "rushing_yard": 0.1,
+    "two_point": 2.0
+  },
+  "started_at": "2026-08-30T19:24:04.680632+00:00",
+  "wall_seconds": 68.345
+}

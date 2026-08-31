@@ -1,0 +1,115 @@
+{
+ "id": 424242,
+ "seasonId": 2026,
+ "scoringPeriodId": 3,
+ "status": {
+  "currentMatchupPeriod": 3,
+  "isActive": true,
+  "waiverLastExecutionDate": "2026-09-16T11:00:00Z",
+  "transactionDeadline": "2026-12-23T18:00:00Z"
+ },
+ "settings": {
+  "name": "Amplified",
+  "rosterSettings": {
+   "lineupSlotCounts": {
+    "0": 1,
+    "2": 2,
+    "4": 2,
+    "6": 1,
+    "23": 1,
+    "16": 1,
+    "17": 1,
+    "20": 4,
+    "21": 1
+   },
+   "isBenchUnlimited": false
+  },
+  "acquisitionSettings": {
+   "waiverProcessDays": [
+    "WEDNESDAY"
+   ],
+   "waiverHours": 11,
+   "isUsingAcquisitionBudget": false,
+   "acquisitionBudget": 0,
+   "acquisitionLimit": -1
+  },
+  "scoringSettings": {
+   "scoringItems": [
+    {
+     "statId": 3,
+     "points": 0.04
+    },
+    {
+     "statId": 4,
+     "points": 4.0
+    },
+    {
+     "statId": 24,
+     "points": 0.1
+    },
+    {
+     "statId": 25,
+     "points": 6.0
+    },
+    {
+     "statId": 42,
+     "points": 0.1
+    },
+    {
+     "statId": 43,
+     "points": 6.0
+    },
+    {
+     "statId": 53,
+     "points": 1.0
+    },
+    {
+     "statId": 20,
+     "points": -2.0
+    }
+   ]
+  }
+ },
+ "teams": [
+  {
+   "id": 1,
+   "name": "Curtis",
+   "playoffSeed": 8,
+   "record": {
+    "overall": {
+     "wins": 0,
+     "losses": 2,
+     "pointsFor": 180.2
+    }
+   },
+   "waiverRank": 1
+  },
+  {
+   "id": 2,
+   "name": "Rival",
+   "playoffSeed": 2,
+   "record": {
+    "overall": {
+     "wins": 2,
+     "losses": 0,
+     "pointsFor": 240.0
+    }
+   },
+   "waiverRank": 8
+  },
+  {
+   "id": 3,
+   "name": "Third",
+   "playoffSeed": 5,
+   "record": {
+    "overall": {
+     "wins": 1,
+     "losses": 1,
+     "pointsFor": 200.0
+    }
+   },
+   "waiverRank": 4
+  }
+ ],
+ "pendingTransactions": []
+}

@@ -1,0 +1,90 @@
+{
+ "players": [
+  {
+   "id": 800001,
+   "onTeamId": 0,
+   "player": {
+    "active": true,
+    "defaultPositionId": 3,
+    "droppable": true,
+    "eligibleSlots": [
+     4,
+     5,
+     23,
+     20
+    ],
+    "firstName": "Free",
+    "fullName": "Free Agent One",
+    "id": 800001,
+    "injured": false,
+    "injuryStatus": "ACTIVE",
+    "lastName": "Agent One",
+    "proTeamId": 2,
+    "universeId": 2
+   },
+   "ratings": {
+    "0": {
+     "totalRating": 12.1
+    }
+   },
+   "status": "FREEAGENT"
+  },
+  {
+   "id": 800002,
+   "onTeamId": 0,
+   "player": {
+    "active": true,
+    "defaultPositionId": 2,
+    "droppable": true,
+    "eligibleSlots": [
+     2,
+     3,
+     23,
+     20
+    ],
+    "firstName": "Free",
+    "fullName": "Free Agent Two",
+    "id": 800002,
+    "injured": false,
+    "injuryStatus": "ACTIVE",
+    "lastName": "Agent Two",
+    "proTeamId": 6,
+    "universeId": 2
+   },
+   "ratings": {
+    "0": {
+     "totalRating": 9.4
+    }
+   },
+   "status": "FREEAGENT"
+  },
+  {
+   "id": 800003,
+   "onTeamId": 0,
+   "player": {
+    "active": true,
+    "defaultPositionId": 1,
+    "droppable": true,
+    "eligibleSlots": [
+     0,
+     7,
+     20
+    ],
+    "firstName": "Waiver",
+    "fullName": "Waiver Wire Three",
+    "id": 800003,
+    "injured": true,
+    "injuryStatus": "QUESTIONABLE",
+    "lastName": "Wire Three",
+    "proTeamId": 9,
+    "universeId": 2
+   },
+   "ratings": {
+    "0": {
+     "totalRating": 7.7
+    }
+   },
+   "status": "WAIVERS"
+  }
+ ]
+}

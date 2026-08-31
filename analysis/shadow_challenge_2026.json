@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "protocol_id": "tailstail-shadow-challenge-2026-v1",
+  "status": "preregistered",
+  "written_before_any_challenger_was_scored": true,
+  "parent_protocol": "nfl-accuracy-2026-v1",
+  "champion": {
+    "name": "direct position-specific ensemble",
+    "families": ["bayesian", "gradient_boosting", "random_forest", "mlp"],
+    "note": "the frozen production forecast center; this prompt may not change it"
+  },
+  "challengers": [
+    {
+      "name": "bayesian_ridge_only",
+      "construction": "the identical pipeline with model_families restricted to ('bayesian',) and stack_weight_cap 1.0",
+      "features": "model_features() unchanged",
+      "rationale": "does the four-family stack earn its complexity over one linear learner?"
+    },
+    {
+      "name": "hist_gradient_boosting_only",
+      "construction": "the identical pipeline with model_families restricted to ('gradient_boosting',) and stack_weight_cap 1.0",
+      "features": "model_features() unchanged",
+      "rationale": "does the stack earn its complexity over one compact boosted-tree learner?"
+    }
+  ],
+  "reference_baselines": [
+    "pre_fantasy_points_ewm4 (trailing fantasy points)",
+    "pre_expected_points_ewm4 (trailing expected points)"
+  ],
+  "forbidden": [
+    "adding a learner family beyond the two named challengers",
+    "adding, removing or re-engineering any model feature",
+    "retuning anything after the 2025 checkpoint is inspected",
+    "selecting the reported metric, season subset, stratum or seed after seeing results",
+    "promoting on the strength of a stratum that was not preregistered here"
+  ],
+  "windows": {
+    "development": {
+      "outer_seasons": [2021, 2022, 2023, 2024],
+      "use": "every promotion decision is made here and nowhere else"
+    },
+    "locked_regression_checkpoint": {
+      "outer_seasons": [2025],
+      "use": "inspected exactly once, after the development decision is written; may confirm or veto a promotion, may never create one"
+    },
+    "prospective_final_judge": {
+      "outer_seasons": [2026],
+      "use": "final judge; graded only once real 2026 results exist"
+    }
+  },
+  "primary_metric": "MAE in fantasy points per player-week over the development outer seasons",
+  "resampling": {
+    "unit": "season-week block, every player in a week resampled together",
+    "iterations": 20000,
+    "seed": 6102026
+  },
+  "promotion_gate": {
+    "all_must_hold": true,
+    "conditions": {
+      "mae_improvement_over_champion_min": 0.05,
+      "probability_of_improvement_min": 0.90,
+      "spearman_regression_max": 0.01,
+      "rmse_must_not_regress": true,
+      "nominal80_absolute_coverage_error_pp_max": 2.0,
+      "nominal80_undercoverage_pp_max": 1.0,
+      "per_position_mae_regression_max": 0.10,
+      "top10_weekly_overlap_min": 0.50,
+      "mean_weekly_lineup_regret_must_not_regress": true
+    },
+    "source_of_thresholds": "data/accuracy_registry.json accept_gates and release_thresholds, and analysis/accuracy_protocol.json acceptance/calibration blocks"
+  },
+  "noninferiority_record": {
+    "definition": "CI95 upper bound of the champion-minus-challenger MAE difference is below 0.05 and every guardrail in promotion_gate holds",
+    "consequence": "recorded as noninferior; NEVER a promotion on its own"
+  },
+  "default_decision": "keep the current ensemble; a challenger that does not clear every condition is recorded as rejected with its numbers, and no threshold is revisited",
+  "reporting": {
+    "strata_declared_in_advance": [
+      "position QB", "position RB", "position WR", "position TE",
+      "role_up", "role_down", "stable_role",
+      "injury_questionable", "practice_dnp", "status_available",
+      "cold_start", "established",
+      "played", "dnp"
+    ],
+    "metrics": ["mae", "rmse", "spearman", "bias", "coverage80", "mean_interval_width", "crps", "lineup_regret"],
+    "exact_n_required_for_every_cell": true
+  }
+}

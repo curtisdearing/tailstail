@@ -41,26 +41,19 @@ def _espn_section(espn_comparison: dict[str, Any] | None) -> str:
         f"{identity.get('unmatched_model_not_projected_count', 0)} not projected by the model "
         "are reported in fantasy_latest.json, not dropped silently"
     )
-    rows_html = []
-    for row in espn_comparison.get("current_week_rows", []):
-        rows_html.append(
-            "<tr>"
-            f"<td>{row['abs_delta_rank']}</td>"
-            f"<td>{html.escape(str(row['position']))}</td>"
-            f"<td><b>{html.escape(str(row['player_name']))}</b>"
-            f"<small>{html.escape(str(row['team']))}</small></td>"
-            f"<td>{row['espn_pts']:.1f}</td>"
-            f"<td>{row['model_pts']:.1f}</td>"
-            f"<td>{row['delta']:+.1f}</td>"
-            "</tr>"
-        )
+    # The per-player comparison table used to be rendered here, and this file is
+    # copied verbatim to the public Pages site every week. Those rows are ESPN's
+    # own projections, fetched under terms recorded on every snapshot as granting
+    # no redistribution right, so publishing them was the leak -- and it survived
+    # the move of `data/fantasy_latest.json` out of `_site`, because it travelled
+    # inside the page rather than beside it. The withheld count is stated so the
+    # absence reads as a decision rather than an empty week.
+    withheld = int(identity.get("matched") or 0)
     table = (
-        "<div class=\"card\"><table><thead><tr>"
-        "<th>Δ rank</th><th>Pos</th><th>Player</th>"
-        "<th>ESPN (PPR)</th><th>Model (PPR)</th><th>Model − ESPN</th>"
-        f"</tr></thead><tbody>{''.join(rows_html)}</tbody></table></div>"
-        if rows_html
-        else "<p class=\"honest\">No pre-kickoff comparison rows for this week yet.</p>"
+        "<p class=\"honest\">Per-player rows are not published: ESPN's projections are "
+        f"used here as an external challenger under terms that grant no redistribution "
+        f"right, so the {withheld} matched player comparisons behind this week's grading "
+        "stay local. The week-by-week scoreboard below is the published result.</p>"
     )
     basis_note = (
         " ESPN raw stat projections re-scored with the model's own full-PPR scorer"
@@ -117,6 +110,10 @@ def _espn_series_table(espn_comparison: dict[str, Any]) -> str:
     )
 
 
+#: Row-level fields that may never reach the published page.
+ROW_LEVEL_ESPN_FIELDS = ("current_week_rows", "espn_pts", "model_pts", "player_name")
+
+
 def render_fantasy_dashboard(
     summaries: pd.DataFrame,
     path: str | Path,
@@ -126,6 +123,27 @@ def render_fantasy_dashboard(
     generated_at: str,
     espn_comparison: dict[str, Any] | None = None,
 ) -> None:
+    """The public weekly page: Tailstail's own projections and the ESPN grading.
+
+    It carries no personalised content.  The eight-section ``my_team`` contract
+    that used to render below the table moved to
+    :mod:`nflvalue.fantasy.decision_page`, which writes to a gitignored path,
+    because this file is copied verbatim to a public site every week and a
+    private league's rosters, team names and league id went with it.
+    """
+    # Fail closed at the renderer rather than at the caller. This page is copied
+    # to a public site by the weekly workflow, so "the pipeline passes the
+    # redacted object" has to be enforced where the markup is written -- one
+    # caller passing the raw payload is all it took last time.
+    if espn_comparison is not None:
+        from .private_boundary import PrivateDataLeak
+
+        for field in ROW_LEVEL_ESPN_FIELDS:
+            if field in espn_comparison:
+                raise PrivateDataLeak(
+                    f"the public dashboard was handed row-level ESPN data ({field!r}); "
+                    "pass private_boundary.public_espn_comparison(...) instead")
+
     rows = []
     for row in summaries.sort_values(["position", "mean"], ascending=[True, False]).to_dict("records"):
         rows.append(
@@ -148,7 +166,11 @@ def render_fantasy_dashboard(
 :root{{--bg:#0b1220;--panel:#111c30;--ink:#ecf3ff;--muted:#92a4bf;--line:#243550;--accent:#67e8b4}}
 *{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,sans-serif}}
 main{{max-width:1180px;margin:auto;padding:30px 18px}}h1{{margin:0}}h2{{margin:34px 0 6px}}h3{{margin:22px 0 6px}}p{{color:var(--muted)}}
-p.honest{{font-size:13px}}
+p.honest{{font-size:13px}}ul.why{{color:var(--muted);font-size:13px;margin:4px 0 0 18px}}
+.nopick{{background:#2a1c22;border:1px solid #5a2b38;border-radius:10px;padding:11px 13px;margin:6px 0}}
+.nopick b{{color:#ffb4c0;letter-spacing:.06em;margin-right:9px}}.nopick span{{color:var(--muted);font-size:13px}}
+.tag{{background:#243550;color:#9fb4d6;border-radius:5px;padding:1px 6px;font-size:11px;letter-spacing:.05em}}
+code{{color:#9fb4d6;font-size:12px}}.f-stale,.f-missing{{color:#ffb4c0}}.f-fresh{{color:var(--accent)}}.f-aging{{color:#e7c98b}}
 .card{{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:auto}}
 table{{border-collapse:collapse;width:100%;min-width:820px}}th,td{{padding:11px 13px;border-bottom:1px solid var(--line);text-align:right}}
 th{{color:var(--muted);font-size:12px;text-transform:uppercase;position:sticky;top:0;background:var(--panel)}}

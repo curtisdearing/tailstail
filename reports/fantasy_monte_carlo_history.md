@@ -1,31 +1,31 @@
 # Historical fantasy Monte Carlo audit
 
-Replayed **11,481** untouched player-weeks across **54** season-week blocks with **1,000** correlated draws per week (11,481,000 player-draws).
+Replayed **11,482** untouched player-weeks across **54** season-week blocks with **1,000** correlated draws per week (11,482,000 player-draws).
 
 The player-draw count is computation, not statistical n. Confidence intervals use season-week blocks.
-Residual fallback was required for **263** player-weeks whose sparse event shapes could not support stable calibrated tails.
+Residual fallback was required for **254** player-weeks whose sparse event shapes could not support stable calibrated tails.
 
 ## Point forecasts and intervals
 
 | Method | n | MAE | RMSE | Bias | Spearman | 80% coverage | Width |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Direct Ensemble | 11,481 | 5.091 | 6.718 | -0.033 | 0.625 | 82.0% | 17.20 |
-| Raw Event Simulator | 11,481 | 5.451 | 7.229 | 0.409 | 0.545 | — | — |
-| Calibrated Monte Carlo | 11,481 | 5.091 | 6.718 | -0.033 | 0.625 | 82.2% | 17.24 |
+| Direct Ensemble | 11,482 | 5.094 | 6.721 | -0.017 | 0.624 | 82.3% | 17.23 |
+| Raw Event Simulator | 11,482 | 5.455 | 7.232 | 0.408 | 0.545 | — | — |
+| Calibrated Monte Carlo | 11,482 | 5.094 | 6.721 | -0.017 | 0.624 | 82.4% | 17.27 |
 
 ## Paired week-block comparisons
 
-- **raw event vs direct:** candidate-minus-direct MAE +0.359, 95% CI [+0.297, +0.423], candidate-better probability 0.0%, tie probability 0.0%.
+- **raw event vs direct:** candidate-minus-direct MAE +0.361, 95% CI [+0.297, +0.425], candidate-better probability 0.0%, tie probability 0.0%.
 - **calibrated mc vs direct:** candidate-minus-direct MAE +0.000, 95% CI [+0.000, +0.000], candidate-better probability 0.0%, tie probability 100.0%.
 
 ## Position results
 
 | Position | n | Direct MAE | Raw-event MAE | Direct coverage | MC coverage |
 |---|---:|---:|---:|---:|---:|
-| QB | 1,759 | 5.562 | 6.068 | 80.9% | 81.0% |
-| RB | 3,012 | 5.179 | 5.417 | 82.5% | 82.5% |
-| TE | 1,921 | 4.261 | 4.659 | 81.5% | 80.7% |
-| WR | 4,789 | 5.197 | 5.563 | 82.4% | 83.1% |
+| QB | 1,759 | 5.557 | 6.067 | 81.0% | 80.7% |
+| RB | 3,012 | 5.178 | 5.417 | 82.6% | 82.7% |
+| TE | 1,921 | 4.268 | 4.659 | 82.2% | 81.1% |
+| WR | 4,790 | 5.203 | 5.573 | 82.7% | 83.4% |
 
 ## Error regimes
 
@@ -33,15 +33,15 @@ Regimes are evaluation labels defined from realized outcomes; they diagnose fail
 
 | Regime | Exact n | Direct MAE | Raw-event MAE | Direct coverage | MC coverage |
 |---|---:|---:|---:|---:|---:|
-| role_increase_5_plus | 1,676 | 7.306 | 8.255 | 71.4% | 72.0% |
-| role_decrease_5_plus | 1,258 | 5.836 | 6.889 | 70.5% | 71.6% |
-| stable_role_abs_lt_3 | 6,247 | 4.231 | 4.218 | 88.6% | 88.3% |
-| scored_touchdown | 3,742 | 7.009 | 7.715 | 72.0% | 72.4% |
-| no_touchdown | 7,739 | 4.164 | 4.356 | 86.9% | 87.0% |
-| team_changed | 168 | 3.928 | 4.717 | 87.5% | 89.9% |
-| qb_changed | 1,475 | 4.580 | 5.368 | 83.8% | 84.6% |
-| injury_questionable | 470 | 5.182 | 5.727 | 85.5% | 90.9% |
-| practice_dnp | 167 | 5.187 | 5.408 | 85.0% | 92.2% |
+| role_increase_5_plus | 1,677 | 7.331 | 8.256 | 71.5% | 72.2% |
+| role_decrease_5_plus | 1,259 | 5.808 | 6.896 | 70.8% | 71.6% |
+| stable_role_abs_lt_3 | 6,244 | 4.234 | 4.221 | 88.8% | 88.3% |
+| scored_touchdown | 3,743 | 7.022 | 7.718 | 72.2% | 72.4% |
+| no_touchdown | 7,739 | 4.162 | 4.360 | 87.3% | 87.2% |
+| team_changed | 168 | 3.967 | 4.735 | 87.5% | 89.9% |
+| qb_changed | 1,475 | 4.582 | 5.377 | 84.1% | 84.9% |
+| injury_questionable | 470 | 5.186 | 5.731 | 85.7% | 90.9% |
+| practice_dnp | 167 | 5.172 | 5.396 | 85.6% | 92.8% |
 
 ## Raw component diagnostics
 
@@ -49,31 +49,31 @@ Bias is actual minus simulated; negative values mean the raw simulator overpredi
 
 | Component | Positions | Exact n | MAE | Bias | Spearman |
 |---|---|---:|---:|---:|---:|
-| completions | QB | 1,759 | 5.221 | -1.482 | 0.427 |
-| attempts | QB | 1,759 | 7.520 | -1.629 | 0.379 |
-| passing_yards | QB | 1,759 | 64.063 | -21.541 | 0.442 |
-| passing_tds | QB | 1,759 | 0.864 | -0.104 | 0.252 |
+| completions | QB | 1,759 | 5.219 | -1.482 | 0.427 |
+| attempts | QB | 1,759 | 7.519 | -1.632 | 0.379 |
+| passing_yards | QB | 1,759 | 64.024 | -21.556 | 0.443 |
+| passing_tds | QB | 1,759 | 0.865 | -0.105 | 0.250 |
 | passing_interceptions | QB | 1,759 | 0.643 | -0.024 | 0.193 |
-| carries | QB, RB, WR | 9,560 | 1.874 | +0.235 | 0.843 |
-| rushing_yards | QB, RB, WR | 9,560 | 10.897 | +1.044 | 0.768 |
-| rushing_tds | QB, RB, WR | 9,560 | 0.180 | +0.049 | 0.373 |
-| targets | RB, WR, TE | 9,722 | 2.106 | +0.089 | 0.594 |
-| receptions | RB, WR, TE | 9,722 | 1.616 | +0.092 | 0.523 |
-| receiving_yards | RB, WR, TE | 9,722 | 21.134 | +0.781 | 0.543 |
-| receiving_tds | RB, WR, TE | 9,722 | 0.290 | +0.024 | 0.237 |
-| fumbles_lost | QB, RB, WR, TE | 11,481 | 0.095 | +0.008 | 0.081 |
+| carries | QB, RB, WR | 9,561 | 1.873 | +0.235 | 0.842 |
+| rushing_yards | QB, RB, WR | 9,561 | 10.901 | +1.046 | 0.768 |
+| rushing_tds | QB, RB, WR | 9,561 | 0.180 | +0.049 | 0.372 |
+| targets | RB, WR, TE | 9,723 | 2.108 | +0.088 | 0.593 |
+| receptions | RB, WR, TE | 9,723 | 1.618 | +0.092 | 0.522 |
+| receiving_yards | RB, WR, TE | 9,723 | 21.158 | +0.777 | 0.542 |
+| receiving_tds | RB, WR, TE | 9,723 | 0.290 | +0.024 | 0.236 |
+| fumbles_lost | QB, RB, WR, TE | 11,482 | 0.095 | +0.008 | 0.080 |
 
 ## Release gate
 
 **PASS**
 
 - Warning: raw event simulator is less accurate than the direct ensemble and is distribution-only
-- Warning: 263 player-weeks required residual fallback because event tails were unstable
+- Warning: 254 player-weeks required residual fallback because event tails were unstable
 - Warning: role_decrease_5_plus coverage is heterogeneous at 71.6%
 - Warning: stable_role_abs_lt_3 coverage is heterogeneous at 88.3%
 - Warning: team_changed coverage is heterogeneous at 89.9%
 - Warning: injury_questionable coverage is heterogeneous at 90.9%
-- Warning: practice_dnp coverage is heterogeneous at 92.2%
+- Warning: practice_dnp coverage is heterogeneous at 92.8%
 
 ## Interpretation
 
@@ -89,7 +89,7 @@ The long-term-absence cohort was added after this frozen feature frame was built
 
 ## Reproducibility
 
-- Outer predictions canonical CSV SHA-256: `1f47873954a3ef6dd1e4b89e8d4f4d59afb6eaa09b59279bf6cc0062bdc59310`
-- Simulation inputs canonical CSV SHA-256: `1009b20a3c78e8f1ff39941e1b33f1aabd7df3f6a1a090008751055791997d84`
-- Replay outputs canonical CSV SHA-256: `0de4c52191077df0ba48c24dfa74707e5b2c0d1a875e563636a32c96bbd0617d`
+- Outer predictions canonical CSV SHA-256: `9cbbf5cbc8ed27936f7c28655b4ad67c0967a39e9e78d43cde89f69d0671999d`
+- Simulation inputs canonical CSV SHA-256: `513f10f3d96af0da8f51d38697b001922915abcf5495d61940237f574510aa69`
+- Replay outputs canonical CSV SHA-256: `c63cfea705b4c3306fb575ff096e7d85ebf7a928c5e3a2d69b9fcbb06ab63399`
 - Canonical CSV format version: `1`

@@ -23,14 +23,34 @@ STATE_PROFILES = {
         "data/weekly_props.json",
         "data/weights.json",
     ),
+    # A release asset on a public repository is published material. This
+    # profile therefore carries only material that may be published.
+    #
+    # `data/espn_comparison_history.json` is the aggregate grading history
+    # (`espn-comparison-history/1`): one immutable row per graded week, counts
+    # and MAEs and a sha256, and nothing that could be a player. It lives here
+    # because the published season series has to survive between runs on its
+    # own -- if it could only be rebuilt from the private row-level ledger, a
+    # run that could not reach that ledger would publish an empty season.
+    #
+    # The row-level ledger and the pre-kickoff ESPN captures are NOT here and
+    # must never be. They are ESPN's per-player projections, and the terms
+    # recorded on every capture
+    # (nflvalue/sources/espn_projections.REDISTRIBUTION_RIGHTS) grant no
+    # redistribution right and say raw snapshots are "retained for audit, not
+    # republication". They travel between runs through the private state
+    # repository instead (nflvalue/fantasy/private_state.py); they are not put
+    # in an Actions cache either, because a cache is restorable from
+    # pull-request workflows against the default branch and GitHub documents it
+    # as unsuitable for sensitive material.
     "fantasy": (
         "data/fantasy_model.joblib",
         "data/player_projection_snapshot.json",
-        # ESPN external-challenger comparison: the prospective ledger and the
-        # immutable pre-kickoff snapshots must survive between weekly runs,
-        # or the season grading series could never accumulate.
-        "data/espn_comparison_ledger.json",
-        "data/espn_snapshots/*.json",
+        "data/espn_comparison_history.json",
+        # Prior seasons, archived by `espn_compare.load_history` at the first
+        # run of a new one. Same contract, same guarantees; they travel here
+        # because this file is gitignored and the release is its only copy.
+        "data/espn_comparison_history.*.json",
     ),
 }
 

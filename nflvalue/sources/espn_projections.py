@@ -37,7 +37,7 @@ from typing import Any, Callable
 
 from ..fantasy.config import ScoringRules
 from ..fantasy.scoring import score_components
-from ._http import get_json
+from ._http import get_json, redact_url
 
 SNAPSHOT_SCHEMA_VERSION = 1
 SNAPSHOT_KIND = "espn_projection_snapshot"
@@ -128,7 +128,8 @@ def fetch_week_raw(
     headers["x-fantasy-filter"] = json.dumps(fantasy_filter)
     payload = get(url, headers=headers, source="espn_projections", timeout=30)
     if not isinstance(payload, dict):
-        raise EspnProjectionsError(f"unexpected payload type {type(payload).__name__} from {url}")
+        raise EspnProjectionsError(
+            f"unexpected payload type {type(payload).__name__} from {redact_url(url)}")
     return payload, url, auth_mode
 
 

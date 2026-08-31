@@ -165,3 +165,33 @@ def test_no_game_rows_are_ineligible_and_do_not_decay_ewm_history():
     # With span=3, alpha=.5: the missing no-game row is ignored, so the prior
     # entering row four is .5*20 + .5*10 = 15 rather than a time-decayed value.
     assert _prior_ewm(history, ["player_id"], "value", 3).iloc[3] == 15.0
+
+
+def test_validate_report_is_json_serialisable():
+    """`fetch_historical` json.dumps() this report into manifest.json.
+
+    `Series.unique()` yields numpy int64, and `json.dumps` refuses those, so a
+    real fetch downloaded every table and then died writing its own manifest --
+    leaving a cache with no provenance record beside it.
+    """
+    import json
+
+    from nflvalue.fantasy.data import HistoricalData
+
+    bundle = HistoricalData(
+        stats=pd.DataFrame({
+            "season": pd.Series([2024, 2024], dtype="int64"),
+            "week": [1, 2], "player_id": ["a", "a"],
+            "position": ["QB", "QB"], "team": ["BUF", "BUF"]}),
+        rosters=pd.DataFrame({
+            "season": pd.Series([2024], dtype="int64"), "week": [1],
+            "gsis_id": ["a"], "position": ["QB"], "team": ["BUF"]}),
+        schedules=pd.DataFrame({
+            "season": pd.Series([2024], dtype="int64"), "week": [1],
+            "game_id": ["g"], "home_team": ["BUF"], "away_team": ["MIA"]}),
+        snaps=None, injuries=None, expected_points=None)
+
+    report = bundle.validate()
+    json.dumps(report)          # must not raise
+    assert report["tables"]["stats"]["seasons"] == [2024]
+    assert all(type(s) is int for s in report["tables"]["stats"]["seasons"])

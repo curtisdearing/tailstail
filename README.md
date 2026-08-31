@@ -57,6 +57,26 @@ and its own GitHub Pages site. It requires no Odds API or betting Discord
 secret. Legacy prop modules remain in the tree temporarily while the shared
 core contract is extracted; no Tailstail production workflow invokes them.
 
+### Public and private output
+
+A weekly run writes two artifacts. `fantasy.html` and `data/fantasy_public.json`
+are public: Tailstail's own projections and the aggregate model grading, built
+from an allow-list and checked before they are written. The league this project
+is pointed at is private, so its snapshot, rosters, team names and league id —
+and the personalised `decision-card/1` page built from them — are written to the
+gitignored `private/` directory and are never published, never uploaded as a
+workflow artifact, and never packed into a release asset.
+
+The ESPN external-challenger comparison is split the same way. The public season
+grading series is a durable aggregate history
+(`data/espn_comparison_history.json`) that carries counts, MAEs and hashes and
+nothing that could be a player; the per-player rows it was once derived from
+live in a separate private repository reached only by a trusted production run.
+They are deliberately **not** in an Actions cache: GitHub documents that a
+pull-request workflow can restore default-branch caches, so a cache is not a
+place for restricted material. See
+[docs/DECISION_CARD.md](docs/DECISION_CARD.md).
+
 ## Validation
 
 The fantasy engine uses position-specific Bayesian ridge, gradient boosting,
@@ -65,11 +85,23 @@ stacking. The event simulator samples shared pace, team volume, player
 target/carry shares, efficiency, availability, and touchdowns before applying
 league scoring.
 
-Current untouched 2023–2025 full-PPR evaluation: 11,481 player-weeks, 5.091
-MAE, 6.718 RMSE, 0.625 Spearman rank correlation, and 82.0% coverage for nominal
-80% intervals. Role shocks and touchdowns remain the largest errors. These
-numbers describe the public-data decision pool; they are not a claim of
-universal accuracy.
+Current 2023–2025 full-PPR evaluation, rebuilt from source on 2026-08-30 and
+reproduced end to end: **11,482 player-weeks, 5.0941 MAE, 6.7215 RMSE, 0.6240
+Spearman, 82.34% coverage for nominal 80% intervals** (82.41% after the
+calibrated Monte Carlo replay, mean CRPS 3.693). Role shocks and touchdowns
+remain the largest errors. These numbers describe the public-data decision
+pool; they are not a claim of universal accuracy.
+
+The previously published figures — 11,481 rows, 5.0914 MAE, 6.7184 RMSE,
+0.6246 Spearman, 82.24% replay coverage — came from an earlier nflverse pull
+under numpy 2.0.2 / pandas 2.3.3. The fresh pull carries one additional
+eligible player-week and vendor restatements of snap, injury and
+expected-opportunity rows, so the two runs differ by ~0.003 MAE. Both are
+recorded in `data/accuracy_registry.json`; neither is reconciled away.
+
+`data/accuracy_registry.json` is the single scoreboard, written only by
+`analysis/eval_harness.py`, and every number in it carries the hash of the
+input that produced it.
 
 Read:
 

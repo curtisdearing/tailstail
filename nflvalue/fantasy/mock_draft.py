@@ -176,24 +176,19 @@ def _lineup_totals(
 
 
 def _best_lineup(points: np.ndarray, positions: np.ndarray, rules: LineupRules) -> float:
-    used = np.zeros(len(points), dtype=bool)
-    total = 0.0
-    for position, needed in rules.starters.items():
-        if position == "FLEX":
-            continue
-        mask = (positions == position) & ~used
-        idx = np.argsort(points * mask - (~mask) * 1e9)[::-1][:needed]
-        for i in idx:
-            if mask[i]:
-                used[i] = True
-                total += points[i]
-    flex_slots = rules.starters.get("FLEX", 0)
-    mask = np.isin(positions, rules.flex_positions) & ~used
-    idx = np.argsort(points * mask - (~mask) * 1e9)[::-1][:flex_slots]
-    for i in idx:
-        if mask[i]:
-            total += points[i]
-    return total
+    """Best legal lineup total, from the one engine.
+
+    This filled base slots greedily and gave FLEX the leftovers, which is not
+    the optimum, and it compared position names so a composite seat scored
+    zero. Both are the engine's problem now.
+    """
+    from . import lineup as lineup_engine
+
+    players = lineup_engine.from_positions(
+        [(index, str(position)) for index, position in enumerate(positions)],
+        rules.starters, flex_positions=rules.flex_positions)
+    values = {index: float(points[index]) for index in range(len(points))}
+    return lineup_engine.optimize(values, players, rules.starters).total
 
 
 def evaluate_slot(

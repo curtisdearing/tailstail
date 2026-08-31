@@ -9,15 +9,15 @@ on:
   workflow_dispatch:
     inputs:
       season:
-        description: Optional NFL season override
+        description: Optional NFL season override (1999-2099). Makes the run DIAGNOSTIC.
         required: false
         type: string
       week:
-        description: Optional NFL week override
+        description: Optional NFL week override (1-22). Makes the run DIAGNOSTIC.
         required: false
         type: string
       fast:
-        description: Use reduced learners for a diagnostic run
+        description: Reduced learners for a diagnostic run. Publishes nothing.
         required: false
         default: false
         type: boolean
@@ -26,10 +26,10 @@ on:
     - cron: "35 23 * 9-12,1 3"
     - cron: "15 14 * 9-12,1 0"
 
+# Least privilege at the top: read-only. Each job asks for exactly the writes
+# it performs, and the two deploy jobs are the only holders of `pages: write`.
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
 
 concurrency:
   group: tailstail-fantasy-production
@@ -40,6 +40,18 @@ jobs:
     if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 75
+    permissions:
+      contents: write        # release assets holding the model-state archive
+    # `TAILSTAIL_STATE_SSH_KEY` is an ENVIRONMENT secret, and `fantasy-production`
+    # has a deployment-branch rule limited to `main`. That rule is enforced by
+    # GitHub before the job starts, so it is the one gate here that a dispatched
+    # branch cannot edit its way past -- unlike `scripts/classify_run.sh` and
+    # unlike these `if:` conditions, both of which are read from the ref being
+    # run. Secrets also resolve per JOB, not per step, so a step-level `if:` is
+    # a convention and this is the access control.
+    environment: fantasy-production
+    outputs:
+      production: ${{ steps.mode.outputs.production }}
     env:
       GH_TOKEN: ${{ github.token }}
       STATE_TAG: fantasy-model-state
@@ -51,6 +63,29 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
 
+      # Trust is decided by the ref, and the logic lives in a tracked script so
+      # it can be executed by a test rather than only read. `scripts/classify_run.sh`
+      # requires refs/heads/main: a `workflow_dispatch` from any other branch with
+      # blank optional inputs used to classify as production, which would have
+      # handed it the private-state deploy key and the right to publish.
+      #
+      # Every value arrives through the environment. `${{ }}` interpolated into a
+      # `run:` block is substituted before bash parses it, so a dispatch input of
+      # `"; curl … | sh; #` would execute with GH_TOKEN in scope.
+      - name: Validate dispatch inputs and classify the run
+        id: mode
+        shell: bash
+        env:
+          IN_SEASON: ${{ inputs.season }}
+          IN_WEEK: ${{ inputs.week }}
+          IN_FAST: ${{ inputs.fast }}
+          GH_REF: ${{ github.ref }}
+          GH_EVENT: ${{ github.event_name }}
+        run: bash scripts/classify_run.sh
+
+      # Public nflverse-derived corpus: rebuildable, large, and not sensitive.
+      # A cache is the right place for it, which is exactly why it is the wrong
+      # place for the ESPN rows above.
       - name: Restore rebuildable fantasy history
         uses: actions/cache/restore@v5
         with:
@@ -58,8 +93,50 @@ jobs:
           key: fantasy-history-${{ runner.os }}-${{ github.run_id }}
           restore-keys: fantasy-history-${{ runner.os }}-
 
-      - name: Restore prior fantasy state (ESPN comparison ledger + snapshots)
+      # Raw ESPN state -- the row-level comparison ledger and the immutable
+      # pre-kickoff captures -- lives in a separate PRIVATE repository. It is not
+      # in an actions/cache: GitHub documents that a pull-request workflow can
+      # restore caches created on the default branch, and says not to store
+      # sensitive material in one. It is not in the release asset either, because
+      # a release on a public repository is published material.
+      #
+      # Only a trusted production run is given the deploy key. A failure here is a
+      # warning and a run without raw state; it is never answered by reaching for
+      # a cache, a release or an artifact.
+      - name: Restore raw ESPN state from the private repository
+        id: private_checkout
+        if: steps.mode.outputs.production == 'true' && github.ref == 'refs/heads/main'
+        continue-on-error: true
+        uses: actions/checkout@v6
+        with:
+          repository: curtisdearing/tailstail-state
+          ssh-key: ${{ secrets.TAILSTAIL_STATE_SSH_KEY }}
+          path: .tailstail-state
+          persist-credentials: true
+
+      - name: Copy allow-listed raw state into the worktree
+        if: steps.mode.outputs.production == 'true' && github.ref == 'refs/heads/main'
         shell: bash
+        run: |
+          if [[ "${PRIVATE_CHECKOUT_OUTCOME}" != "success" ]]; then
+            echo "::warning::private state checkout did not succeed (${PRIVATE_CHECKOUT_OUTCOME}); this run has no raw ESPN state and the season grading history is unchanged"
+            exit 0
+          fi
+          if ! python scripts/private_state.py restore --store .tailstail-state; then
+            echo "::warning::private state restore was refused (malformed or unsafe content in the private store; see the ::error:: above); this run has no raw ESPN state and the season grading history is unchanged. Projections are not affected."
+            exit 0
+          fi
+        env:
+          PRIVATE_CHECKOUT_OUTCOME: ${{ steps.private_checkout.outcome }}
+
+      # This archive is the ONLY durable copy of `data/espn_comparison_history.json`,
+      # which is gitignored. Continuing past a failed restore means loading an
+      # empty history, saving it, and repointing the release at the empty
+      # archive -- so on a production run a failed restore stops the run.
+      - name: Restore prior fantasy state (model + projection snapshot + grading history)
+        shell: bash
+        env:
+          IS_PRODUCTION: ${{ steps.mode.outputs.production }}
         run: |
           if gh release view "$STATE_TAG" --json body --jq .body > "$RUNNER_TEMP/fantasy-pointer.json" 2>/dev/null; then
             asset=$(jq -r '.asset // empty' "$RUNNER_TEMP/fantasy-pointer.json" 2>/dev/null || true)
@@ -69,7 +146,8 @@ jobs:
                  python scripts/state_store.py restore --archive "$RUNNER_TEMP/$asset" --sha "$sha" --profile fantasy; then
                 echo "restored prior fantasy state from $asset"
               else
-                echo "::warning::prior fantasy state restore failed; season ESPN grading series may reset"
+                echo "::error::prior fantasy state restore failed; refusing to continue on a production run because the published grading history would be republished empty"
+                [[ "${IS_PRODUCTION}" != "true" ]] || exit 1
               fi
             else
               echo "no prior state pointer recorded; starting fresh"
@@ -80,11 +158,16 @@ jobs:
 
       - name: Build current projections
         shell: bash
+        env:
+          IN_SEASON: ${{ inputs.season }}
+          IN_WEEK: ${{ inputs.week }}
+          IN_FAST: ${{ inputs.fast }}
         run: |
+          set -euo pipefail
           args=()
-          [[ -z "${{ inputs.season }}" ]] || args+=(--season "${{ inputs.season }}")
-          [[ -z "${{ inputs.week }}" ]] || args+=(--week "${{ inputs.week }}")
-          [[ "${{ inputs.fast }}" != "true" ]] || args+=(--fast)
+          [[ -z "${IN_SEASON:-}" ]] || args+=(--season "$IN_SEASON")
+          [[ -z "${IN_WEEK:-}" ]] || args+=(--week "$IN_WEEK")
+          [[ "${IN_FAST:-false}" != "true" ]] || args+=(--fast)
           python scripts/fantasy_weekly.py "${args[@]}"
 
       - name: Verify generated contracts
@@ -93,9 +176,28 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+          import sys
+          sys.path.insert(0, ".")
+          from nflvalue.fantasy import private_boundary
           fantasy = json.loads(Path("data/fantasy_latest.json").read_text())
+          public = json.loads(Path("data/fantasy_public.json").read_text())
           snapshot = json.loads(Path("data/player_projection_snapshot.json").read_text())
           assert fantasy["players"], "weekly fantasy output contains no players"
+          # Everything below this line is published. The private half of the run
+          # -- the league snapshot, its rosters and the personalised decision
+          # card -- must not be in any of it.
+          assert public["players"], "public payload contains no players"
+          assert "my_team" not in public
+          private_boundary.assert_public_safe(public, what="data/fantasy_public.json")
+          private_boundary.assert_public_text_safe(
+              Path("fantasy.html").read_text(), what="fantasy.html")
+          assert not Path("_site").exists() or not list(Path("_site").glob("my_team*"))
+          # The public season series is read from the durable aggregate history,
+          # which travels in the checksummed public state archive. The row-level
+          # ledger it was once derived from is private and is not here.
+          history = json.loads(Path("data/espn_comparison_history.json").read_text())
+          assert history["kind"] == "espn-comparison-history/1"
+          private_boundary.assert_public_safe(history, what="espn_comparison_history")
           assert fantasy["simulation"]["simulations"] >= 1000
           assert snapshot["schema_version"] == 1
           assert snapshot["players"], "shared projection snapshot contains no players"
@@ -112,6 +214,7 @@ jobs:
           PY
 
       - name: Publish checksummed fantasy state
+        if: steps.mode.outputs.production == 'true'
         shell: bash
         run: |
           asset="fantasy-state-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.tar.gz"
@@ -125,6 +228,7 @@ jobs:
           gh release edit "$STATE_TAG" --notes-file "$RUNNER_TEMP/fantasy-state.json"
 
       - name: Keep the eight newest fantasy states
+        if: steps.mode.outputs.production == 'true'
         shell: bash
         run: |
           gh release view "$STATE_TAG" --json assets --jq '.assets | sort_by(.createdAt) | reverse | map(select(.name | test("^fantasy-state-[0-9]+-[0-9]+\\.tar\\.gz$"))) | .[8:] | .[].name' |
@@ -133,41 +237,87 @@ jobs:
           done
 
       - name: Save refreshed fantasy history
+        if: steps.mode.outputs.production == 'true'
         uses: actions/cache/save@v5
         with:
           path: historical/fantasy
           key: fantasy-history-${{ runner.os }}-${{ github.run_id }}
 
+      # Copy the allow-listed raw paths back and push them, commit only when the
+      # content actually changed. The commit message carries the source run id and
+      # never any data. A failure is a warning: the publish already happened, the
+      # projections are unaffected, and there is no public place to put this
+      # instead.
+      - name: Save raw ESPN state to the private repository
+        if: steps.mode.outputs.production == 'true' && github.ref == 'refs/heads/main'
+        continue-on-error: true
+        shell: bash
+        env:
+          PRIVATE_CHECKOUT_OUTCOME: ${{ steps.private_checkout.outcome }}
+          SOURCE_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [[ "${PRIVATE_CHECKOUT_OUTCOME}" != "success" ]]; then
+            echo "::warning::no private state checkout to save into; raw ESPN state for this run was not persisted"
+            exit 0
+          fi
+          python scripts/private_state.py save --store .tailstail-state
+          cd .tailstail-state
+          git config user.name "tailstail-state-bot"
+          git config user.email "tailstail-state-bot@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "raw ESPN state unchanged; nothing to commit"
+            exit 0
+          fi
+          git commit -m "raw ESPN comparison state from tailstail run ${SOURCE_RUN_ID}"
+          if ! git push; then
+            echo "::warning::could not push raw ESPN state to the private repository; it is unchanged there and no public fallback was attempted"
+            exit 0
+          fi
+
+      # An ordinary workflow artifact is downloadable by anyone who can read the
+      # repository, so it carries only public material: Tailstail's own model
+      # state, the public payload and the public page. No raw ESPN captures, no
+      # comparison ledger, no league snapshot, no personalised card.
+      #
+      # It is still named by run mode, so a diagnostic archive cannot be mistaken
+      # for the season's real output when somebody downloads one months later.
       - uses: actions/upload-artifact@v6
         with:
-          name: tailstail-fantasy-${{ github.run_id }}
+          name: tailstail-fantasy-${{ steps.mode.outputs.production == 'true' && 'production' || 'diagnostic' }}-${{ github.run_id }}
           retention-days: 30
           path: |
-            data/fantasy_latest.json
+            data/fantasy_public.json
             data/fantasy_model.joblib
             data/player_projection_snapshot.json
             data/player_projection_samples.parquet
-            data/espn_comparison_ledger.json
-            data/espn_snapshots/
             reports/fantasy_model_card.json
             fantasy.html
 
       - name: Prepare Tailstail Pages site
+        if: steps.mode.outputs.production == 'true'
         run: |
           mkdir -p _site
           cp fantasy.html _site/index.html
-          cp data/fantasy_latest.json _site/fantasy_latest.json
+          # The allow-listed subset, not the full payload: data/fantasy_latest.json
+          # carries the personalised my_team contract and this directory is served
+          # to the public internet.
+          cp data/fantasy_public.json _site/fantasy_latest.json
           cp data/player_projection_snapshot.json _site/player_projection_snapshot.json
       - uses: actions/configure-pages@v5
+        if: steps.mode.outputs.production == 'true'
       - uses: actions/upload-pages-artifact@v4
+        if: steps.mode.outputs.production == 'true'
         with:
           path: _site
 
   deploy-dashboard:
-    if: github.event_name != 'push'
+    if: github.event_name != 'push' && needs.project.outputs.production == 'true'
     needs: project
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pages: write
       id-token: write
     environment:
@@ -182,6 +332,7 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pages: write
       id-token: write
     environment:

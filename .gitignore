@@ -16,3 +16,39 @@ reports/fantasy_model_card.json
 historical/fantasy/
 fantasy.html
 .DS_Store
+
+# --- live, private and personalised state: never committed --------------------
+# The league this tool is pointed at is private. A snapshot of it carries the
+# league's name, its members' team names and every roster in it, and an ESPN
+# member id IS the SWID cookie -- so none of this belongs in a public repo or
+# in a release asset, however convenient it would be to have a real fixture.
+# Offline tests use the hand-built synthetic fixtures under tests/fixtures/
+# instead; regenerate those by hand, never by pointing a script at the league.
+data/espn_league/
+data/espn_snapshots/
+data/espn_comparison_ledger.json
+# public-safe aggregate grading history: generated, and carried between runs
+# by the checksummed public state release rather than by the repository
+data/espn_comparison_history.json
+data/my_team*.json
+data/my_team*.html
+my_team.html
+reports/espn_watchlist_*.json
+reports/my_team*.json
+reports/my_team*.md
+reports/team_intel_latest.md
+data/team_intel_latest.json
+# the decision card: the personalised page, and the contract behind it
+private/
+# checkout of the private raw-state repository (curtisdearing/tailstail-state)
+.tailstail-state/
+
+# generated locally by a run; rebuildable, and large
+data/fantasy_public.json
+data/shadow/
+data/accuracy_registry_test*.json
+_site/
+_landing/
+.pytest_cache/
+__pycache__/
+*.pyc

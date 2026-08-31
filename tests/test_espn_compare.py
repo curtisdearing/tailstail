@@ -13,7 +13,7 @@ import json
 import pandas as pd
 import pytest
 
-from nflvalue.fantasy import espn_compare
+from nflvalue.fantasy import espn_compare, private_boundary
 from nflvalue.fantasy.config import ScoringRules
 from nflvalue.fantasy.dashboard import render_fantasy_dashboard
 from nflvalue.sources import espn_projections
@@ -354,11 +354,24 @@ def test_dnp_players_are_flagged_and_reported_separately():
     assert aggregate["mae_model_incl_dnp"] == pytest.approx((1.0 + 10.0) / 2)
 
 
+def published_history(ledger):
+    """The public aggregate history the real pipeline builds from a ledger.
+
+    `build_payload` reads the season series from here rather than from the
+    ledger, so the published history no longer depends on the private
+    row-level file being reachable. See `tests/test_espn_comparison_history.py`.
+    """
+    history = espn_compare.new_history(int(ledger["season"]))
+    espn_compare.sync_history_from_ledger(history, ledger)
+    return history
+
+
 def test_payload_ranks_by_abs_delta_and_builds_season_series():
     ledger, _ = graded_ledger()
     payload = espn_compare.build_payload(
         ledger, current_week=1, espn_provenance={"retrieved_at": "t"},
         identity_report={"matched": 1, "espn_players": 1},
+        history=published_history(ledger),
     )
     assert payload["current_week_rows"][0]["abs_delta_rank"] == 1
     assert payload["current_week_rows"][0]["delta"] == pytest.approx(-2.0)
@@ -384,7 +397,7 @@ def test_kickoffs_convert_eastern_to_utc():
 def test_dashboard_renders_espn_section_with_honest_labels(tmp_path):
     ledger, _ = graded_ledger()
     payload = espn_compare.build_payload(
-        ledger, current_week=1,
+        ledger, current_week=1, history=published_history(ledger),
         espn_provenance={
             "retrieved_at": "2026-09-10T12:00:00+00:00",
             "source": {"name": "ESPN Fantasy API"},
@@ -402,25 +415,32 @@ def test_dashboard_renders_espn_section_with_honest_labels(tmp_path):
         "availability_probability": 0.95, "component_model_disagreement": False,
     }])
     target = tmp_path / "fantasy.html"
+    # The published page renders the REDACTED comparison, exactly as the weekly
+    # pipeline does: the per-player rows are not redistributable and the page is
+    # copied verbatim to the public site.
     render_fantasy_dashboard(
         summaries, target, season=2026, week=1,
-        generated_at="2026-09-10T13:00:00+00:00", espn_comparison=payload,
+        generated_at="2026-09-10T13:00:00+00:00",
+        espn_comparison=private_boundary.public_espn_comparison(payload),
     )
     document = target.read_text()
     assert "ESPN vs model" in document
     assert "2026-09-10T12:00:00+00:00" in document          # retrieval timestamp label
     assert "not a betting edge" in document                  # honesty line
     assert "Season grading" in document
+    assert "Per-player rows are not published" in document
     # the pre-existing projections table is intact
     assert "fantasy projections" in document and "Matched Model" in document
+    private_boundary.assert_public_text_safe(document, what="fantasy.html")
 
 
 def test_dashboard_renders_honest_failure_when_espn_unavailable(tmp_path):
     ledger = espn_compare.new_ledger(2026)
-    payload = espn_compare.build_payload(
+    payload = private_boundary.public_espn_comparison(espn_compare.build_payload(
         ledger, current_week=1, espn_provenance=None, identity_report=None,
+        history=espn_compare.new_history(2026),
         status="espn_unavailable", error="SourceTimeout: espn_projections",
-    )
+    ))
     summaries = pd.DataFrame([{
         "player_id": "00-001", "player_name": "Matched Model", "position": "RB",
         "team": "DET", "mean": 18.0, "median": 17.5, "event_simulator_mean": 17.0,

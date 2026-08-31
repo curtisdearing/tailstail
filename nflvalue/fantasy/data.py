@@ -71,7 +71,12 @@ class HistoricalData:
             if missing:
                 errors.append(f"{name} missing {missing}")
             season_values = frame["season"] if "season" in frame else pd.Series(dtype=float)
-            seasons = sorted(pd.to_numeric(season_values, errors="coerce").dropna().astype(int).unique())
+            # int() each element: `unique()` yields numpy int64, which
+            # json.dumps refuses -- and this report is written to manifest.json.
+            seasons = sorted(
+                int(value)
+                for value in pd.to_numeric(season_values, errors="coerce").dropna().unique()
+            )
             report["tables"][name] = {
                 "present": True,
                 "rows": int(len(frame)),

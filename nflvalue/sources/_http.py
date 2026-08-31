@@ -31,6 +31,55 @@ MAX_BACKOFF = 20.0
 RETRY_STATUSES = frozenset({408, 425, 429, 500, 502, 503, 504})
 
 
+# --- credential redaction -------------------------------------------------
+# A URL is not safe to put in an exception. Three things hide credentials in
+# one: userinfo (``https://user:pass@host``), query parameters whose *name*
+# marks the value secret, and webhook paths -- a Discord webhook URL is a
+# bearer credential in its entirety, so its path segments are replaced rather
+# than trusted to look harmless. Every URL that reaches a raised error, a log
+# line, or a CI transcript goes through :func:`redact_url` first.
+
+_SENSITIVE_PARAMS = frozenset({
+    "apikey", "api_key", "key", "token", "access_token", "accesstoken",
+    "auth", "auth_token", "authorization", "secret", "client_secret",
+    "signature", "sig", "password", "passwd", "pwd", "swid", "espn_s2",
+    "session", "sessionid", "sid", "code", "credential",
+})
+_SECRET_PATH_ROOTS = ("webhooks", "webhook", "hooks")
+REDACTED = "<redacted>"
+
+
+def redact_url(url: str) -> str:
+    """Return ``url`` with anything credential-bearing replaced."""
+    try:
+        parts = urllib.parse.urlsplit(str(url))
+    except ValueError:
+        return REDACTED
+    if not parts.scheme and not parts.netloc:
+        return str(url)
+
+    netloc = parts.netloc
+    if "@" in netloc:                       # strip userinfo entirely
+        netloc = REDACTED + "@" + netloc.rsplit("@", 1)[1]
+
+    segments = parts.path.split("/")
+    for index, segment in enumerate(segments):
+        if segment.lower() in _SECRET_PATH_ROOTS:
+            # everything after the hook root is the credential
+            segments[index + 1:] = [REDACTED for _ in segments[index + 1:]]
+            break
+    path = "/".join(segments)
+
+    query = parts.query
+    if query:
+        pairs = urllib.parse.parse_qsl(query, keep_blank_values=True)
+        if pairs:
+            query = urllib.parse.urlencode(
+                [(k, REDACTED if k.lower() in _SENSITIVE_PARAMS else v) for k, v in pairs]
+            )
+    return urllib.parse.urlunsplit((parts.scheme, netloc, path, query, parts.fragment))
+
+
 def _sleep_for(attempt_number: int, retry_after: Optional[float]) -> float:
     """Exponential backoff, with the server's ``Retry-After`` taking priority.
 
@@ -79,7 +128,7 @@ def request_bytes(url: str, *, params: Optional[Dict] = None,
                                status=exc.code, retry_after=retry_after))
             if exc.code not in RETRY_STATUSES:
                 # 401/403/404 will not fix themselves; fail now, keep the credit.
-                raise SourceRejected(source, url, log) from exc
+                raise SourceRejected(source, redact_url(url), log) from exc
             last_kind = SourceUnavailable
         except TimeoutError:
             log.append(Attempt(number, f"timeout after {timeout}s"))
@@ -101,7 +150,7 @@ def request_bytes(url: str, *, params: Optional[Dict] = None,
         if number < attempts:
             sleep(_sleep_for(number, log[-1].retry_after))
 
-    raise last_kind(source, url, log)
+    raise last_kind(source, redact_url(url), log)
 
 
 def get_json(url: str, params: Optional[Dict] = None,
@@ -117,5 +166,5 @@ def get_json(url: str, params: Optional[Dict] = None,
         return json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise SourceUnavailable(
-            source, url, [Attempt(1, f"unparseable body: {type(exc).__name__}: {exc}")],
+            source, redact_url(url), [Attempt(1, f"unparseable body: {type(exc).__name__}: {exc}")],
             detail=f"first 120 bytes: {raw[:120]!r}") from exc

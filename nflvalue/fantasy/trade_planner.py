@@ -67,6 +67,32 @@ def load_rosters_json(path: str | Path, my_team: str) -> LeagueRosters:
     return LeagueRosters(teams=teams, my_team=my_team)
 
 
+def load_rosters_from_snapshot(snapshot) -> LeagueRosters:
+    """Build rosters from a validated ESPN league snapshot.
+
+    This is the honest path. The snapshot has already proved it is the right
+    league, season and team, carries stable ESPN player ids, and knows whether
+    a draft has happened -- so a caller cannot silently plan trades against a
+    league that has not drafted, or against somebody else's league.
+
+    Names are produced here only because ``LeagueRosters`` is a name-keyed
+    structure the rest of the planner already speaks; the ids remain in
+    ``snapshot.rosters`` and should be preferred by anything new.
+    """
+
+    if snapshot.roster_state != "populated":
+        raise ValueError(
+            f"league {snapshot.league.league_id} is {snapshot.roster_state} "
+            f"(draft status {snapshot.draft.status}); there are no rosters to plan against. "
+            "A pre-draft league has intentions, not teams.")
+    id_to_name = {team.team_id: team.name for team in snapshot.teams}
+    teams = {
+        id_to_name[team_id]: [player.full_name for player in players]
+        for team_id, players in snapshot.rosters.items()
+    }
+    return LeagueRosters(teams=teams, my_team=snapshot.my_team.name)
+
+
 def load_rosters_espn(
     league_id: int,
     season: int,
@@ -75,13 +101,28 @@ def load_rosters_espn(
     espn_s2: str | None = None,
     swid: str | None = None,
 ) -> LeagueRosters:
-    """Pull all rosters from ESPN.  Requires the ``espn_api`` package."""
+    """Pull roster player NAMES from ESPN. **This is not a full league sync.**
+
+    A name-only loader, kept for the legacy ``espn_api`` path. It returns
+    player names and nothing else -- no player ids, no lineup slots, no
+    eligibility, no bench/IR split, no free agents, no schedule, no draft
+    state, and no identity check beyond "a team with this name exists". It
+    cannot tell a pre-draft league from a league whose rosters failed to load;
+    both come back as empty name lists.
+
+    For anything that matters, use :mod:`nflvalue.fantasy.espn_client` +
+    :mod:`nflvalue.fantasy.espn_league` to build a validated snapshot and pass
+    it to :func:`load_rosters_from_snapshot`, which fails closed on all of the
+    above. Credentials there come from the environment; the parameters here are
+    part of the legacy signature and should not be filled from a CLI argument.
+    """
 
     try:
         from espn_api.football import League
     except ImportError as exc:  # pragma: no cover - optional dependency
         raise RuntimeError(
-            "pip install espn_api for ESPN ingestion, or use load_rosters_json"
+            "pip install espn_api for the legacy name-only path, or build a snapshot with "
+            "nflvalue.fantasy.espn_client and use load_rosters_from_snapshot"
         ) from exc
     league = League(league_id=league_id, year=season, espn_s2=espn_s2, swid=swid)
     teams = {
@@ -157,63 +198,47 @@ def market_temperature(
 # ---------------------------------------------------------------------------
 
 class _FastLineup:
-    """Vectorized optimal-lineup mean for single-FLEX rules.
+    """Cached optimal-lineup mean over the one engine.
 
-    With exactly one FLEX slot the greedy optimum decomposes exactly: sum the
-    top ``k_p`` per base position, then add the best (k_p+1)-th-ranked player
-    across flex-eligible positions.  Verified against ``season.lineup_points``
-    in tests/test_draft_and_trades.py; falls back to the reference loop for
-    multi-FLEX rules.
+    The vectorised single-FLEX decomposition that used to live here was exact
+    only for one FLEX seat and only when slots were named after positions; it
+    fell back to a greedy reference otherwise and dropped composite seats
+    silently. It is gone: this is now a memo in front of
+    `lineup.optimize_matrix`, which is exact for any slot shape.
     """
 
     def __init__(self, season: SeasonSimulation, rules: LineupRules) -> None:
+        from . import lineup as lineup_engine
+
+        self._engine = lineup_engine
         self.season = season
         self.rules = rules
-        self.points = {c: season.points[c].to_numpy() for c in season.points.columns}
+        self.columns = list(season.points.columns)
+        self._index = {column: i for i, column in enumerate(self.columns)}
+        self._matrix = season.points.to_numpy(dtype=float)
         self.position = dict(zip(
             season.player_meta["player_id"], season.player_meta["position"]
         ))
         self.n = len(season.points)
-        self.fast = int(rules.starters.get("FLEX", 0)) <= 1
         self._cache: dict[frozenset, float] = {}
 
-    def mean(self, roster: Sequence[str]) -> float:
-        usable = frozenset(pid for pid in roster if pid in self.points)
+    def vector(self, roster: Sequence[str]) -> np.ndarray:
+        usable = sorted(pid for pid in set(roster) if pid in self._index)
         if not usable:
-            return 0.0
+            return np.zeros(self.n)
+        players = self._engine.from_positions(
+            [(pid, str(self.position.get(pid, ""))) for pid in usable],
+            self.rules.starters, flex_positions=self.rules.flex_positions)
+        columns = [self._index[pid] for pid in usable]
+        return self._engine.optimize_matrix(
+            self._matrix[:, columns], players, self.rules.starters)
+
+    def mean(self, roster: Sequence[str]) -> float:
+        usable = frozenset(pid for pid in roster if pid in self._index)
         cached = self._cache.get(usable)
         if cached is not None:
             return cached
-        if not self.fast:
-            value = float(lineup_points(self.season, sorted(usable), self.rules).mean())
-            self._cache[usable] = value
-            return value
-        total = np.zeros(self.n)
-        flex_pool: list[np.ndarray] = []
-        flex_positions = set(self.rules.flex_positions)
-        flex_count = int(self.rules.starters.get("FLEX", 0))
-        for position, count in self.rules.starters.items():
-            if position == "FLEX":
-                continue
-            candidates = [pid for pid in usable if self.position.get(pid) == position]
-            if not candidates:
-                continue
-            matrix = np.column_stack([self.points[pid] for pid in candidates])
-            matrix.sort(axis=1)  # ascending
-            k = min(int(count), matrix.shape[1])
-            if k:
-                total += matrix[:, -k:].sum(axis=1)
-            if position in flex_positions and matrix.shape[1] > int(count):
-                flex_pool.append(matrix[:, -(int(count) + 1)])  # (k+1)-th best
-        # Flex-eligible positions with no dedicated starter slot still feed FLEX.
-        for position in flex_positions - set(self.rules.starters):
-            candidates = [pid for pid in usable if self.position.get(pid) == position]
-            if candidates:
-                matrix = np.column_stack([self.points[pid] for pid in candidates])
-                flex_pool.append(matrix.max(axis=1))
-        if flex_count and flex_pool:
-            total += np.max(np.column_stack(flex_pool), axis=1)
-        value = float(total.mean())
+        value = float(self.vector(sorted(usable)).mean()) if usable else 0.0
         self._cache[usable] = value
         return value
 

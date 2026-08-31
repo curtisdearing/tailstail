@@ -22,7 +22,18 @@ class ScoringRules:
     rushing_td: float = 6.0
     receiving_yard: float = 0.1
     receiving_td: float = 6.0
+    #: Legacy single two-point value. Kept as the DEFAULT for all three
+    #: conversion types so every existing caller, preset and stored artifact
+    #: behaves exactly as before. Leagues that price conversions differently
+    #: set the specific fields below; ESPN models them as three separate
+    #: categories (statIds 19 / 26 / 44) and Curtis's league prices receiving
+    #: conversions at 4.0 against 2.0 for passing and rushing.
     two_point: float = 2.0
+    #: Per-type overrides. ``None`` means "inherit ``two_point``" -- which is
+    #: what keeps the legacy behaviour bit-identical rather than merely close.
+    passing_two_point: float | None = None
+    rushing_two_point: float | None = None
+    receiving_two_point: float | None = None
     fumble_lost: float = -2.0
     passing_300_bonus: float = 0.0
     rushing_100_bonus: float = 0.0
@@ -40,8 +51,47 @@ class ScoringRules:
         except KeyError as exc:
             raise ValueError(f"unknown scoring preset {name!r}; choose {sorted(presets)}") from exc
 
+    @property
+    def passing_two_point_value(self) -> float:
+        return self.two_point if self.passing_two_point is None else self.passing_two_point
+
+    @property
+    def rushing_two_point_value(self) -> float:
+        return self.two_point if self.rushing_two_point is None else self.rushing_two_point
+
+    @property
+    def receiving_two_point_value(self) -> float:
+        return self.two_point if self.receiving_two_point is None else self.receiving_two_point
+
+    @property
+    def two_point_is_uniform(self) -> bool:
+        """True when all three conversion types are priced identically."""
+        return (
+            self.passing_two_point_value
+            == self.rushing_two_point_value
+            == self.receiving_two_point_value
+        )
+
     def to_dict(self) -> dict[str, float]:
-        return asdict(self)
+        """Canonical scoring fingerprint.
+
+        ``models.fit_position_models`` embeds this dict in every feature frame
+        and refuses to train when a frame's stored fingerprint differs from the
+        requested rules. So the LEGACY SHAPE MUST BE PRESERVED EXACTLY: a
+        uniform-conversion ruleset serialises to the original 13 keys, byte for
+        byte, and every frame and model artifact built before the split stays
+        valid. The split keys appear only once they carry information the old
+        shape could not express.
+        """
+        data = asdict(self)
+        split = ("passing_two_point", "rushing_two_point", "receiving_two_point")
+        if self.two_point_is_uniform:
+            for key in split:
+                data.pop(key)
+            return data
+        for key in split:
+            data[key] = getattr(self, f"{key}_value")
+        return data
 
 
 @dataclass(frozen=True)

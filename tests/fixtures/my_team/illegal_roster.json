@@ -1,0 +1,1327 @@
+{
+ "draft": {
+  "my_slot": 1,
+  "pick_order": [
+   1,
+   4,
+   2,
+   5,
+   6,
+   3,
+   7,
+   8
+  ],
+  "pick_slot_count": 128,
+  "picks": [
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 1,
+    "player_id": 11,
+    "position": "QB",
+    "round": 1,
+    "round_pick": null,
+    "team_id": 1
+   },
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 16,
+    "player_id": 12,
+    "position": "QB",
+    "round": 2,
+    "round_pick": null,
+    "team_id": 1
+   },
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 17,
+    "player_id": 21,
+    "position": "RB",
+    "round": 3,
+    "round_pick": null,
+    "team_id": 1
+   },
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 32,
+    "player_id": 22,
+    "position": "RB",
+    "round": 4,
+    "round_pick": null,
+    "team_id": 1
+   },
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 33,
+    "player_id": 23,
+    "position": "RB",
+    "round": 5,
+    "round_pick": null,
+    "team_id": 1
+   },
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 48,
+    "player_id": 24,
+    "position": "RB",
+    "round": 6,
+    "round_pick": null,
+    "team_id": 1
+   },
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 49,
+    "player_id": 25,
+    "position": "RB",
+    "round": 7,
+    "round_pick": null,
+    "team_id": 1
+   },
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 64,
+    "player_id": 31,
+    "position": "WR",
+    "round": 8,
+    "round_pick": null,
+    "team_id": 1
+   },
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 65,
+    "player_id": 32,
+    "position": "WR",
+    "round": 9,
+    "round_pick": null,
+    "team_id": 1
+   },
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 80,
+    "player_id": 33,
+    "position": "WR",
+    "round": 10,
+    "round_pick": null,
+    "team_id": 1
+   },
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 81,
+    "player_id": 34,
+    "position": "WR",
+    "round": 11,
+    "round_pick": null,
+    "team_id": 1
+   },
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 96,
+    "player_id": 35,
+    "position": "WR",
+    "round": 12,
+    "round_pick": null,
+    "team_id": 1
+   },
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 97,
+    "player_id": 41,
+    "position": "TE",
+    "round": 13,
+    "round_pick": null,
+    "team_id": 1
+   },
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 112,
+    "player_id": 42,
+    "position": "TE",
+    "round": 14,
+    "round_pick": null,
+    "team_id": 1
+   },
+   {
+    "bid_amount": 0.0,
+    "keeper": false,
+    "name": null,
+    "overall_pick": 113,
+    "player_id": 61,
+    "position": "D/ST",
+    "round": 15,
+    "round_pick": null,
+    "team_id": 1
+   }
+  ],
+  "rounds": 16,
+  "scheduled_at": "2026-09-05T19:30:00.000Z",
+  "status": "post_draft",
+  "time_per_selection": null,
+  "type": "MANUAL"
+ },
+ "eligibility_violations": [],
+ "free_agents": null,
+ "hashes": {
+  "league": "league:1111111111",
+  "roster": "e095122f4828a42cfc1fd657a7179c60039405008cdf18fcd1167df50f055ecb",
+  "scoring": "b80af60fc57b9b33b7e5619276a796501da81b45a9a3a2bd8c81fc301f8b908e"
+ },
+ "league": {
+  "current_matchup_period": 1,
+  "current_scoring_period": 1,
+  "final_scoring_period": 17,
+  "first_scoring_period": 1,
+  "is_active": true,
+  "is_public": false,
+  "league_id": 1111111111,
+  "name": "Test League",
+  "season": 2026,
+  "segment_id": 0,
+  "size": 8,
+  "teams_joined": 8
+ },
+ "members": [],
+ "my_team": {
+  "abbrev": "CURT",
+  "matched_by": "team_id+name",
+  "name": "Team One",
+  "team_id": 1
+ },
+ "playoffs": {
+  "matchup_period_length": 1,
+  "playoff_matchup_periods": [
+   15,
+   16
+  ],
+  "playoff_scoring_periods": [
+   15,
+   16
+  ],
+  "regular_season_matchup_periods": 14,
+  "reseed": false,
+  "seeding_rule": "TOTAL_POINTS_SCORED",
+  "team_count": 4
+ },
+ "retrieved_at": "2026-08-29T02:55:45.998Z",
+ "roster_settings": {
+  "bench_slots": 7,
+  "ir_slots": 1,
+  "lineup_slot_counts": {
+   "BE": 7,
+   "D/ST": 1,
+   "FLEX": 1,
+   "IR": 1,
+   "K": 1,
+   "QB": 1,
+   "RB": 2,
+   "TE": 1,
+   "WR": 2
+  },
+  "roster_size": 17,
+  "starting_slots": 9
+ },
+ "roster_state": "populated",
+ "rosters": {
+  "1": [
+   {
+    "acquisition_date": null,
+    "acquisition_type": "UNKNOWN",
+    "default_position": "QB",
+    "eligible_slots": [
+     "QB",
+     "BE"
+    ],
+    "full_name": "Q. Starter",
+    "injury_status": "ACTIVE",
+    "is_starter": true,
+    "lineup_slot": "QB",
+    "player_id": 11,
+    "pro_team_id": 0
+   },
+   {
+    "acquisition_date": null,
+    "acquisition_type": "UNKNOWN",
+    "default_position": "QB",
+    "eligible_slots": [
+     "QB",
+     "BE"
+    ],
+    "full_name": "Q. Backup",
+    "injury_status": "ACTIVE",
+    "is_starter": false,
+    "lineup_slot": "BE",
+    "player_id": 12,
+    "pro_team_id": 0
+   },
+   {
+    "acquisition_date": null,
+    "acquisition_type": "UNKNOWN",
+    "default_position": "RB",
+    "eligible_slots": [
+     "RB",
+     "FLEX",
+     "BE"
+    ],
+    "full_name": "R. Bell",
+    "injury_status": "ACTIVE",
+    "is_starter": true,
+    "lineup_slot": "RB",
+    "player_id": 21,
+    "pro_team_id": 0
+   },
+   {
+    "acquisition_date": null,
+    "acquisition_type": "UNKNOWN",
+    "default_position": "RB",
+    "eligible_slots": [
+     "RB",
+     "FLEX",
+     "BE"
+    ],
+    "full_name": "R. Cobb",
+    "injury_status": "ACTIVE",
+    "is_starter": true,
+    "lineup_slot": "RB",
+    "player_id": 22,
+    "pro_team_id": 0
+   },
+   {
+    "acquisition_date": null,
+    "acquisition_type": "UNKNOWN",
+    "default_position": "RB",
+    "eligible_slots": [
+     "RB",
+     "FLEX",
+     "BE"
+    ],
+    "full_name": "R. Dunn",
+    "injury_status": "ACTIVE",
+    "is_starter": false,
+    "lineup_slot": "BE",
+    "player_id": 23,
+    "pro_team_id": 0
+   },
+   {
+    "acquisition_date": null,
+    "acquisition_type": "UNKNOWN",
+    "default_position": "RB",
+    "eligible_slots": [
+     "RB",
+     "FLEX",
+     "BE"
+    ],
+    "full_name": "R. Ellis",
+    "injury_status": "ACTIVE",
+    "is_starter": false,
+    "lineup_slot": "BE",
+    "player_id": 24,
+    "pro_team_id": 0
+   },
+   {
+    "acquisition_date": null,
+    "acquisition_type": "UNKNOWN",
+    "default_position": "RB",
+    "eligible_slots": [
+     "RB",
+     "FLEX",
+     "BE"
+    ],
+    "full_name": "R. Frost",
+    "injury_status": "ACTIVE",
+    "is_starter": false,
+    "lineup_slot": "BE",
+    "player_id": 25,
+    "pro_team_id": 0
+   },
+   {
+    "acquisition_date": null,
+    "acquisition_type": "UNKNOWN",
+    "default_position": "WR",
+    "eligible_slots": [
+     "WR",
+     "FLEX",
+     "BE"
+    ],
+    "full_name": "W. Gray",
+    "injury_status": "ACTIVE",
+    "is_starter": true,
+    "lineup_slot": "WR",
+    "player_id": 31,
+    "pro_team_id": 0
+   },
+   {
+    "acquisition_date": null,
+    "acquisition_type": "UNKNOWN",
+    "default_position": "TE",
+    "eligible_slots": [
+     "TE",
+     "FLEX",
+     "BE"
+    ],
+    "full_name": "T. Lane",
+    "injury_status": "ACTIVE",
+    "is_starter": true,
+    "lineup_slot": "TE",
+    "player_id": 41,
+    "pro_team_id": 0
+   },
+   {
+    "acquisition_date": null,
+    "acquisition_type": "UNKNOWN",
+    "default_position": "TE",
+    "eligible_slots": [
+     "TE",
+     "FLEX",
+     "BE"
+    ],
+    "full_name": "T. Moss",
+    "injury_status": "ACTIVE",
+    "is_starter": false,
+    "lineup_slot": "BE",
+    "player_id": 42,
+    "pro_team_id": 0
+   },
+   {
+    "acquisition_date": null,
+    "acquisition_type": "UNKNOWN",
+    "default_position": "D/ST",
+    "eligible_slots": [
+     "D/ST",
+     "BE"
+    ],
+    "full_name": "D. Owls",
+    "injury_status": "ACTIVE",
+    "is_starter": true,
+    "lineup_slot": "D/ST",
+    "player_id": 61,
+    "pro_team_id": 0
+   }
+  ],
+  "2": [],
+  "3": [],
+  "4": [],
+  "5": [],
+  "6": [],
+  "7": [],
+  "8": []
+ },
+ "rules": {
+  "contract_version": 1,
+  "league_rules": {
+   "acquisition_budget": 100,
+   "final_scoring_period": 18,
+   "first_scoring_period": 1,
+   "matchup_period_count": 14,
+   "matchup_period_length": 1,
+   "playoff_matchup_period_length": 2,
+   "playoff_reseed": false,
+   "playoff_seeding_rule": "TOTAL_POINTS_SCORED",
+   "playoff_team_count": 4,
+   "regular_season_matchups": 14,
+   "uses_acquisition_budget": false,
+   "waiver_hours": 24,
+   "waiver_order_reset": true,
+   "waiver_process_days": [
+    "FRIDAY",
+    "MONDAY",
+    "SATURDAY",
+    "SUNDAY",
+    "THURSDAY",
+    "WEDNESDAY"
+   ],
+   "waiver_type": "WAIVERS_TRADITIONAL"
+  },
+  "roster": {
+   "contract_version": 1,
+   "roster": {
+    "position_limits": {
+     "D/ST": 3,
+     "K": 3,
+     "QB": 4,
+     "RB": 8,
+     "TE": 3,
+     "WR": 8,
+     "position_0": 0
+    },
+    "slot_counts": {
+     "BE": 7,
+     "D/ST": 1,
+     "FLEX": 1,
+     "IR": 1,
+     "K": 1,
+     "QB": 1,
+     "RB": 2,
+     "TE": 1,
+     "WR": 2
+    }
+   }
+  },
+  "scoring": {
+   "categories": [
+    {
+     "key": "blocked_kick",
+     "points": 0,
+     "position_overrides": {
+      "16": 2
+     },
+     "stat_id": 97
+    },
+    {
+     "key": "blocked_kick_return_td",
+     "points": 6,
+     "position_overrides": {
+      "16": 30
+     },
+     "stat_id": 93
+    },
+    {
+     "key": "defensive_fumble_recovery",
+     "points": 0,
+     "position_overrides": {
+      "16": 2
+     },
+     "stat_id": 96
+    },
+    {
+     "key": "defensive_interception",
+     "points": 0,
+     "position_overrides": {
+      "16": 2
+     },
+     "stat_id": 95
+    },
+    {
+     "key": "defensive_sack",
+     "points": 0,
+     "position_overrides": {
+      "16": 1
+     },
+     "stat_id": 99
+    },
+    {
+     "key": "defensive_safety",
+     "points": 0,
+     "position_overrides": {
+      "16": 10
+     },
+     "stat_id": 98
+    },
+    {
+     "key": "fg_made_0_39",
+     "points": 3,
+     "position_overrides": {},
+     "stat_id": 80
+    },
+    {
+     "key": "fg_made_40_49",
+     "points": 4,
+     "position_overrides": {},
+     "stat_id": 77
+    },
+    {
+     "key": "fg_made_50_59",
+     "points": 5,
+     "position_overrides": {},
+     "stat_id": 198
+    },
+    {
+     "key": "fg_made_60_plus",
+     "points": 6,
+     "position_overrides": {},
+     "stat_id": 201
+    },
+    {
+     "key": "fg_missed_total",
+     "points": -3,
+     "position_overrides": {},
+     "stat_id": 85
+    },
+    {
+     "key": "fumble_lost",
+     "points": -2,
+     "position_overrides": {},
+     "stat_id": 72
+    },
+    {
+     "key": "fumble_recovered_td",
+     "points": 6,
+     "position_overrides": {},
+     "stat_id": 63
+    },
+    {
+     "key": "fumble_return_td",
+     "points": 6,
+     "position_overrides": {
+      "16": 20
+     },
+     "stat_id": 103
+    },
+    {
+     "key": "interception_return_td",
+     "points": 6,
+     "position_overrides": {
+      "16": 20
+     },
+     "stat_id": 104
+    },
+    {
+     "key": "interception_thrown",
+     "points": -2,
+     "position_overrides": {},
+     "stat_id": 20
+    },
+    {
+     "key": "kickoff_return_td",
+     "points": 6,
+     "position_overrides": {
+      "16": 12
+     },
+     "stat_id": 101
+    },
+    {
+     "key": "one_point_safety",
+     "points": 1,
+     "position_overrides": {
+      "16": 1
+     },
+     "stat_id": 209
+    },
+    {
+     "key": "passing_2pt",
+     "points": 2,
+     "position_overrides": {},
+     "stat_id": 19
+    },
+    {
+     "key": "passing_td",
+     "points": 4,
+     "position_overrides": {},
+     "stat_id": 4
+    },
+    {
+     "key": "passing_yards",
+     "points": 0.04,
+     "position_overrides": {},
+     "stat_id": 3
+    },
+    {
+     "key": "pat_made",
+     "points": 1,
+     "position_overrides": {},
+     "stat_id": 86
+    },
+    {
+     "key": "pat_missed",
+     "points": -3,
+     "position_overrides": {},
+     "stat_id": 88
+    },
+    {
+     "key": "points_allowed_0",
+     "points": 0,
+     "position_overrides": {
+      "16": 5
+     },
+     "stat_id": 89
+    },
+    {
+     "key": "points_allowed_14_17",
+     "points": 0,
+     "position_overrides": {
+      "16": 1
+     },
+     "stat_id": 92
+    },
+    {
+     "key": "points_allowed_1_6",
+     "points": 0,
+     "position_overrides": {
+      "16": 4
+     },
+     "stat_id": 90
+    },
+    {
+     "key": "points_allowed_28_34",
+     "points": 0,
+     "position_overrides": {
+      "16": -1
+     },
+     "stat_id": 123
+    },
+    {
+     "key": "points_allowed_35_45",
+     "points": 0,
+     "position_overrides": {
+      "16": -3
+     },
+     "stat_id": 124
+    },
+    {
+     "key": "points_allowed_46_plus",
+     "points": 0,
+     "position_overrides": {
+      "16": -5
+     },
+     "stat_id": 125
+    },
+    {
+     "key": "points_allowed_7_13",
+     "points": 0,
+     "position_overrides": {
+      "16": 3
+     },
+     "stat_id": 91
+    },
+    {
+     "key": "punt_return_td",
+     "points": 6,
+     "position_overrides": {
+      "16": 12
+     },
+     "stat_id": 102
+    },
+    {
+     "key": "receiving_2pt",
+     "points": 4,
+     "position_overrides": {},
+     "stat_id": 44
+    },
+    {
+     "key": "receiving_td",
+     "points": 6,
+     "position_overrides": {},
+     "stat_id": 43
+    },
+    {
+     "key": "receiving_yards",
+     "points": 0.1,
+     "position_overrides": {},
+     "stat_id": 42
+    },
+    {
+     "key": "reception",
+     "points": 1,
+     "position_overrides": {},
+     "stat_id": 53
+    },
+    {
+     "key": "rushing_2pt",
+     "points": 2,
+     "position_overrides": {},
+     "stat_id": 26
+    },
+    {
+     "key": "rushing_td",
+     "points": 6,
+     "position_overrides": {},
+     "stat_id": 25
+    },
+    {
+     "key": "rushing_yards",
+     "points": 0.1,
+     "position_overrides": {},
+     "stat_id": 24
+    },
+    {
+     "key": "team_win",
+     "points": 2,
+     "position_overrides": {
+      "14": 0
+     },
+     "stat_id": 155
+    },
+    {
+     "key": "two_point_return",
+     "points": 2,
+     "position_overrides": {
+      "16": 2
+     },
+     "stat_id": 206
+    },
+    {
+     "key": "yards_allowed_100_199",
+     "points": 0,
+     "position_overrides": {
+      "16": 3
+     },
+     "stat_id": 129
+    },
+    {
+     "key": "yards_allowed_200_299",
+     "points": 0,
+     "position_overrides": {
+      "16": 2
+     },
+     "stat_id": 130
+    },
+    {
+     "key": "yards_allowed_350_399",
+     "points": 0,
+     "position_overrides": {
+      "16": -1
+     },
+     "stat_id": 132
+    },
+    {
+     "key": "yards_allowed_400_449",
+     "points": 0,
+     "position_overrides": {
+      "16": -3
+     },
+     "stat_id": 133
+    },
+    {
+     "key": "yards_allowed_450_499",
+     "points": 0,
+     "position_overrides": {
+      "16": -5
+     },
+     "stat_id": 134
+    },
+    {
+     "key": "yards_allowed_500_549",
+     "points": 0,
+     "position_overrides": {
+      "16": -6
+     },
+     "stat_id": 135
+    },
+    {
+     "key": "yards_allowed_550_plus",
+     "points": 0,
+     "position_overrides": {
+      "16": -7
+     },
+     "stat_id": 136
+    },
+    {
+     "key": "yards_allowed_under_100",
+     "points": 0,
+     "position_overrides": {
+      "16": 5
+     },
+     "stat_id": 128
+    }
+   ],
+   "contract_version": 1,
+   "scoring_type": "H2H_POINTS"
+  }
+ },
+ "schedule": [],
+ "schema_version": "espn-league/1",
+ "scoring": {
+  "home_team_bonus": 0.0,
+  "items": [
+   [
+    3,
+    0.04,
+    0,
+    null
+   ],
+   [
+    4,
+    4,
+    0,
+    null
+   ],
+   [
+    19,
+    2,
+    0,
+    null
+   ],
+   [
+    20,
+    -2,
+    0,
+    null
+   ],
+   [
+    24,
+    0.1,
+    0,
+    null
+   ],
+   [
+    25,
+    6,
+    0,
+    null
+   ],
+   [
+    26,
+    2,
+    0,
+    null
+   ],
+   [
+    42,
+    0.1,
+    0,
+    null
+   ],
+   [
+    43,
+    6,
+    0,
+    null
+   ],
+   [
+    44,
+    4,
+    0,
+    null
+   ],
+   [
+    53,
+    1,
+    0,
+    null
+   ],
+   [
+    63,
+    6,
+    0,
+    null
+   ],
+   [
+    72,
+    -2,
+    0,
+    null
+   ],
+   [
+    77,
+    4,
+    0,
+    null
+   ],
+   [
+    80,
+    3,
+    0,
+    null
+   ],
+   [
+    85,
+    -3,
+    0,
+    null
+   ],
+   [
+    86,
+    1,
+    0,
+    null
+   ],
+   [
+    88,
+    -3,
+    0,
+    null
+   ],
+   [
+    89,
+    0,
+    0,
+    {
+     "16": 5
+    }
+   ],
+   [
+    90,
+    0,
+    0,
+    {
+     "16": 4
+    }
+   ],
+   [
+    91,
+    0,
+    0,
+    {
+     "16": 3
+    }
+   ],
+   [
+    92,
+    0,
+    0,
+    {
+     "16": 1
+    }
+   ],
+   [
+    93,
+    6,
+    0,
+    {
+     "16": 30
+    }
+   ],
+   [
+    95,
+    0,
+    0,
+    {
+     "16": 2
+    }
+   ],
+   [
+    96,
+    0,
+    0,
+    {
+     "16": 2
+    }
+   ],
+   [
+    97,
+    0,
+    0,
+    {
+     "16": 2
+    }
+   ],
+   [
+    98,
+    0,
+    0,
+    {
+     "16": 10
+    }
+   ],
+   [
+    99,
+    0,
+    0,
+    {
+     "16": 1
+    }
+   ],
+   [
+    101,
+    6,
+    0,
+    {
+     "16": 12
+    }
+   ],
+   [
+    102,
+    6,
+    0,
+    {
+     "16": 12
+    }
+   ],
+   [
+    103,
+    6,
+    0,
+    {
+     "16": 20
+    }
+   ],
+   [
+    104,
+    6,
+    0,
+    {
+     "16": 20
+    }
+   ],
+   [
+    123,
+    0,
+    0,
+    {
+     "16": -1
+    }
+   ],
+   [
+    124,
+    0,
+    0,
+    {
+     "16": -3
+    }
+   ],
+   [
+    125,
+    0,
+    0,
+    {
+     "16": -5
+    }
+   ],
+   [
+    128,
+    0,
+    0,
+    {
+     "16": 5
+    }
+   ],
+   [
+    129,
+    0,
+    0,
+    {
+     "16": 3
+    }
+   ],
+   [
+    130,
+    0,
+    0,
+    {
+     "16": 2
+    }
+   ],
+   [
+    132,
+    0,
+    0,
+    {
+     "16": -1
+    }
+   ],
+   [
+    133,
+    0,
+    0,
+    {
+     "16": -3
+    }
+   ],
+   [
+    134,
+    0,
+    0,
+    {
+     "16": -5
+    }
+   ],
+   [
+    135,
+    0,
+    0,
+    {
+     "16": -6
+    }
+   ],
+   [
+    136,
+    0,
+    0,
+    {
+     "16": -7
+    }
+   ],
+   [
+    155,
+    2,
+    0,
+    {
+     "14": 0
+    }
+   ],
+   [
+    198,
+    5,
+    0,
+    null
+   ],
+   [
+    201,
+    6,
+    0,
+    null
+   ],
+   [
+    206,
+    2,
+    0,
+    {
+     "16": 2
+    }
+   ],
+   [
+    209,
+    1,
+    0,
+    {
+     "16": 1
+    }
+   ]
+  ],
+  "matchup_tie_rule": "NONE",
+  "playoff_matchup_tie_rule": "NONE",
+  "scoring_type": "H2H_POINTS"
+ },
+ "source": {
+  "credentialed": true,
+  "request_started": "2026-08-29T02:55:45.933Z",
+  "response_received": "2026-08-29T02:55:45.998Z",
+  "urls": [
+   "https://lm-api-reads.fantasy.espn.com/<redacted>"
+  ],
+  "views": [
+   "mSettings",
+   "mTeam",
+   "mRoster",
+   "mMatchup",
+   "mDraftDetail"
+  ]
+ },
+ "standings": {
+  "rows": [],
+  "tiebreaker": {}
+ },
+ "teams": [
+  {
+   "abbrev": "CURT",
+   "acquisition_budget_spent": 0.0,
+   "division_id": 0,
+   "name": "Team One",
+   "owner_keys": [],
+   "playoff_seed": 1,
+   "team_id": 1,
+   "waiver_rank": 1
+  },
+  {
+   "abbrev": "64",
+   "acquisition_budget_spent": 0.0,
+   "division_id": 0,
+   "name": "Peach's Super Mario-ta",
+   "owner_keys": [],
+   "playoff_seed": 2,
+   "team_id": 2,
+   "waiver_rank": 2
+  },
+  {
+   "abbrev": "CULP",
+   "acquisition_budget_spent": 0.0,
+   "division_id": 0,
+   "name": "Travis Swift",
+   "owner_keys": [],
+   "playoff_seed": 3,
+   "team_id": 3,
+   "waiver_rank": 3
+  },
+  {
+   "abbrev": "TY",
+   "acquisition_budget_spent": 0.0,
+   "division_id": 0,
+   "name": "Ridley\u2019s Roulette Wheel",
+   "owner_keys": [],
+   "playoff_seed": 4,
+   "team_id": 4,
+   "waiver_rank": 4
+  },
+  {
+   "abbrev": "YOLo",
+   "acquisition_budget_spent": 0.0,
+   "division_id": 0,
+   "name": "Meigs Trump rules",
+   "owner_keys": [],
+   "playoff_seed": 5,
+   "team_id": 5,
+   "waiver_rank": 5
+  },
+  {
+   "abbrev": "Mud",
+   "acquisition_budget_spent": 0.0,
+   "division_id": 0,
+   "name": "Chatt Mudcats",
+   "owner_keys": [],
+   "playoff_seed": 6,
+   "team_id": 6,
+   "waiver_rank": 6
+  },
+  {
+   "abbrev": "TM7",
+   "acquisition_budget_spent": 0.0,
+   "division_id": 0,
+   "name": "Team 7",
+   "owner_keys": [],
+   "playoff_seed": 7,
+   "team_id": 7,
+   "waiver_rank": 7
+  },
+  {
+   "abbrev": "TM8",
+   "acquisition_budget_spent": 0.0,
+   "division_id": 0,
+   "name": "Team 8",
+   "owner_keys": [],
+   "playoff_seed": 8,
+   "team_id": 8,
+   "waiver_rank": 8
+  }
+ ],
+ "transactions": {
+  "completed": [],
+  "pending": []
+ },
+ "unmatched_players": [],
+ "unsupported": {
+  "league_keys": [],
+  "settings_keys": [],
+  "views_not_requested": []
+ },
+ "waivers": {
+  "acquisition_budget": 0.0,
+  "acquisition_limit": -1,
+  "acquisition_type": "WAIVERS_TRADITIONAL",
+  "lock_policy": "waivers process WEDNESDAY at 03:00 league time; priority resets weekly to inverse standings",
+  "mode": "inverse_standings",
+  "order_reset": true,
+  "process_days": [
+   "WEDNESDAY"
+  ],
+  "team_budget_spent": {},
+  "team_priority": {
+   "1": 1,
+   "2": 2,
+   "3": 3,
+   "4": 4,
+   "5": 5,
+   "6": 6,
+   "7": 7,
+   "8": 8
+  },
+  "transaction_deadline": null,
+  "uses_acquisition_budget": false,
+  "waiver_hours": 3
+ },
+ "warnings": []
+}

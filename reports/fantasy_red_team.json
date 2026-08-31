@@ -1,0 +1,166 @@
+{
+  "baseline_pre_expected_points_ewm4": {
+    "bias_actual_minus_prediction": 0.19358548575203938,
+    "mae": 5.594375896125,
+    "rmse": 7.307584114056772,
+    "spearman": 0.5219396159580879
+  },
+  "baseline_pre_fantasy_points_ewm4": {
+    "bias_actual_minus_prediction": 0.16316416953813945,
+    "mae": 5.696326412245215,
+    "rmse": 7.515494472174235,
+    "spearman": 0.5078858508729778
+  },
+  "by_position": {
+    "QB": {
+      "bias_actual_minus_prediction": -0.1797049968577626,
+      "coverage80": 0.8101193860147812,
+      "mae": 5.55692110859033,
+      "rmse": 7.213750226313154,
+      "spearman": 0.5424945067136885
+    },
+    "RB": {
+      "bias_actual_minus_prediction": 0.19286267283482042,
+      "coverage80": 0.8263612217795485,
+      "mae": 5.177924529744463,
+      "rmse": 6.804449483747616,
+      "spearman": 0.6180895614097834
+    },
+    "TE": {
+      "bias_actual_minus_prediction": -0.08446513962010611,
+      "coverage80": 0.8219677251431546,
+      "mae": 4.267674928271961,
+      "rmse": 5.703887338017931,
+      "spearman": 0.5418692771377053
+    },
+    "WR": {
+      "bias_actual_minus_prediction": -0.0611143720073371,
+      "coverage80": 0.8269311064718163,
+      "mae": 5.2028814780935,
+      "rmse": 6.8573807110807685,
+      "spearman": 0.5661169568745832
+    }
+  },
+  "by_season": {
+    "2023": {
+      "bias_actual_minus_prediction": 0.10429571878284874,
+      "coverage80": 0.8426645930533956,
+      "mae": 5.012270817551804,
+      "rmse": 6.648713960572391,
+      "spearman": 0.6215599099998241
+    },
+    "2024": {
+      "bias_actual_minus_prediction": 0.19694914857661588,
+      "coverage80": 0.82374573154715,
+      "mae": 5.083912591913607,
+      "rmse": 6.725295311114989,
+      "spearman": 0.6401758560298211
+    },
+    "2025": {
+      "bias_actual_minus_prediction": -0.3516773344812944,
+      "coverage80": 0.803510610427037,
+      "mae": 5.18699048450329,
+      "rmse": 6.790412187050448,
+      "spearman": 0.6128429188999298
+    }
+  },
+  "calibration": {
+    "intercept": -0.3818731160436162,
+    "mean_actual": 10.105728967078907,
+    "mean_prediction": 10.122293511062505,
+    "slope": 1.0360895059662896
+  },
+  "coverage80": 0.8233757185159379,
+  "overall": {
+    "bias_actual_minus_prediction": -0.01656454398359986,
+    "mae": 5.094107187848721,
+    "rmse": 6.721460888190277,
+    "spearman": 0.6240102428017669
+  },
+  "paired_bootstrap": {
+    "pre_expected_points_ewm4": {
+      "ci95": [
+        0.42141976196059944,
+        0.5726699429321702
+      ],
+      "mae_improvement": 0.49497318124662676,
+      "n": 11400,
+      "probability_nonpositive": 0.0,
+      "week_win_rate": 1.0,
+      "weeks": 54
+    },
+    "pre_fantasy_points_ewm4": {
+      "ci95": [
+        0.515618404911142,
+        0.6805448277344561
+      ],
+      "mae_improvement": 0.5969236973668411,
+      "n": 11400,
+      "probability_nonpositive": 0.0,
+      "week_win_rate": 1.0,
+      "weeks": 54
+    }
+  },
+  "regimes": {
+    "injury_questionable": {
+      "bias_actual_minus_prediction": -0.1214381528811351,
+      "coverage80": 0.8574468085106383,
+      "mae": 5.185587438304004,
+      "n": 470
+    },
+    "no_touchdown": {
+      "bias_actual_minus_prediction": -2.7845342576063725,
+      "coverage80": 0.8725933583150278,
+      "mae": 4.161704358435466,
+      "n": 7739
+    },
+    "practice_dnp": {
+      "bias_actual_minus_prediction": -0.7490825555459432,
+      "coverage80": 0.8562874251497006,
+      "mae": 5.171901523626372,
+      "n": 167
+    },
+    "qb_changed": {
+      "bias_actual_minus_prediction": -0.5136351030983626,
+      "coverage80": 0.8406779661016949,
+      "mae": 4.5822299971642115,
+      "n": 1475
+    },
+    "role_decrease_5_plus": {
+      "bias_actual_minus_prediction": -4.364146210389722,
+      "coverage80": 0.7084988085782367,
+      "mae": 5.808499112445668,
+      "n": 1259
+    },
+    "role_increase_5_plus": {
+      "bias_actual_minus_prediction": 5.2871061267192765,
+      "coverage80": 0.7149672033392963,
+      "mae": 7.330544408365632,
+      "n": 1677
+    },
+    "scored_touchdown": {
+      "bias_actual_minus_prediction": 5.706469817150955,
+      "coverage80": 0.7216136788672188,
+      "mae": 7.021936601909415,
+      "n": 3743
+    },
+    "stable_role": {
+      "bias_actual_minus_prediction": -0.5572281772579362,
+      "coverage80": 0.887572069186419,
+      "mae": 4.234459448216319,
+      "n": 6244
+    },
+    "team_changed": {
+      "bias_actual_minus_prediction": -0.9751141814390225,
+      "coverage80": 0.875,
+      "mae": 3.9668996391072757,
+      "n": 168
+    }
+  },
+  "release_gate": {
+    "failures": [],
+    "pass": true
+  },
+  "role_shock_correlation": 0.3994652654396379,
+  "rows": 11482
+}

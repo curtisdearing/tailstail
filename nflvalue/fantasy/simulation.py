@@ -12,6 +12,20 @@ from .config import ScoringRules, SimulationConfig
 from .role_state import ACTIVE_STATES, STATE_PROB_COLUMNS, state_multiplier_table
 from .scoring import score_components
 
+#: Exactly what this simulator produces per draw. Published as a constant so
+#: `coverage.audit` can compare it against what the league actually prices --
+#: a category with no component here is scored from a missing value, which
+#: `score_components` reads as zero, which is indistinguishable from the event
+#: never happening. Adding a name here without also sampling it would make the
+#: audit lie, so the tuple is the single source for both.
+EMITTED_COMPONENTS = (
+    "completions", "attempts", "passing_yards", "passing_tds",
+    "passing_interceptions", "carries", "rushing_yards", "rushing_tds",
+    "targets", "receptions", "receiving_yards", "receiving_tds",
+    "fumbles_lost",
+)
+
+
 
 @dataclass
 class SimulationResult:
@@ -316,12 +330,7 @@ def simulate_week(
     n = cfg.simulations
     p = len(players)
     rng = np.random.default_rng(cfg.random_seed)
-    component_names = (
-        "completions", "attempts", "passing_yards", "passing_tds",
-        "passing_interceptions", "carries", "rushing_yards", "rushing_tds",
-        "targets", "receptions", "receiving_yards", "receiving_tds",
-        "fumbles_lost",
-    )
+    component_names = EMITTED_COMPONENTS
     components = {name: np.zeros((n, p), dtype=float) for name in component_names}
     availability_prob = _availability(players)
 
