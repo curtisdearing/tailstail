@@ -456,3 +456,54 @@ def test_dashboard_renders_honest_failure_when_espn_unavailable(tmp_path):
     assert "unavailable this run" in document
     assert "SourceTimeout" in document
     assert "No comparison is fabricated" in document
+
+
+# --------------------------------------------------------------------------- #
+# Clocks and deadlines (prospective-capture review, 2026-09-08)
+# --------------------------------------------------------------------------- #
+
+def test_snapshot_separates_request_response_provider_and_archive_clocks(tmp_path):
+    """One `retrieved_at` is not provenance. The request time, the response
+    time, the provider's own timestamp (which this endpoint does not carry --
+    so it is recorded as unknown, not filled in) and the archive time are four
+    different clocks and are stored as four fields."""
+    ticks = iter(["2026-09-08T19:00:00+00:00", "2026-09-08T19:00:02+00:00"])
+    snapshot = espn_projections.fetch_week_snapshot(
+        2026, 1, rules=PPR, get=lambda *a, **k: synthetic_payload(week=1),
+        clock=lambda: next(ticks),
+    )
+    clocks = snapshot["clocks"]
+    assert clocks["requested_at"] == "2026-09-08T19:00:00+00:00"
+    assert clocks["received_at"] == "2026-09-08T19:00:02+00:00"
+    assert snapshot["retrieved_at"] == clocks["received_at"]
+    assert clocks["provider_timestamp"] is None
+    assert "unknown" in clocks["provider_timestamp_note"]
+    assert clocks["archived_at"] is None
+    path = espn_projections.write_snapshot(
+        snapshot, tmp_path, archived_at="2026-09-08T19:00:05+00:00")
+    stored = espn_projections.load_snapshot(path)
+    assert stored["clocks"]["archived_at"] == "2026-09-08T19:00:05+00:00"
+    assert stored["clocks"]["received_at"] == "2026-09-08T19:00:02+00:00"
+    assert stored["run_context"] == {"event": None, "schedule": None,
+                                     "run_id": None, "run_attempt": None}
+
+
+def test_kickoffs_without_a_gametime_are_omitted_not_defaulted():
+    """A defaulted deadline is a fabricated deadline. A row without a kickoff
+    time gets no kickoff, so `record_week` skips it as `skipped_no_kickoff`
+    instead of judging it against 13:00 ET."""
+    schedules = pd.DataFrame({
+        "season": [2026, 2026, 2026], "week": [1, 1, 1],
+        "game_id": ["2026_01_DET_GB", "2026_01_NE_SEA", "2026_01_SF_LA"],
+        "home_team": ["GB", "SEA", "LA"], "away_team": ["DET", "NE", "SF"],
+        "gameday": ["2026-09-13", "2026-09-09", "2026-09-10"], "gametime": ["13:00", None, ""],
+    })
+    kickoffs = espn_compare.game_kickoffs_utc(schedules, 2026, 1)
+    assert kickoffs == {"2026_01_DET_GB": "2026-09-13T17:00:00+00:00"}
+
+
+def test_a_snapshot_taken_exactly_at_kickoff_is_not_prospective():
+    kickoff = "2026-09-13T17:00:00+00:00"
+    assert espn_compare.is_prospective("2026-09-13T16:59:59+00:00", kickoff) is True
+    assert espn_compare.is_prospective(kickoff, kickoff) is False
+    assert espn_compare.is_prospective("2026-09-13T13:00:00-04:00", kickoff) is False

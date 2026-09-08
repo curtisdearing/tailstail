@@ -113,13 +113,84 @@ class HistoricalData:
         return bundle
 
 
+#: Release assets behind the nflreadpy loaders that validate a season against
+#: the library's own calendar. The library's `get_current_season()` advances
+#: to the new year only on the Thursday after Labor Day, so on the Wednesday
+#: of Week 1 it still refuses the season that kicks off that night -- while
+#: the asset has already been published. These are the exact (repository,
+#: path) pairs the library downloads (nflreadpy 0.1.5 load_rosters_weekly /
+#: load_snap_counts / load_injuries / load_ff_opportunity); a season the
+#: library has not "reached" is fetched from the same place through the
+#: library's own downloader.
+SEASONAL_ASSETS = {
+    "rosters": ("nflverse-data", "weekly_rosters/roster_weekly_{season}"),
+    "snaps": ("nflverse-data", "snap_counts/snap_counts_{season}"),
+    "injuries": ("nflverse-data", "injuries/injuries_{season}"),
+    "expected_points": ("ffopportunity", "latest-data/ep_weekly_{season}"),
+}
+
+
+def _library_current_season(nfl) -> int | None:
+    try:
+        return int(nfl.utils_date.get_current_season())
+    except Exception:
+        return None
+
+
+def _load_seasonal(nfl, name: str, loader, seasons: list[int], *, optional: bool,
+                   current_season: int | None) -> tuple[pd.DataFrame, list[int], str | None]:
+    """One seasonal table, whole.
+
+    The library call over every season is tried first and, when it works, is
+    the only thing that runs -- the frozen path, byte for byte. Only when the
+    library refuses does the load split: the seasons it accepts still come
+    from the library in one call, and the newest season comes either from the
+    library (if it accepts it) or, when its calendar has not reached that
+    season, directly from the nflverse asset it would have downloaded. An
+    in-season file that does not exist yet (snap counts before Week 1) drops
+    that one season of an OPTIONAL table and says so; a required table with
+    no current season still fails the run.
+    """
+    try:
+        return _pandas(loader(seasons)), list(seasons), None
+    except Exception as first_error:
+        latest = max(seasons)
+        past = [season for season in seasons if season != latest]
+        if not past:
+            raise
+        frames = [_pandas(loader(past))]
+        loaded = list(past)
+        note: str | None = None
+        try:
+            if current_season is not None and latest > current_season:
+                downloader = nfl.downloader.get_downloader()
+                repository, template = SEASONAL_ASSETS[name]
+                path = template.format(season=latest)
+                frames.append(_pandas(downloader.download(repository, path, season=latest)))
+                note = (f"{latest} downloaded directly from {repository}/{path}: "
+                        f"nflreadpy's season rule still reported {current_season} "
+                        f"({type(first_error).__name__}: {first_error})")
+            else:
+                frames.append(_pandas(loader([latest])))
+                note = f"{latest} loaded separately after {type(first_error).__name__}"
+            loaded.append(latest)
+        except Exception as exc:
+            if not optional:
+                raise
+            # Before Week 1 the current-season file can legitimately be absent.
+            note = (f"{latest} unavailable and skipped for this optional table "
+                    f"({type(exc).__name__}: {exc}); prior seasons retained")
+        return pd.concat(frames, ignore_index=True, sort=False), loaded, note
+
+
 def fetch_historical(
-    seasons: Iterable[int], directory: str | Path, *, force: bool = False
+    seasons: Iterable[int], directory: str | Path, *, force: bool = False, nfl=None
 ) -> dict[str, object]:
     """Download and cache the official tables needed by every model family.
 
     nflreadpy returns Polars frames.  Cache boundaries are pandas Parquet so
     the modeling code stays independent of the downloader implementation.
+    ``nfl`` is the loader module (nflreadpy); tests pass a stand-in.
     """
 
     seasons = sorted({int(season) for season in seasons})
@@ -127,10 +198,25 @@ def fetch_historical(
         raise ValueError("at least one season is required")
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
-    try:
-        import nflreadpy as nfl
-    except ImportError as exc:
-        raise RuntimeError("nflreadpy is required for fetch; install requirements.txt") from exc
+    if nfl is None:
+        try:
+            import nflreadpy as nfl
+        except ImportError as exc:
+            raise RuntimeError(
+                "nflreadpy is required for fetch; install requirements.txt") from exc
+    current_season = _library_current_season(nfl)
+    seasons_loaded: dict[str, list[int]] = {}
+    seasons_note: dict[str, str] = {}
+
+    def seasonal(name: str, loader, optional: bool):
+        def load():
+            frame, loaded, note = _load_seasonal(
+                nfl, name, loader, seasons, optional=optional, current_season=current_season)
+            seasons_loaded[name] = loaded
+            if note:
+                seasons_note[name] = note
+            return frame
+        return load
 
     def available_player_stats():
         frames = []
@@ -146,21 +232,25 @@ def fetch_historical(
             raise RuntimeError("no player-stat season was available")
         return pd.concat(frames, ignore_index=True, sort=False)
 
+    optional = {"snaps", "injuries", "expected_points"}
     loaders = {
         "stats": available_player_stats,
-        "rosters": lambda: nfl.load_rosters_weekly(seasons),
+        "rosters": seasonal("rosters", nfl.load_rosters_weekly, optional=False),
         "schedules": lambda: nfl.load_schedules(seasons),
-        "snaps": lambda: nfl.load_snap_counts(seasons),
-        "injuries": lambda: nfl.load_injuries(seasons),
-        "expected_points": lambda: nfl.load_ff_opportunity(seasons, stat_type="weekly"),
+        "snaps": seasonal("snaps", nfl.load_snap_counts, optional=True),
+        "injuries": seasonal("injuries", nfl.load_injuries, optional=True),
+        "expected_points": seasonal(
+            "expected_points",
+            lambda years: nfl.load_ff_opportunity(years, stat_type="weekly"),
+            optional=True),
     }
     manifest: dict[str, object] = {
         "retrieved_at": datetime.now(timezone.utc).isoformat(),
         "seasons": seasons,
         "nflreadpy_version": getattr(nfl, "__version__", "unknown"),
+        "nflreadpy_current_season": current_season,
         "tables": {},
     }
-    optional = {"snaps", "injuries", "expected_points"}
     for name, loader in loaders.items():
         path = directory / DATA_FILES[name]
         try:
@@ -198,6 +288,10 @@ def fetch_historical(
             "sha256": _sha256(path),
             "reused_cache": cached,
         }
+        if name in seasons_loaded and not cached:
+            manifest["tables"][name]["seasons_loaded"] = seasons_loaded[name]
+        if name in seasons_note and not cached:
+            manifest["tables"][name]["seasons_note"] = seasons_note[name]
     bundle = HistoricalData.load(directory)
     manifest["quality"] = bundle.validate()
     (directory / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")

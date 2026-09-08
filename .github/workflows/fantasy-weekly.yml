@@ -23,8 +23,22 @@ on:
         type: boolean
   schedule:
     # Wednesday after practice reports and Sunday before the early window.
+    #
+    # GitHub starts a scheduled run late under load: the two September 2026
+    # runs fired 1h47m and 2h49m after their cron. The Sunday cron therefore
+    # sits at 12:15 UTC, four and three-quarter hours before the 17:00 UTC
+    # early window, rather than at 14:15 where one bad delay would have put
+    # it after kickoff. What each run captured, and against which kickoffs,
+    # is not inferred from this schedule: every run writes its own entry to
+    # data/prospective_archive with per-game deadlines and the clocks it
+    # actually ran on (nflvalue/fantasy/prospective_archive.py).
+    #
+    # A Wednesday-night game (2026 Week 1 opened with one at 00:20 UTC
+    # Thursday) is NOT covered by the Wednesday cron, which fires 45 minutes
+    # before that kickoff; such a game needs a production dispatch earlier in
+    # the week, and the archive labels the slate partial otherwise.
     - cron: "35 23 * 9-12,1 3"
-    - cron: "15 14 * 9-12,1 0"
+    - cron: "15 12 * 9-12,1 0"
 
 # Least privilege at the top: read-only. Each job asks for exactly the writes
 # it performs, and the two deploy jobs are the only holders of `pages: write`.
@@ -156,12 +170,20 @@ jobs:
             echo "no prior fantasy state release; starting fresh"
           fi
 
+      # Run provenance travels through the environment too, and is written
+      # into the archive entry and the ESPN capture by the pipeline: which
+      # event and which cron produced this forecast, and which run. Absent
+      # means unknown, and unknown is recorded as such, never inferred.
       - name: Build current projections
         shell: bash
         env:
           IN_SEASON: ${{ inputs.season }}
           IN_WEEK: ${{ inputs.week }}
           IN_FAST: ${{ inputs.fast }}
+          TAILSTAIL_RUN_EVENT: ${{ github.event_name }}
+          TAILSTAIL_RUN_SCHEDULE: ${{ github.event.schedule }}
+          TAILSTAIL_RUN_ID: ${{ github.run_id }}
+          TAILSTAIL_RUN_ATTEMPT: ${{ github.run_attempt }}
         run: |
           set -euo pipefail
           args=()
@@ -211,6 +233,28 @@ jobs:
               assert comparison["error"], "an unavailable ESPN pull must carry its error"
           assert Path("data/player_projection_samples.parquet").stat().st_size > 1000
           assert Path("fantasy.html").stat().st_size > 1000
+          # The immutable archive entry for THIS forecast: present, indexed,
+          # pointed at by `latest`, hash-verified, tied to the snapshot that is
+          # about to be published, and free of anything private. A run whose
+          # forecast is not archived has no prospective record and must not
+          # publish as if it had one.
+          from nflvalue.fantasy import prospective_archive
+          archive_dir = Path("data/prospective_archive")
+          index = prospective_archive.load_index(archive_dir)
+          latest = json.loads((archive_dir / "latest.json").read_text())
+          assert latest["kind"] == prospective_archive.LATEST_KIND
+          assert index["entries"] and index["entries"][-1]["path"] == latest["path"]
+          entry = prospective_archive.load_entry(archive_dir / latest["path"])
+          assert entry["payload_sha256"] == latest["payload_sha256"]
+          assert entry["projection_snapshot"]["players_canonical_csv_sha256"] == (
+              snapshot["players_canonical_csv_sha256"])
+          archived_document = prospective_archive.load_document(archive_dir, entry)
+          assert archived_document == snapshot, "archived snapshot document differs from the one being published"
+          assert public["prospective_capture"]["payload_sha256"] == entry["payload_sha256"]
+          private_boundary.assert_public_safe(entry, what=latest["path"])
+          print(f"prospective archive: {entry['eligibility']['label']} "
+                f"({entry['eligibility']['games_prospective']}/{entry['eligibility']['games_total']} "
+                f"games before deadline) -> {latest['path']}")
           PY
 
       - name: Publish checksummed fantasy state

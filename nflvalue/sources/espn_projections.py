@@ -108,14 +108,32 @@ def _auth_headers() -> tuple[dict[str, str], str]:
     return {}, "public (no auth)"
 
 
-def fetch_week_raw(
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+#: The kona_player_info view carries no publication timestamp for its
+#: projections. That is recorded as unknown, never filled in from our clocks.
+PROVIDER_TIMESTAMP_NOTE = (
+    "ESPN's kona_player_info view carries no publication timestamp for its "
+    "projections; the provider's own as-of time is unknown and is not inferred"
+)
+
+
+def fetch_week_raw_timed(
     season: int,
     week: int,
     *,
     limit: int = 800,
     get: Callable[..., Any] = get_json,
-) -> tuple[dict[str, Any], str, str]:
-    """Fetch the raw kona_player_info payload. Returns (payload, url, auth_mode)."""
+    clock: Callable[[], str] = _now_iso,
+) -> tuple[dict[str, Any], str, str, dict[str, Any]]:
+    """Fetch the raw kona_player_info payload with its request/response clocks.
+
+    Returns ``(payload, url, auth_mode, clocks)`` where ``clocks`` separates
+    when the request was sent from when the response arrived; the provider's
+    own timestamp is recorded as unknown (see PROVIDER_TIMESTAMP_NOTE).
+    """
     url = API_TEMPLATE.format(season=int(season), week=int(week))
     fantasy_filter = {
         "players": {
@@ -126,11 +144,44 @@ def fetch_week_raw(
     }
     headers, auth_mode = _auth_headers()
     headers["x-fantasy-filter"] = json.dumps(fantasy_filter)
+    requested_at = clock()
     payload = get(url, headers=headers, source="espn_projections", timeout=30)
+    received_at = clock()
     if not isinstance(payload, dict):
         raise EspnProjectionsError(
             f"unexpected payload type {type(payload).__name__} from {redact_url(url)}")
+    clocks = {
+        "requested_at": requested_at,
+        "received_at": received_at,
+        "provider_timestamp": None,
+        "provider_timestamp_note": PROVIDER_TIMESTAMP_NOTE,
+        "archived_at": None,
+    }
+    return payload, url, auth_mode, clocks
+
+
+def fetch_week_raw(
+    season: int,
+    week: int,
+    *,
+    limit: int = 800,
+    get: Callable[..., Any] = get_json,
+) -> tuple[dict[str, Any], str, str]:
+    """Fetch the raw kona_player_info payload. Returns (payload, url, auth_mode)."""
+    payload, url, auth_mode, _ = fetch_week_raw_timed(season, week, limit=limit, get=get)
     return payload, url, auth_mode
+
+
+def run_context_from_env(environ: dict[str, str] | None = None) -> dict[str, str | None]:
+    """Which scheduled run produced this capture, from the environment only.
+    Absent means unknown, recorded as ``None``."""
+    source = os.environ if environ is None else environ
+    return {
+        "event": source.get("TAILSTAIL_RUN_EVENT") or None,
+        "schedule": source.get("TAILSTAIL_RUN_SCHEDULE") or None,
+        "run_id": source.get("TAILSTAIL_RUN_ID") or None,
+        "run_attempt": source.get("TAILSTAIL_RUN_ATTEMPT") or None,
+    }
 
 
 def _projection_entry(player: dict[str, Any], season: int, week: int) -> dict[str, Any] | None:
@@ -241,14 +292,26 @@ def build_snapshot(
     auth_mode: str,
     retrieved_at: str | None = None,
     rules: ScoringRules | None = None,
+    clocks: dict[str, Any] | None = None,
+    run_context: dict[str, str | None] | None = None,
 ) -> dict[str, Any]:
     """Assemble the immutable provenance-complete snapshot document.
 
     Records all five protocol-required fields: source, retrieval timestamp,
-    scoring rules, player coverage, and redistribution rights.
+    scoring rules, player coverage, and redistribution rights -- and keeps
+    the clocks apart: request, response, provider (unknown), archive.
+    ``retrieved_at`` is the response time.
     """
     rules = rules or ScoringRules.preset("ppr")
-    retrieved = retrieved_at or datetime.now(timezone.utc).isoformat()
+    if clocks is None:
+        clocks = {
+            "requested_at": None,
+            "received_at": retrieved_at or datetime.now(timezone.utc).isoformat(),
+            "provider_timestamp": None,
+            "provider_timestamp_note": PROVIDER_TIMESTAMP_NOTE,
+            "archived_at": None,
+        }
+    retrieved = retrieved_at or clocks["received_at"]
     by_position: dict[str, int] = {}
     rescored = 0
     deltas: list[float] = []
@@ -264,6 +327,8 @@ def build_snapshot(
         "season": int(season),
         "week": int(week),
         "retrieved_at": retrieved,
+        "clocks": dict(clocks),
+        "run_context": dict(run_context) if run_context is not None else run_context_from_env({}),
         "source": {
             "name": "ESPN Fantasy API (lm-api-reads.fantasy.espn.com)",
             "endpoint": endpoint,
@@ -297,16 +362,26 @@ def snapshot_path(directory: str | Path, snapshot: dict[str, Any]) -> Path:
     return Path(directory) / name
 
 
-def write_snapshot(snapshot: dict[str, Any], directory: str | Path) -> Path:
-    """Persist a snapshot. Immutable: an existing file is never overwritten."""
+def write_snapshot(
+    snapshot: dict[str, Any], directory: str | Path, *, archived_at: str | None = None
+) -> Path:
+    """Persist a snapshot. Immutable: an existing file is never overwritten.
+
+    The archive time is the fourth clock and is stamped here, at the write,
+    not at the fetch. The players hash is unaffected.
+    """
     path = snapshot_path(directory, snapshot)
     if path.exists():
         raise FileExistsError(
             f"refusing to overwrite immutable ESPN snapshot {path}; "
             "a new retrieval must produce a new timestamped file"
         )
+    stored = dict(snapshot)
+    clocks = dict(stored.get("clocks") or {})
+    clocks["archived_at"] = archived_at or _now_iso()
+    stored["clocks"] = clocks
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(snapshot, indent=2, sort_keys=True) + "\n")
+    path.write_text(json.dumps(stored, indent=2, sort_keys=True) + "\n")
     return path
 
 
@@ -331,10 +406,13 @@ def fetch_week_snapshot(
     *,
     rules: ScoringRules | None = None,
     get: Callable[..., Any] = get_json,
+    clock: Callable[[], str] = _now_iso,
+    run_context: dict[str, str | None] | None = None,
 ) -> dict[str, Any]:
     """Fetch + parse + assemble in one call (the weekly pipeline entrypoint)."""
-    payload, url, auth_mode = fetch_week_raw(season, week, get=get)
+    payload, url, auth_mode, clocks = fetch_week_raw_timed(season, week, get=get, clock=clock)
     players = parse_players(payload, season=season, week=week, rules=rules)
     return build_snapshot(
-        players, season=season, week=week, endpoint=url, auth_mode=auth_mode, rules=rules
+        players, season=season, week=week, endpoint=url, auth_mode=auth_mode, rules=rules,
+        clocks=clocks, run_context=run_context,
     )

@@ -14,7 +14,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue.fantasy import decision_card, decision_page, espn_compare, private_boundary
+from nflvalue.fantasy import decision_card, decision_page, espn_compare, private_boundary, prospective_archive
 from nflvalue.fantasy import my_team as my_team_mod
 from nflvalue.fantasy.config import ModelConfig, ScoringRules, SimulationConfig
 from nflvalue.fantasy.dashboard import render_fantasy_dashboard
@@ -141,7 +141,8 @@ def run_espn_comparison(
     provenance = None
     identity_report = None
     try:
-        snapshot = espn_projections.fetch_week_snapshot(season, week, rules=rules)
+        snapshot = espn_projections.fetch_week_snapshot(
+            season, week, rules=rules, run_context=espn_projections.run_context_from_env())
         espn_projections.write_snapshot(snapshot, snapshot_dir)
         identity = espn_compare.build_identity_map(data.rosters, season)
         model_points = dict(
@@ -307,6 +308,9 @@ def main(argv=None) -> int:
     parser.add_argument("--model", default="data/fantasy_model.joblib")
     parser.add_argument("--projection-snapshot", default="data/player_projection_snapshot.json")
     parser.add_argument("--component-samples", default="data/player_projection_samples.parquet")
+    parser.add_argument("--prospective-archive-dir", default=prospective_archive.DEFAULT_DIRECTORY,
+                        help="immutable per-run archive of this forecast, with per-game "
+                             "decision deadlines; public material, carried by the state release")
     args = parser.parse_args(argv)
 
     data_dir = Path(args.data_dir)
@@ -375,6 +379,23 @@ def main(argv=None) -> int:
         component_validation=component_validation,
     )
     write_projection_snapshot(projection_snapshot, args.projection_snapshot)
+    # The immutable record of THIS forecast against THIS slate's kickoffs. It
+    # is written before anything else can fail, so a run that reaches this
+    # point has left a timestamped, hash-verified copy behind even if ESPN or
+    # the league snapshot is unavailable afterwards. Per-game eligibility is
+    # decided here, once, from the same schedule the ESPN ledger uses.
+    kickoffs_utc = espn_compare.game_kickoffs_utc(data.schedules, season, week)
+    archive_entry = prospective_archive.build_entry(
+        projection_snapshot, result.summaries,
+        scoring=rules, scoring_preset=args.scoring, kickoffs_utc=kickoffs_utc,
+        run_context=prospective_archive.run_context_from_env(os.environ),
+    )
+    archive_path = prospective_archive.write_entry(
+        archive_entry, args.prospective_archive_dir, projection_snapshot=projection_snapshot)
+    prospective_capture = prospective_archive.public_summary(archive_entry, archive_path)
+    print(f"[prospective-archive] {prospective_capture['label']}: "
+          f"{prospective_capture['games_prospective']}/{prospective_capture['games_total']} "
+          f"games before their deadline -> {archive_path}")
     player_games = (
         dict(zip(projected["player_id"].astype(str), projected["game_id"].astype(str)))
         if "game_id" in projected.columns
@@ -415,6 +436,7 @@ def main(argv=None) -> int:
             "samples_canonical_csv_sha256": sample_artifact["canonical_csv_sha256"],
             "component_validation": projection_snapshot["component_validation"],
         },
+        "prospective_capture": prospective_capture,
         "players": result.summaries.to_dict("records"),
     }
     output = Path(args.output)

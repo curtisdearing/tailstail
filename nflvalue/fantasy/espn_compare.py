@@ -122,7 +122,13 @@ def game_kickoffs_utc(schedules: pd.DataFrame, season: int, week: int) -> dict[s
     kickoffs: dict[str, str] = {}
     for row in games.to_dict("records"):
         gameday = str(row.get("gameday", "") or "")
-        gametime = str(row.get("gametime", "") or "") or "13:00"
+        # A row without a kickoff time gets NO kickoff. Defaulting it to 13:00
+        # would fabricate a decision deadline, and a fabricated deadline can
+        # admit a post-kickoff snapshot; `record_week` counts such a game as
+        # `skipped_no_kickoff` instead.
+        gametime = str(row.get("gametime", "") or "")
+        if not gametime or gametime.lower() in {"nan", "none"}:
+            continue
         try:
             local = datetime.strptime(f"{gameday} {gametime}", "%Y-%m-%d %H:%M")
         except ValueError:

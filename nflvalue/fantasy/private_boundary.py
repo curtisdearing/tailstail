@@ -40,6 +40,9 @@ from typing import Any, Iterable, Mapping, Sequence
 PUBLIC_PAYLOAD_KEYS = (
     "generated_at", "season", "week", "data_quality", "model_card", "simulation",
     "projection_snapshot", "players",
+    # this run's own capture record: labels, counts, kickoffs and a hash --
+    # Tailstail's forecast provenance, nothing from ESPN or a league
+    "prospective_capture",
 )
 
 #: ESPN comparison fields that carry no per-player ESPN projection.
