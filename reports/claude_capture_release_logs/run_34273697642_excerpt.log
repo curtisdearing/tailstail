@@ -1,0 +1,9 @@
+project	Validate dispatch inputs and classify the run	2026-09-08T20:15:36.8165193Z run mode: production=true ref=refs/heads/main event=workflow_dispatch
+project	Restore prior fantasy state (model + projection snapshot + grading history)	2026-09-08T20:15:39.4250132Z no prior fantasy state release; starting fresh
+project	Build current projections	2026-09-08T20:22:08.2576413Z [prospective-archive] prospective_full_slate: 16/16 games before their deadline -> data/prospective_archive/2026/projection_2026_wk01_20260908T202113.json
+project	Build current projections	2026-09-08T20:22:08.2579292Z projected 256 players for 2026 week 1
+project	Verify generated contracts	2026-09-08T20:22:08.5691385Z ^[[36;1mprint(f"prospective archive: {entry['eligibility']['label']} "^[[0m
+project	Verify generated contracts	2026-09-08T20:22:09.0162241Z prospective archive: prospective_full_slate (16/16 games before deadline) -> 2026/projection_2026_wk01_20260908T202113.json
+project	Publish checksummed fantasy state	2026-09-08T20:22:14.8249915Z {"asset": "fantasy-state-34273697642-1.tar.gz", "profile": "fantasy", "schema_version": 1, "sha256": "1a177e94c3ff4ce9cf935c420a59a2ffbdce2c5fbc8fbb5
+project	Save raw ESPN state to the private repository	2026-09-08T20:22:16.6185120Z ^[[36;1mgit commit -m "raw ESPN comparison state from tailstail run ${SOURCE_RUN_ID}"^[[0m
+project	Save raw ESPN state to the private repository	2026-09-08T20:22:17.0786225Z [main dc3ce3a] raw ESPN comparison state from tailstail run 34273697642

@@ -1,0 +1,8 @@
+fetch seconds 10.9 library season 2025
+stats 129812 True None 
+rosters 330659 True [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026] 2026 downloaded directly from nflverse-data/weekly_rosters/roster_weekly_2026: nflreadpy's season rule still r
+schedules 2232 True None 
+snaps 181477 True [2019, 2020, 2021, 2022, 2023, 2024, 2025] 2026 unavailable and skipped for this optional table (ConnectionError: Failed to download https://github.com/n
+injuries 40215 True [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026] 2026 downloaded directly from nflverse-data/injuries/injuries_2026: nflreadpy's season rule still reported 202
+expected_points 41696 True [2019, 2020, 2021, 2022, 2023, 2024, 2025] 2026 unavailable and skipped for this optional table (ConnectionError: Failed to download https://github.com/f
+fetch exit 0

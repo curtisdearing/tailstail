@@ -1,0 +1,213 @@
+{
+  "accuracy_protocol_sha256": "733e370c2dac3c7355827174f1e36def9bb1a38e6e317ec02b8980a56bd1ce42",
+  "end_to_end": {
+    "fetch_2019_2026_real_nflreadpy_0_1_5": [
+      "fetch seconds 10.9 library season 2025",
+      "stats 129812 True None ",
+      "rosters 330659 True [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026] 2026 downloaded directly from nflverse-data/weekly_rosters/roster_weekly_2026: nflreadpy's season rule still r",
+      "schedules 2232 True None ",
+      "snaps 181477 True [2019, 2020, 2021, 2022, 2023, 2024, 2025] 2026 unavailable and skipped for this optional table (ConnectionError: Failed to download https://github.com/n",
+      "injuries 40215 True [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026] 2026 downloaded directly from nflverse-data/injuries/injuries_2026: nflreadpy's season rule still reported 202",
+      "expected_points 41696 True [2019, 2020, 2021, 2022, 2023, 2024, 2025] 2026 unavailable and skipped for this optional table (ConnectionError: Failed to download https://github.com/f",
+      "fetch exit 0"
+    ],
+    "state_pack": [
+      "{\"files\": [\"data/espn_comparison_history.json\", \"data/fantasy_model.joblib\", \"data/player_projection_snapshot.json\", \"data/prospective_archive/2026/projection_2026_wk01_20260908T200829.json\", \"data/prospective_archive/2026/snapshot_2026_wk01_20260908T200829.json\", \"data/prospective_archive/index.json\", \"data/prospective_archive/latest.json\"], \"profile\": \"fantasy\", \"schema_version\": 1, \"sha256\": \"17fa3b49a724812b5c64727f47b6f748c77facdc14b307a449eb2af196e2061f\"}",
+      "pack exit 0"
+    ],
+    "weekly_fast_run": [
+      "[prospective-archive] prospective_full_slate: 16/16 games before their deadline -> data/prospective_archive/2026/projection_2026_wk01_20260908T200829.json",
+      "[decision-card] no_current_pick \u00b7 0 decision(s) \u00b7 private/my_team_latest.json, private/my_team.html",
+      "projected 256 players for 2026 week 1",
+      "weekly exit 0 seconds 101"
+    ],
+    "weekly_full_fidelity_timing": [
+      "projected 256 players for 2026 week 1",
+      "weekly-full exit 0 seconds 123"
+    ],
+    "workflow_verify_step_replayed_locally": [
+      "prospective archive: prospective_full_slate (16/16 games before deadline) -> 2026/projection_2026_wk01_20260908T200829.json",
+      "verify exit 0"
+    ]
+  },
+  "environment": {
+    "ci_python": "3.11 (ci.yml, fantasy-weekly.yml)",
+    "date_utc_at_start": "2026-09-08T19:32:52Z",
+    "local_python": "/opt/homebrew/bin/python3.11 -> venv (Python 3.11.15)",
+    "nflreadpy": "0.1.5 (latest on PyPI; requires Python>=3.10)",
+    "packages": "see venv"
+  },
+  "evaluator": "Claude (Fable 5.1), prospective-capture release session 2026-09-08",
+  "file_sha256": {
+    ".github/workflows/fantasy-weekly.yml": "f72b66dae25db56b2f0651427e8befb130cdc1982daaa9103e23ad73f9b4b0a8",
+    ".gitignore": "ec62c0158ebb7cd977f9d8cc881784f9890b224955fae2d0f86c0959220e7356",
+    "docs/PROSPECTIVE_CAPTURE.md": "d98db1cb7ff0ee27ef6e9c0166a13174bb2e24c3a6a152ed1f5586a857550eb9",
+    "nflvalue/fantasy/data.py": "620440fedae1ec442bb9f35fc7870731bafdf99baa8e6954f3ba183da99f5da4",
+    "nflvalue/fantasy/espn_compare.py": "c5a14b62d918f5fb939b6853bdb43d68fee012edd27ecbfe1a95afdc6949ead4",
+    "nflvalue/fantasy/private_boundary.py": "a2ca4f4d9bf05783b632a2f02f7fd5312ec1c3fe57e529af30c5aaae6c1e444b",
+    "nflvalue/fantasy/prospective_archive.py": "02422d5ae2e47587289cb7b5364ce0c87a1386a5150d26a372b58a64e425e56f",
+    "nflvalue/sources/espn_projections.py": "f7860ad15d745b7764b045a08910dc8c942de276d4c827aed421016da53db009",
+    "scripts/fantasy_weekly.py": "20aa40de56fc606cececc9bf5b13dcad31721942118e3b6ed343454c8567d313",
+    "scripts/state_store.py": "2d1a8eb1f1755a1016b3cfe108a02eeac2e10c51e813361150a49a5c6a4d04ca",
+    "tests/test_espn_compare.py": "968363153e63c98a549fab55deca28e802f1ff0b79881fa350b746f8f804a2e4",
+    "tests/test_fantasy_fetch_seasons.py": "11145227607b185764638537c71396bf15d17b1a717bbfa2533c600c67afb47e",
+    "tests/test_prospective_archive.py": "9b46b2b2510e7eebace329b1ac4f7735fdb52adfae6d4b6c2d9d29721b8dc462",
+    "tests/test_prospective_capture_boundary.py": "40c75e66fa08e4839f5339704c91672f9082dab8db50da0d5ac6c5381a1bf116"
+  },
+  "files_changed_vs_origin_main": [
+    ".github/workflows/fantasy-weekly.yml",
+    ".gitignore",
+    "docs/PROSPECTIVE_CAPTURE.md",
+    "nflvalue/fantasy/data.py",
+    "nflvalue/fantasy/espn_compare.py",
+    "nflvalue/fantasy/private_boundary.py",
+    "nflvalue/fantasy/prospective_archive.py",
+    "nflvalue/sources/espn_projections.py",
+    "scripts/fantasy_weekly.py",
+    "scripts/state_store.py",
+    "tests/test_espn_compare.py",
+    "tests/test_fantasy_fetch_seasons.py",
+    "tests/test_prospective_archive.py",
+    "tests/test_prospective_capture_boundary.py"
+  ],
+  "frozen_files_untouched": {
+    "analysis/accuracy_protocol.json": true,
+    "nflvalue/fantasy/config.py": true,
+    "nflvalue/fantasy/features.py": true,
+    "nflvalue/fantasy/models.py": true,
+    "nflvalue/fantasy/simulation.py": true,
+    "nflvalue/projection_snapshot.py": true
+  },
+  "generated_at": "2026-09-08T20:25:03.487764+00:00",
+  "logs": [
+    "baseline_offline.log",
+    "collect_excluded.log",
+    "e2e_fetch_2026.log",
+    "e2e_fetch_2026_v2.log",
+    "e2e_pack.log",
+    "e2e_verify_step.log",
+    "e2e_verify_step.py",
+    "e2e_weekly_fast.log",
+    "e2e_weekly_fast_v2.log",
+    "e2e_weekly_full_timing.log",
+    "full_offline_after.log",
+    "full_offline_final.log",
+    "green_new_tests.log",
+    "mutation_tests.log",
+    "red_new_tests.log",
+    "run_33703355606.log",
+    "run_34047448573.log",
+    "run_34273697642.log",
+    "venv_install.log"
+  ],
+  "manifest_version": 1,
+  "privacy": {
+    "diff_grep": "league id / team name / cookie shapes / redacted league name: no match in the 14 committed files",
+    "ignore_rules": "data/prospective_archive/, data/espn_snapshots/, private/, data/fantasy_public.json ignored (git check-ignore)",
+    "local_private_files_untouched": [
+      "reports/espn_watchlist_2026_1692768992.json (untracked, main checkout)",
+      "docs/K_SHADOW_MODEL_CARD.md (older local draft, main checkout)"
+    ],
+    "public_sinks": "Pages copies only index.html, fantasy_latest.json, player_projection_snapshot.json; workflow artifact and release carry no ESPN row or league data (tests)",
+    "remote_history": "league descriptive name present at commit 6874610 (docs/K_SHADOW_MODEL_CARD.md), redacted at cbf8ab3; no history rewrite attempted; no league id, roster, cookie or token in any tracked object",
+    "staging": "explicit paths only; no git add -A; no reset; no force-push"
+  },
+  "prospective_eligibility": {
+    "2026_week_1": "prospective_full_slate: 16/16 games, 256/256 players; earliest deadline NE@SEA 2026-09-10T00:20Z (forecast 2026-09-08T20:21Z, 28h before); latest DEN@KC 2026-09-15T00:15Z",
+    "cohorts_before_this_release": "none exist: no production run had ever produced a snapshot; nothing was reconstructed",
+    "espn_side": "ESPN snapshot retrieved 2026-09-08T20:22:07.883804Z, before every Week 1 kickoff; 251 matched rows eligible for the ledger (rows and raw capture live in the private state repo, commit dc3ce3a)"
+  },
+  "release": {
+    "archived_entry_in_public_release": {
+      "clocks": {
+        "archived_at": "2026-09-08T20:22:07.159161+00:00",
+        "forecast_generated_at": "2026-09-08T20:21:13.624843+00:00",
+        "information_as_of": "2026-09-08T20:15:40.625920+00:00",
+        "scheduled_for": null
+      },
+      "document": "data/prospective_archive/2026/snapshot_2026_wk01_20260908T202113.json == deployed player_projection_snapshot.json (equal after JSON load)",
+      "model_version": "c8071b7b85b6c5990b41d789de4af1d652c6398c",
+      "path": "data/prospective_archive/2026/projection_2026_wk01_20260908T202113.json",
+      "payload_sha256": "e07f91cc7a2cce669f24b1507d92590b3673965449e41ca6789877352b88df2b",
+      "public_safe": "assert_public_safe passed on the released entry",
+      "run_context": {
+        "event": "workflow_dispatch",
+        "run_attempt": "1",
+        "run_id": "34273697642",
+        "schedule": null
+      }
+    },
+    "ci_on_pr": {
+      "lint": "pass (runs 34273150105, 34273156464)",
+      "unit": "pass 4m34s / 4m37s"
+    },
+    "deployed_endpoints_requested_after_deploy": {
+      "fantasy_latest.json": "HTTP 200; public allow-listed payload; prospective_capture present (prospective_full_slate 16/16, payload_sha256 e07f91cc7a2cce66...); espn_comparison status ok, 511 ESPN players, 251 matched, 10 no crosswalk, 250 not projected by model; no my_team",
+      "index.html": "HTTP 200, 2026 Week 1 dashboard",
+      "player_projection_snapshot.json": "HTTP 200 application/json, Last-Modified Tue, 08 Sep 2026 20:22:33 GMT, 794,712 bytes; schema_version 1; season 2026 week 1; generated_at 2026-09-08T20:21:13.624843+00:00; information_as_of 2026-09-08T20:15:40.625920+00:00; model_version c8071b7b85b6c5990b41d789de4af1d652c6398c; 256 players; 10,000 simulations; players_canonical_csv_sha256 8723faef77bd4836..."
+    },
+    "merge_path": "gh pr merge 12 --merge (no force, no rebase); d9ea7d0 verified ancestor of origin/main",
+    "production_run": {
+      "build_step": "2026-09-08T20:15:39Z -> 2026-09-08T20:22:08Z (6m29s)",
+      "classified": "production=true",
+      "completed": "2026-09-08T20:22:40Z",
+      "created": "2026-09-08T20:15:07Z",
+      "event": "workflow_dispatch",
+      "id": 34273697642,
+      "pages_deploy_job": "deploy-dashboard success 2026-09-08T20:22:29Z -> 20:22:39Z; github-pages deployment 6336400042 at c8071b7",
+      "private_state": "checkout + restore + save succeeded; raw ESPN state committed to curtisdearing/tailstail-state as dc3ce3a (private)",
+      "publish_state": "fantasy-state-34273697642-1.tar.gz sha256 1a177e94c3ff4ce9cf935c420a59a2ffbdce2c5fbc8fbb56fd0520e8d7e1b1d9",
+      "ref": "refs/heads/main",
+      "sha": "c8071b7",
+      "verify_step": "success"
+    }
+  },
+  "report": "reports/claude_capture_release.md",
+  "repository": "curtisdearing/tailstail (public)",
+  "revisions": {
+    "espn_compare_branch": "origin/agent/espn-compare-2026-08 = 656f9b6, merged to origin/main by PR #10 (94ccfde) on 2026-08-30",
+    "freeze": "tag freeze-2026-wk1 = a9e9765; docs/PROTOCOL_FREEZE_2026.md at 80e742d",
+    "local_main_at_start": "80e742dcdd46ce129a5e5f934d72d7c55d6570b1 (freeze doc; 9 behind origin)",
+    "origin_main_after_release": "c8071b7b85b6c5990b41d789de4af1d652c6398c",
+    "origin_main_at_start": "0b560d9f2fa87512758b85b5c208b9bb980ed985 (PR #11 merge)",
+    "pr": "https://github.com/curtisdearing/tailstail/pull/12 (merged, merge commit c8071b7b85b6c5990b41d789de4af1d652c6398c)",
+    "release_commit": "d9ea7d0 (14 files, +1490/-24)",
+    "work_branch": "agent/prospective-capture-2026-09",
+    "work_head": "d9ea7d09f00dd4410e6ffb5675eb1e740ba79c1f"
+  },
+  "role_mixture": "OFF: SimulationConfig.role_scenario_mixture defaults False (config.py untouched); scripts/fantasy_weekly.py never sets it; mutation M4 (default True) killed",
+  "schedule_2026_week1_kickoffs_utc": {
+    "2026_01_DEN_KC": "2026-09-15T00:15:00+00:00 (Monday 20:15 ET)",
+    "2026_01_NE_SEA": "2026-09-10T00:20:00+00:00 (Wednesday 20:20 ET)",
+    "2026_01_SF_LA": "2026-09-11T00:35:00+00:00 (Thursday 20:35 ET)",
+    "source": "nflverse-data schedules/games.parquet, 272 REG games, downloaded 2026-09-08",
+    "sunday_early_window": "2026-09-13T17:00:00+00:00"
+  },
+  "tests": {
+    "baseline_offline_at_origin_main": "1266 passed, 6 skipped, 35 deselected, 451 warnings in 97.08s (0:01:37)",
+    "excluded_suites_collect_only": [
+      "exit 0"
+    ],
+    "full_offline_final": "1306 passed, 6 skipped, 35 deselected, 451 warnings in 86.41s (0:01:26)",
+    "green_new_tests_after_implementation": "116 passed in 0.51s",
+    "mutation_tests": [
+      "10/10 mutations killed"
+    ],
+    "red_new_tests_before_implementation": "14 failed, 7 passed, 1 error in 0.12s",
+    "ruff": "All checks passed! (ruff 0.15.22, ruff.toml)"
+  },
+  "workflow": {
+    "crons_after": [
+      "35 23 * 9-12,1 3",
+      "15 12 * 9-12,1 0"
+    ],
+    "crons_before": [
+      "35 23 * 9-12,1 3",
+      "15 14 * 9-12,1 0"
+    ],
+    "observed_schedule_delays": {
+      "33703355606": "cron Wed 23:35Z -> started 2026-09-03T01:22:14Z (+1h47m), failed: nflreadpy season rule",
+      "34047448573": "cron Sun 14:15Z -> started 2026-09-06T17:04:29Z (+2h49m), failed: nflreadpy season rule"
+    }
+  }
+}

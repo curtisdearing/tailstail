@@ -1,0 +1,297 @@
+FFFFFFFFFFF.F.F....F.                                                    [100%]
+==================================== ERRORS ====================================
+______________ ERROR collecting tests/test_prospective_archive.py ______________
+ImportError while importing test module '/private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/tests/test_prospective_archive.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Cellar/python@3.11/3.11.15_3/Frameworks/Python.framework/Versions/3.11/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_prospective_archive.py:31: in <module>
+    from nflvalue.fantasy import prospective_archive as archive
+E   ImportError: cannot import name 'prospective_archive' from 'nflvalue.fantasy' (/private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/__init__.py)
+=================================== FAILURES ===================================
+_____ test_the_library_path_is_used_unchanged_when_it_accepts_every_season _____
+
+tmp_path = PosixPath('/private/var/folders/mc/9xqyhty13l536gjd0q2xr02c0000gn/T/pytest-of-curtisdearing/pytest-123/test_the_library_path_is_used_0')
+
+    def test_the_library_path_is_used_unchanged_when_it_accepts_every_season(tmp_path):
+        nfl = _FakeNfl(current_season=2026)
+>       fetch(tmp_path, nfl)
+
+tests/test_fantasy_fetch_seasons.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/private/var/folders/mc/9xqyhty13l536gjd0q2xr02c0000gn/T/pytest-of-curtisdearing/pytest-123/test_the_library_path_is_used_0')
+nfl = <test_fantasy_fetch_seasons._FakeNfl object at 0x10e2df290>
+seasons = (2024, 2025, 2026)
+
+    def fetch(tmp_path, nfl, seasons=(2024, 2025, 2026)):
+>       return data_mod.fetch_historical(seasons, tmp_path, force=True, nfl=nfl)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: fetch_historical() got an unexpected keyword argument 'nfl'
+
+tests/test_fantasy_fetch_seasons.py:109: TypeError
+____ test_a_season_the_library_rule_has_not_reached_is_downloaded_directly _____
+
+tmp_path = PosixPath('/private/var/folders/mc/9xqyhty13l536gjd0q2xr02c0000gn/T/pytest-of-curtisdearing/pytest-123/test_a_season_the_library_rule0')
+
+    def test_a_season_the_library_rule_has_not_reached_is_downloaded_directly(tmp_path):
+        nfl = _FakeNfl(current_season=2025)      # the state of nflreadpy 0.1.5 on 2026-09-09
+>       manifest = fetch(tmp_path, nfl)
+                   ^^^^^^^^^^^^^^^^^^^^
+
+tests/test_fantasy_fetch_seasons.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/private/var/folders/mc/9xqyhty13l536gjd0q2xr02c0000gn/T/pytest-of-curtisdearing/pytest-123/test_a_season_the_library_rule0')
+nfl = <test_fantasy_fetch_seasons._FakeNfl object at 0x10e2dd090>
+seasons = (2024, 2025, 2026)
+
+    def fetch(tmp_path, nfl, seasons=(2024, 2025, 2026)):
+>       return data_mod.fetch_historical(seasons, tmp_path, force=True, nfl=nfl)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: fetch_historical() got an unexpected keyword argument 'nfl'
+
+tests/test_fantasy_fetch_seasons.py:109: TypeError
+__ test_a_missing_in_season_file_drops_only_that_season_of_an_optional_table ___
+
+tmp_path = PosixPath('/private/var/folders/mc/9xqyhty13l536gjd0q2xr02c0000gn/T/pytest-of-curtisdearing/pytest-123/test_a_missing_in_season_file_0')
+
+    def test_a_missing_in_season_file_drops_only_that_season_of_an_optional_table(tmp_path):
+        nfl = _FakeNfl(current_season=2025, missing={"snap_counts/snap_counts_2026"})
+>       manifest = fetch(tmp_path, nfl)
+                   ^^^^^^^^^^^^^^^^^^^^
+
+tests/test_fantasy_fetch_seasons.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/private/var/folders/mc/9xqyhty13l536gjd0q2xr02c0000gn/T/pytest-of-curtisdearing/pytest-123/test_a_missing_in_season_file_0')
+nfl = <test_fantasy_fetch_seasons._FakeNfl object at 0x10e0b5a10>
+seasons = (2024, 2025, 2026)
+
+    def fetch(tmp_path, nfl, seasons=(2024, 2025, 2026)):
+>       return data_mod.fetch_historical(seasons, tmp_path, force=True, nfl=nfl)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: fetch_historical() got an unexpected keyword argument 'nfl'
+
+tests/test_fantasy_fetch_seasons.py:109: TypeError
+____ test_a_missing_current_season_of_a_required_table_still_fails_the_run _____
+
+tmp_path = PosixPath('/private/var/folders/mc/9xqyhty13l536gjd0q2xr02c0000gn/T/pytest-of-curtisdearing/pytest-123/test_a_missing_current_season_0')
+
+    def test_a_missing_current_season_of_a_required_table_still_fails_the_run(tmp_path):
+        nfl = _FakeNfl(current_season=2025, missing={"weekly_rosters/roster_weekly_2026"})
+>       with pytest.raises(Exception, match="roster_weekly_2026"):
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'roster_weekly_2026'
+E         Actual message: "fetch_historical() got an unexpected keyword argument 'nfl'"
+
+tests/test_fantasy_fetch_seasons.py:147: AssertionError
+__________ test_the_manifest_records_which_seasons_each_table_carries __________
+
+tmp_path = PosixPath('/private/var/folders/mc/9xqyhty13l536gjd0q2xr02c0000gn/T/pytest-of-curtisdearing/pytest-123/test_the_manifest_records_whic0')
+
+    def test_the_manifest_records_which_seasons_each_table_carries(tmp_path):
+        nfl = _FakeNfl(current_season=2025)
+>       fetch(tmp_path, nfl)
+
+tests/test_fantasy_fetch_seasons.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/private/var/folders/mc/9xqyhty13l536gjd0q2xr02c0000gn/T/pytest-of-curtisdearing/pytest-123/test_the_manifest_records_whic0')
+nfl = <test_fantasy_fetch_seasons._FakeNfl object at 0x10e181fd0>
+seasons = (2024, 2025, 2026)
+
+    def fetch(tmp_path, nfl, seasons=(2024, 2025, 2026)):
+>       return data_mod.fetch_historical(seasons, tmp_path, force=True, nfl=nfl)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: fetch_historical() got an unexpected keyword argument 'nfl'
+
+tests/test_fantasy_fetch_seasons.py:109: TypeError
+_________ test_the_archive_travels_in_the_public_fantasy_state_profile _________
+
+tmp_path = PosixPath('/private/var/folders/mc/9xqyhty13l536gjd0q2xr02c0000gn/T/pytest-of-curtisdearing/pytest-123/test_the_archive_travels_in_th0')
+
+    def test_the_archive_travels_in_the_public_fantasy_state_profile(tmp_path):
+        root = tmp_path / "repo"
+        (root / "data" / "prospective_archive" / "2026").mkdir(parents=True)
+        (root / "data" / "prospective_archive" / "index.json").write_text("{}")
+        (root / "data" / "prospective_archive" / "latest.json").write_text("{}")
+        (root / "data" / "prospective_archive" / "2026" / "projection_2026_wk01_x.json").write_text("{}")
+        (root / "data" / "player_projection_snapshot.json").write_text("{}")
+        archive = tmp_path / "state.tar.gz"
+        manifest = state_store.pack(archive, root, profile="fantasy")
+>       assert "data/prospective_archive/index.json" in manifest["files"]
+E       AssertionError: assert 'data/prospective_archive/index.json' in ['data/player_projection_snapshot.json']
+
+tests/test_prospective_capture_boundary.py:55: AssertionError
+___________________ test_the_archive_directory_is_gitignored ___________________
+
+    def test_the_archive_directory_is_gitignored():
+>       assert re.search(r"^data/prospective_archive/$", GITIGNORE, re.M), GITIGNORE
+E       AssertionError: __pycache__/
+E         .pytest_cache/
+E         *.pyc
+E         # large regenerable data + build artifacts
+E         *.parquet
+E         data/*.db
+E         data/*.db-journal
+E         *.db-journal
+E         
+E         # secrets (webhooks, API keys) live here — NEVER tracked
+E         config.local.json
+E         data/*.joblib
+E         data/fantasy_latest.json
+E         data/player_projection_snapshot.json
+E         reports/fantasy_model_card.json
+E         historical/fantasy/
+E         fantasy.html
+E         .DS_Store
+E         
+E         # --- live, private and personalised state: never committed --------------------
+E         # The league this tool is pointed at is private. A snapshot of it carries the
+E         # league's name, its members' team names and every roster in it, and an ESPN
+E         # member id IS the SWID cookie -- so none of this belongs in a public repo or
+E         # in a release asset, however convenient it would be to have a real fixture.
+E         # Offline tests use the hand-built synthetic fixtures under tests/fixtures/
+E         # instead; regenerate those by hand, never by pointing a script at the league.
+E         data/espn_league/
+E         data/espn_snapshots/
+E         data/espn_comparison_ledger.json
+E         # public-safe aggregate grading history: generated, and carried between runs
+E         # by the checksummed public state release rather than by the repository
+E         data/espn_comparison_history.json
+E         data/my_team*.json
+E         data/my_team*.html
+E         my_team.html
+E         reports/espn_watchlist_*.json
+E         reports/my_team*.json
+E         reports/my_team*.md
+E         reports/team_intel_latest.md
+E         data/team_intel_latest.json
+E         # the decision card: the personalised page, and the contract behind it
+E         private/
+E         # checkout of the private raw-state repository (curtisdearing/tailstail-state)
+E         .tailstail-state/
+E         
+E         # generated locally by a run; rebuildable, and large
+E         data/fantasy_public.json
+E         data/shadow/
+E         data/accuracy_registry_test*.json
+E         _site/
+E         _landing/
+E         .pytest_cache/
+E         __pycache__/
+E         *.pyc
+E         
+E       assert None
+E        +  where None = <function search at 0x10290e7a0>('^data/prospective_archive/$', '__pycache__/\n.pytest_cache/\n*.pyc\n# large regenerable data + build artifacts\n*.parquet\ndata/*.db\ndata/*.db-jour...public.json\ndata/shadow/\ndata/accuracy_registry_test*.json\n_site/\n_landing/\n.pytest_cache/\n__pycache__/\n*.pyc\n', re.MULTILINE)
+E        +    where <function search at 0x10290e7a0> = re.search
+E        +    and   re.MULTILINE = re.M
+
+tests/test_prospective_capture_boundary.py:64: AssertionError
+___________ test_the_archive_never_shares_a_path_with_raw_espn_state ___________
+
+    def test_the_archive_never_shares_a_path_with_raw_espn_state():
+>       from nflvalue.fantasy import private_state, prospective_archive
+E       ImportError: cannot import name 'prospective_archive' from 'nflvalue.fantasy' (/private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/__init__.py)
+
+tests/test_prospective_capture_boundary.py:68: ImportError
+_ test_the_public_payload_carries_the_capture_summary_and_the_guard_accepts_it _
+
+    def test_the_public_payload_carries_the_capture_summary_and_the_guard_accepts_it():
+>       assert "prospective_capture" in private_boundary.PUBLIC_PAYLOAD_KEYS
+E       AssertionError: assert 'prospective_capture' in ('generated_at', 'season', 'week', 'data_quality', 'model_card', 'simulation', ...)
+E        +  where ('generated_at', 'season', 'week', 'data_quality', 'model_card', 'simulation', ...) = private_boundary.PUBLIC_PAYLOAD_KEYS
+
+tests/test_prospective_capture_boundary.py:75: AssertionError
+________ test_the_build_step_passes_run_context_through_the_environment ________
+
+    def test_the_build_step_passes_run_context_through_the_environment():
+        step = _build_step()
+        for name, expression in (
+            ("TAILSTAIL_RUN_EVENT", "${{ github.event_name }}"),
+            ("TAILSTAIL_RUN_SCHEDULE", "${{ github.event.schedule }}"),
+            ("TAILSTAIL_RUN_ID", "${{ github.run_id }}"),
+            ("TAILSTAIL_RUN_ATTEMPT", "${{ github.run_attempt }}"),
+        ):
+>           assert f"{name}: {expression}" in step, name
+E           AssertionError: TAILSTAIL_RUN_EVENT
+E           assert 'TAILSTAIL_RUN_EVENT: ${{ github.event_name }}' in '- name: Build current projections\n        shell: bash\n        env:\n          IN_SEASON: ${{ inputs.season }}\n    ... "${IN_FAST:-false}" != "true" ]] || args+=(--fast)\n          python scripts/fantasy_weekly.py "${args[@]}"\n\n      '
+
+tests/test_prospective_capture_boundary.py:100: AssertionError
+_____ test_the_verify_step_checks_the_archive_before_anything_is_published _____
+
+    def test_the_verify_step_checks_the_archive_before_anything_is_published():
+        step = _verify_step()
+>       assert "prospective_archive" in step
+E       assert 'prospective_archive' in '- name: Verify generated contracts\n        shell: bash\n        run: |\n          python - <<\'PY\'\n          impor...s.parquet").stat().st_size > 1000\n          assert Path("fantasy.html").stat().st_size > 1000\n          PY\n\n      '
+
+tests/test_prospective_capture_boundary.py:108: AssertionError
+________ test_the_schedule_leaves_margin_before_the_sunday_early_window ________
+
+    def test_the_schedule_leaves_margin_before_the_sunday_early_window():
+        """GitHub delayed both September scheduled runs by 1h47m and 2h49m. A
+        Sunday cron at 14:15 UTC therefore starts *after* the 17:00 UTC early
+        window on a bad day. The Sunday run has to fire at least four hours ahead."""
+        crons = re.findall(r'- cron: "([^"]+)"', WORKFLOW)
+        assert len(crons) == 2, crons
+        sunday = next(c for c in crons if c.split()[-1] == "0")
+        minute, hour = (int(field) for field in sunday.split()[:2])
+>       assert hour * 60 + minute <= 13 * 60, sunday
+E       AssertionError: 15 14 * 9-12,1 0
+E       assert ((14 * 60) + 15) <= (13 * 60)
+
+tests/test_prospective_capture_boundary.py:128: AssertionError
+_______ test_the_weekly_run_archives_after_the_snapshot_and_before_espn ________
+
+    def test_the_weekly_run_archives_after_the_snapshot_and_before_espn():
+>       order = [WEEKLY.index(marker) for marker in (
+            "write_projection_snapshot(", "prospective_archive.write_entry(", "run_espn_comparison(")]
+
+tests/test_prospective_capture_boundary.py:144: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <tuple_iterator object at 0x10e31f490>
+
+>   order = [WEEKLY.index(marker) for marker in (
+             ^^^^^^^^^^^^^^^^^^^^
+        "write_projection_snapshot(", "prospective_archive.write_entry(", "run_espn_comparison(")]
+E   ValueError: substring not found
+
+tests/test_prospective_capture_boundary.py:144: ValueError
+_____ test_snapshot_separates_request_response_provider_and_archive_clocks _____
+
+tmp_path = PosixPath('/private/var/folders/mc/9xqyhty13l536gjd0q2xr02c0000gn/T/pytest-of-curtisdearing/pytest-123/test_snapshot_separates_reques0')
+
+    def test_snapshot_separates_request_response_provider_and_archive_clocks(tmp_path):
+        """One `retrieved_at` is not provenance. The request time, the response
+        time, the provider's own timestamp (which this endpoint does not carry --
+        so it is recorded as unknown, not filled in) and the archive time are four
+        different clocks and are stored as four fields."""
+        ticks = iter(["2026-09-08T19:00:00+00:00", "2026-09-08T19:00:02+00:00"])
+>       snapshot = espn_projections.fetch_week_snapshot(
+            2026, 1, rules=PPR, get=lambda *a, **k: synthetic_payload(week=1),
+            clock=lambda: next(ticks),
+        )
+E       TypeError: fetch_week_snapshot() got an unexpected keyword argument 'clock'
+
+tests/test_espn_compare.py:471: TypeError
+=========================== short test summary info ============================
+FAILED tests/test_fantasy_fetch_seasons.py::test_the_library_path_is_used_unchanged_when_it_accepts_every_season
+FAILED tests/test_fantasy_fetch_seasons.py::test_a_season_the_library_rule_has_not_reached_is_downloaded_directly
+FAILED tests/test_fantasy_fetch_seasons.py::test_a_missing_in_season_file_drops_only_that_season_of_an_optional_table
+FAILED tests/test_fantasy_fetch_seasons.py::test_a_missing_current_season_of_a_required_table_still_fails_the_run
+FAILED tests/test_fantasy_fetch_seasons.py::test_the_manifest_records_which_seasons_each_table_carries
+FAILED tests/test_prospective_capture_boundary.py::test_the_archive_travels_in_the_public_fantasy_state_profile
+FAILED tests/test_prospective_capture_boundary.py::test_the_archive_directory_is_gitignored
+FAILED tests/test_prospective_capture_boundary.py::test_the_archive_never_shares_a_path_with_raw_espn_state
+FAILED tests/test_prospective_capture_boundary.py::test_the_public_payload_carries_the_capture_summary_and_the_guard_accepts_it
+FAILED tests/test_prospective_capture_boundary.py::test_the_build_step_passes_run_context_through_the_environment
+FAILED tests/test_prospective_capture_boundary.py::test_the_verify_step_checks_the_archive_before_anything_is_published
+FAILED tests/test_prospective_capture_boundary.py::test_the_schedule_leaves_margin_before_the_sunday_early_window
+FAILED tests/test_prospective_capture_boundary.py::test_the_weekly_run_archives_after_the_snapshot_and_before_espn
+FAILED tests/test_espn_compare.py::test_snapshot_separates_request_response_provider_and_archive_clocks
+ERROR tests/test_prospective_archive.py
+14 failed, 7 passed, 1 error in 0.12s
