@@ -1,0 +1,196 @@
+........................................................................ [  5%]
+.....................................................................s.s [ 10%]
+ss.s.................................................................... [ 16%]
+........................................................................ [ 21%]
+........................................................................ [ 27%]
+..........................................................s............. [ 32%]
+........................................................................ [ 38%]
+........................................................................ [ 43%]
+........................................................................ [ 49%]
+........................................................................ [ 54%]
+........................................................................ [ 60%]
+........................................................................ [ 65%]
+........................................................................ [ 71%]
+........................................................................ [ 76%]
+........................................................................ [ 82%]
+........................................................................ [ 87%]
+........................................................................ [ 93%]
+........................................................................ [ 98%]
+................                                                         [100%]
+=============================== warnings summary ===============================
+tests/test_backtest_determinism.py: 2 warnings
+tests/test_cutoff_poisoning.py: 8 warnings
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/models.py:203: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
+    correlation = spearmanr(actual, predicted, nan_policy="omit").statistic
+
+tests/test_fantasy_features.py: 54 warnings
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:156: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame[column] = fill
+
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_schedule_spread_is_translated_from_each_teams_view
+tests/test_fantasy_features.py::test_feature_frame_is_roster_first_and_unique
+tests/test_fantasy_features.py::test_no_game_rows_are_ineligible_and_do_not_decay_ewm_history
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:450: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame["_role_rank"] = frame.groupby(["season", "week", "team", "position"])[
+
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_schedule_spread_is_translated_from_each_teams_view
+tests/test_fantasy_features.py::test_feature_frame_is_roster_first_and_unique
+tests/test_fantasy_features.py::test_no_game_rows_are_ineligible_and_do_not_decay_ewm_history
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:453: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame["pre_position_role_rank"] = frame["_role_rank"].fillna(99.0).clip(1, 99)
+
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_schedule_spread_is_translated_from_each_teams_view
+tests/test_fantasy_features.py::test_feature_frame_is_roster_first_and_unique
+tests/test_fantasy_features.py::test_no_game_rows_are_ineligible_and_do_not_decay_ewm_history
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:456: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame["_vac_target"] = frame["pre_target_share_calc_ewm4"].fillna(0.0).where(unavailable & skill, 0.0)
+
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_schedule_spread_is_translated_from_each_teams_view
+tests/test_fantasy_features.py::test_feature_frame_is_roster_first_and_unique
+tests/test_fantasy_features.py::test_no_game_rows_are_ineligible_and_do_not_decay_ewm_history
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:457: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame["_vac_carry"] = frame["pre_carry_share_ewm4"].fillna(0.0).where(unavailable & skill, 0.0)
+
+tests/test_fantasy_features.py: 27 warnings
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:483: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame[f"pre_reconciled_{name}_share"] = values / denominator
+
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_schedule_spread_is_translated_from_each_teams_view
+tests/test_fantasy_features.py::test_feature_frame_is_roster_first_and_unique
+tests/test_fantasy_features.py::test_no_game_rows_are_ineligible_and_do_not_decay_ewm_history
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:485: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame["pre_usage_share_overflow"] = overflow
+
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_schedule_spread_is_translated_from_each_teams_view
+tests/test_fantasy_features.py::test_feature_frame_is_roster_first_and_unique
+tests/test_fantasy_features.py::test_no_game_rows_are_ineligible_and_do_not_decay_ewm_history
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:486: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame["pre_topdown_attempts"] = (
+
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_schedule_spread_is_translated_from_each_teams_view
+tests/test_fantasy_features.py::test_feature_frame_is_roster_first_and_unique
+tests/test_fantasy_features.py::test_no_game_rows_are_ineligible_and_do_not_decay_ewm_history
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:489: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame["pre_topdown_targets"] = (
+
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_schedule_spread_is_translated_from_each_teams_view
+tests/test_fantasy_features.py::test_feature_frame_is_roster_first_and_unique
+tests/test_fantasy_features.py::test_no_game_rows_are_ineligible_and_do_not_decay_ewm_history
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:492: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame["pre_topdown_carries"] = (
+
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_schedule_spread_is_translated_from_each_teams_view
+tests/test_fantasy_features.py::test_feature_frame_is_roster_first_and_unique
+tests/test_fantasy_features.py::test_no_game_rows_are_ineligible_and_do_not_decay_ewm_history
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:495: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame["pre_topdown_opportunities"] = frame[
+
+tests/test_fantasy_features.py: 90 warnings
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:439: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    work = frame.assign(_condition_key=key, _played_points=frame["fantasy_points"].where(frame["played"]))
+
+tests/test_fantasy_features.py: 45 warnings
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:445: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame[f"pre_{condition}_uplift"] = (shrunk - baseline).fillna(0.0)
+
+tests/test_fantasy_features.py: 45 warnings
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:446: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame[f"pre_{condition}_games"] = prior_n
+
+tests/test_fantasy_features.py: 72 warnings
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:507: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame[f"z_{column[4:]}"] = ((values - mean) / sd).fillna(0.0).clip(-5, 5)
+
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_schedule_spread_is_translated_from_each_teams_view
+tests/test_fantasy_features.py::test_feature_frame_is_roster_first_and_unique
+tests/test_fantasy_features.py::test_no_game_rows_are_ineligible_and_do_not_decay_ewm_history
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:656: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame["model_eligible"] = (
+
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_schedule_spread_is_translated_from_each_teams_view
+tests/test_fantasy_features.py::test_feature_frame_is_roster_first_and_unique
+tests/test_fantasy_features.py::test_no_game_rows_are_ineligible_and_do_not_decay_ewm_history
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:662: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame["active_participant"] = frame["played"] & frame["status_inactive"].eq(0)
+
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_same_week_outcome_cannot_change_same_week_features
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_expected_opportunity_components_are_shifted_before_use
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_coach_tendencies_are_prior_only_and_usage_is_reconciled
+tests/test_fantasy_features.py::test_schedule_spread_is_translated_from_each_teams_view
+tests/test_fantasy_features.py::test_feature_frame_is_roster_first_and_unique
+tests/test_fantasy_features.py::test_no_game_rows_are_ineligible_and_do_not_decay_ewm_history
+  /private/tmp/claude-501/-Users-curtisdearing/511e13c8-4b81-4dd2-9217-b6428c9ee2ae/scratchpad/tt-capture/nflvalue/fantasy/features.py:663: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+    frame["scoring_rules"] = json.dumps(rules.to_dict(), sort_keys=True)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1306 passed, 6 skipped, 35 deselected, 451 warnings in 86.41s (0:01:26)
+exit 0

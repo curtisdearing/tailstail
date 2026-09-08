@@ -1,0 +1,2 @@
+{"files": ["data/espn_comparison_history.json", "data/fantasy_model.joblib", "data/player_projection_snapshot.json", "data/prospective_archive/2026/projection_2026_wk01_20260908T200829.json", "data/prospective_archive/2026/snapshot_2026_wk01_20260908T200829.json", "data/prospective_archive/index.json", "data/prospective_archive/latest.json"], "profile": "fantasy", "schema_version": 1, "sha256": "17fa3b49a724812b5c64727f47b6f748c77facdc14b307a449eb2af196e2061f"}
+pack exit 0

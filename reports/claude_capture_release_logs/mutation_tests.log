@@ -1,0 +1,12 @@
+M1   KILLED (1 failed, 16 passed in 0.06s)                                  accept a snapshot generated AT the deadline (>= becomes >)
+M1b  KILLED (2 failed, 15 passed in 0.10s)                                  ignore information_as_of when judging a deadline
+M1c  KILLED (1 failed, 27 passed in 0.10s)                                  ESPN ledger accepts a post-kickoff snapshot (< becomes <=)
+M2   KILLED (1 failed, 16 passed in 0.07s)                                  overwrite an existing immutable archive entry
+M2b  KILLED (1 failed, 16 passed in 0.07s)                                  index silently accepts lost history
+M3   KILLED (1 failed, 16 passed in 0.06s)                                  expose a private field in the archive entry
+M3b  KILLED (1 failed, 116 passed in 1.06s)                                 public payload allow-list leaks my_team
+M4   KILLED (1 failed, 32 passed in 3.91s)                                  enable the role mixture by default
+M5   KILLED (4 failed, 1 passed in 0.11s)                                   fetch bypass downloads nothing for the lagging season (silently drops it)
+M6   KILLED (1 failed, 27 passed in 0.11s)                                  kickoff defaulted to 13:00 when missing (the old behaviour)
+
+10/10 mutations killed

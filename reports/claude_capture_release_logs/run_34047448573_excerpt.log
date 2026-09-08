@@ -1,0 +1,8 @@
+project	UNKNOWN STEP	2026-09-06T17:04:57.4727825Z run mode: production=true ref=refs/heads/main event=schedule
+project	UNKNOWN STEP	2026-09-06T17:04:59.2068732Z ^[[36;1m    echo "no prior state pointer recorded; starting fresh"^[[0m
+project	UNKNOWN STEP	2026-09-06T17:04:59.2069656Z ^[[36;1m  echo "no prior fantasy state release; starting fresh"^[[0m
+project	UNKNOWN STEP	2026-09-06T17:04:59.5911013Z no prior fantasy state release; starting fresh
+project	UNKNOWN STEP	2026-09-06T17:05:01.3178247Z Traceback (most recent call last):
+project	UNKNOWN STEP	2026-09-06T17:05:01.3194954Z     raise ValueError(f"Season must be between 2002 and {current_season}")
+project	UNKNOWN STEP	2026-09-06T17:05:01.3195715Z ValueError: Season must be between 2002 and 2025
+project	UNKNOWN STEP	2026-09-06T17:05:01.4574084Z ##[error]Process completed with exit code 1.
