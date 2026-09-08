@@ -43,6 +43,10 @@ private/
 # checkout of the private raw-state repository (curtisdearing/tailstail-state)
 .tailstail-state/
 
+# immutable archive of each run's own forecast (public material; carried
+# between runs by the checksummed public state release, never by the repo)
+data/prospective_archive/
+
 # generated locally by a run; rebuildable, and large
 data/fantasy_public.json
 data/shadow/

@@ -51,6 +51,15 @@ STATE_PROFILES = {
         # run of a new one. Same contract, same guarantees; they travel here
         # because this file is gitignored and the release is its only copy.
         "data/espn_comparison_history.*.json",
+        # The immutable archive of Tailstail's OWN weekly forecast (one entry
+        # per run, an append-only index and a separate latest pointer;
+        # nflvalue/fantasy/prospective_archive.py). It is the forecast already
+        # published in full on the Pages site -- no ESPN row, no league -- so
+        # it is public material, and this release is what carries it between
+        # runs. Fixed-depth patterns because `_safe_member` matches with
+        # PurePath.match, which has no `**`.
+        "data/prospective_archive/*.json",
+        "data/prospective_archive/*/*.json",
     ),
 }
 
