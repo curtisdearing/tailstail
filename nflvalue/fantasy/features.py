@@ -527,8 +527,11 @@ def build_feature_frame(
     frame.drop(columns=["_merge"], inplace=True)
     _numeric(frame, (*STAT_DEFAULTS, "fumbles_lost", "fantasy_points", "roster_snapshot_carried"))
     frame = _merge_optional(frame, data)
-    frame["expected_points_missing"] = frame["expected_points"].isna().astype(float)
-    frame["snaps_missing"] = frame["offense_pct"].isna().astype(float)
+    # NOTE: the feed-missingness flags used to be defined here from the SAME
+    # week's expected-points / snap rows. Those rows cannot exist before a game
+    # is played, so every projection-week row carried both flags = 1 and the
+    # ensemble read it as "did not play" (2026 wk1-2: QB means of 1-3 points).
+    # They are now prior-history flags, defined after the pre_* features below.
     _numeric(frame, ("expected_points", *EXPECTED_COMPONENTS.values(), "offense_pct"))
 
     schedule = _schedule_long(data.schedules)
@@ -597,6 +600,12 @@ def build_feature_frame(
     ).fillna(0.0)
     rolling_features["pre_roster_weeks"] = frame.groupby("player_id").cumcount().astype(float)
     frame = pd.concat([frame, pd.DataFrame(rolling_features, index=frame.index)], axis=1)
+    # Feed-missingness is a fact about the player's PRIOR history (has this
+    # feed ever covered them), never about the week being projected: a row
+    # whose game has not been played yet must look like an active player with
+    # history, not like a DNP.  Same-week presence is unknowable pregame.
+    frame["expected_points_missing"] = frame["pre_expected_points_ewm4"].isna().astype(float)
+    frame["snaps_missing"] = frame["pre_offense_pct_ewm4"].isna().astype(float)
 
     position_prior = frame.groupby(["position", "season", "week"])["fantasy_points"].transform("mean")
     position_week = frame[["position", "season", "week", "fantasy_points"]].copy()

@@ -577,3 +577,43 @@ def test_no_test_in_this_file_performs_a_network_call():
     for forbidden in ("urlopen(", "fetch_league_views(", "requests.get"):
         assert forbidden not in source.split("def test_no_test_in_this_file")[0], (
             f"{forbidden} would make this suite depend on ESPN being up")
+
+
+def test_unknown_lineup_slot_with_zero_count_is_ignored_and_nonzero_is_refused():
+    """ESPN enumerates every slot id 0-24 with zeros for unused ones; the live
+    2026 league payload carries id 22 at zero, which must not block a read."""
+    from nflvalue.fantasy import espn_league
+    settings = {"rosterSettings": {"lineupSlotCounts": {"0": 1, "2": 2, "20": 7, "21": 1, "22": 0, "23": 1}}}
+    roster = espn_league._roster_settings(settings)
+    assert roster.lineup_slot_counts == {"BE": 7, "FLEX": 1, "IR": 1, "QB": 1, "RB": 2}
+    assert roster.starting_slots == 4
+    import pytest
+    with pytest.raises(espn_league.EspnSchemaError):
+        espn_league._roster_settings({"rosterSettings": {"lineupSlotCounts": {"0": 1, "22": 1}}})
+
+
+def test_merge_views_keeps_roster_entries_and_draft_picks_across_views():
+    """Live 2026-09-17 payload shape: mTeam repeats `teams` without roster
+    entries and every view repeats `draftDetail` with an empty pick list; a
+    sorted top-level replacement emptied all eight rosters and the draft."""
+    from nflvalue.fantasy import espn_league
+    roster_entry = {"lineupSlotId": 0, "playerPoolEntry": {"player": {"id": 42, "fullName": "QB One"}}}
+    views = {
+        "mDraftDetail": {"id": 1, "draftDetail": {"drafted": True, "inProgress": False,
+                                                    "picks": [{"overallPickNumber": 1, "teamId": 1, "playerId": 42}]}},
+        "mRoster": {"id": 1, "draftDetail": {"drafted": True, "inProgress": False, "picks": []},
+                    "teams": [{"id": 1, "roster": {"entries": [roster_entry]}}]},
+        "mTeam": {"id": 1, "draftDetail": {"drafted": True, "inProgress": False, "picks": []},
+                  "teams": [{"id": 1, "name": "Team One", "abbrev": "ONE"}]},
+    }
+    merged, contributing = espn_league.merge_views(views)
+    assert contributing == ["mDraftDetail", "mRoster", "mTeam"]
+    assert merged["draftDetail"]["picks"] == [{"overallPickNumber": 1, "teamId": 1, "playerId": 42}]
+    (team,) = merged["teams"]
+    assert team["name"] == "Team One" and team["abbrev"] == "ONE"
+    assert team["roster"]["entries"] == [roster_entry]
+
+
+def test_rookie_eligible_slot_id_25_is_known():
+    from nflvalue.fantasy import espn_league
+    assert espn_league._slot_name(25, where="eligibleSlots") == "RK"

@@ -195,3 +195,42 @@ def test_validate_report_is_json_serialisable():
     json.dumps(report)          # must not raise
     assert report["tables"]["stats"]["seasons"] == [2024]
     assert all(type(s) is int for s in report["tables"]["stats"]["seasons"])
+
+
+def _bundle_with_feeds():
+    """The _bundle() world plus expected-points and snap-count feeds for the
+    three played weeks, so a projection week (4) has prior history for both."""
+    data = _bundle()
+    expected_points = pd.DataFrame([
+        {"season": 2022, "week": week, "player_id": player, "total_fantasy_points_exp": 12.0}
+        for week in (1, 2, 3)
+        for player in ("00-0000001", "00-0000002", "00-0000003", "00-0000004")
+    ])
+    snaps = pd.DataFrame([
+        {"season": 2022, "week": week, "game_type": "REG", "pfr_player_id": player, "offense_pct": 0.9}
+        for week in (1, 2, 3)
+        for player in ("00-0000001", "00-0000002", "00-0000003", "00-0000004")
+    ])
+    return HistoricalData(stats=data.stats, rosters=data.rosters, schedules=data.schedules,
+                          snaps=snaps, expected_points=expected_points)
+
+
+def test_projection_week_missingness_flags_are_prior_history_not_same_week():
+    """Regression for the 2026 wk1-2 production defect: the projection week has
+    no expected-points or snap rows yet (the game has not been played), and the
+    flags derived from same-week presence made every starter look like a DNP."""
+    data = materialize_projection_week(_bundle_with_feeds(), 2022, 4)
+    frame = build_feature_frame(data)
+    assert {"expected_points_missing", "snaps_missing"} <= set(model_features())
+    target = frame[frame.week.eq(4)]
+    assert len(target) == 4
+    assert target["expected_points_missing"].eq(0).all(), "projection week must not read as DNP"
+    assert target["snaps_missing"].eq(0).all()
+    # a played week with feed rows is 0; the very first week (no prior history) is 1
+    played = frame[frame.week.eq(3)]
+    assert played["expected_points_missing"].eq(0).all() and played["snaps_missing"].eq(0).all()
+    first = frame[frame.week.eq(1)]
+    assert first["expected_points_missing"].eq(1).all() and first["snaps_missing"].eq(1).all()
+    # and the flags never depend on the week being projected: identical for wk4 and a wk3 row
+    qb = frame[frame.player_id.eq("00-0000001")].set_index("week")
+    assert qb.loc[4, "expected_points_missing"] == qb.loc[3, "expected_points_missing"]

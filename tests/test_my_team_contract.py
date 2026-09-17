@@ -650,3 +650,13 @@ def test_pipeline_without_a_contract_uses_the_snapshots_embedded_hashes(tmp_path
     assert result["scoring_hash"] == fixture("post_draft")["hashes"]["scoring"]
     assert "embedded" in result["hash_source"]
     assert result["hash_reason"] is None
+
+
+def test_draft_status_complete_from_adapter_is_read_as_complete():
+    """The adapter emits draft.status == "complete"; the reader used to map
+    only "post_draft", so a drafted league rendered as pre-draft with no roster."""
+    from nflvalue.fantasy import my_team
+    snapshot = {"draft": {"status": "complete", "picks": []}}
+    assert my_team._draft(snapshot, team_id=1)["state"] == "complete"
+    assert my_team._draft({"draft": {"status": "post_draft", "picks": []}}, team_id=1)["state"] == "complete"
+    assert my_team._draft({"draft": {"status": "pre_draft", "picks": []}}, team_id=1)["state"] == "pre_draft"
