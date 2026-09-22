@@ -70,6 +70,10 @@ SLOT_NAMES: Mapping[int, str] = {
     7: "OP", 8: "DT", 9: "DE", 10: "LB", 11: "DL", 12: "CB", 13: "S",
     14: "DB", 15: "DP", 16: "D/ST", 17: "K", 18: "P", 19: "HC",
     20: "BE", 21: "IR", 23: "FLEX", 24: "EDR",
+    # 25 is ESPN's rookie designation (it appears in a player's eligibleSlots,
+    # never as a lineup slot a league fills); confirmed on the live 2026 payload
+    # 2026-09-17 and matches the public espn-api position map ("Rookie").
+    25: "RK",
 }
 BENCH_SLOT = "BE"
 IR_SLOT = "IR"
@@ -504,8 +508,50 @@ def merge_views(views: Mapping[str, Mapping[str, Any]]) -> tuple[dict[str, Any],
                 base.update(value)
                 merged["settings"] = base
             else:
-                merged[key] = value
+                merged[key] = _merge_block(merged.get(key), value)
     return merged, contributing
+
+
+def _merge_block(current: Any, incoming: Any) -> Any:
+    """Combine one top-level block across views without losing populated data.
+
+    Every view repeats the same envelope with different sub-blocks filled in:
+    ``mTeam`` carries ``teams`` without roster entries, ``mRoster`` carries the
+    same ``teams`` with them, and only ``mDraftDetail`` fills ``draftDetail.picks``.
+    A plain replacement in sorted view order let ``mTeam`` overwrite the rosters
+    and a later view blank the pick list (found live 2026-09-17: eight empty
+    rosters, "complete" draft with zero picks). Mappings merge key by key, lists
+    of ``{"id": ...}`` records merge by id, and a populated value is never
+    replaced by an empty one.
+    """
+    if current is None:
+        return incoming
+    if isinstance(current, Mapping) and isinstance(incoming, Mapping):
+        out = dict(current)
+        for key, value in incoming.items():
+            out[key] = _merge_block(out.get(key), value)
+        return out
+    if isinstance(current, list) and isinstance(incoming, list):
+        if not incoming:
+            return current
+        if not current:
+            return incoming
+        keyed = all(isinstance(item, Mapping) and "id" in item for item in current + incoming)
+        if not keyed:
+            return incoming
+        # A view that repeats an id inside ONE list is ambiguous; keep it as
+        # sent so the identity validator can refuse it instead of merging it away.
+        for block in (current, incoming):
+            ids = [item["id"] for item in block]
+            if len(set(ids)) != len(ids):
+                return incoming
+        by_id: dict[Any, Any] = {item["id"]: item for item in current}
+        for item in incoming:
+            by_id[item["id"]] = _merge_block(by_id.get(item["id"]), item)
+        return list(by_id.values())
+    if incoming in ({}, [], None) and current not in ({}, [], None):
+        return current
+    return incoming
 
 
 # --------------------------------------------------------------------------- #
@@ -567,6 +613,16 @@ def _roster_settings(settings: Mapping[str, Any]) -> RosterSettings:
         raise EspnSchemaError("rosterSettings.lineupSlotCounts is missing or empty")
     counts: dict[str, int] = {}
     for slot_id, count in counts_raw.items():
+        # ESPN lists every slot id it knows (0-24) with a zero count for the
+        # ones a league does not use. An unknown id with a ZERO count changes
+        # nothing about the lineup, so it is skipped; an unknown id with a
+        # non-zero count is still refused rather than guessed.
+        try:
+            numeric = int(slot_id)
+        except (TypeError, ValueError):
+            numeric = None
+        if numeric is not None and numeric not in SLOT_NAMES and int(count) == 0:
+            continue
         name = _slot_name(slot_id, where="rosterSettings.lineupSlotCounts")
         counts[name] = int(count)
     bench = counts.get(BENCH_SLOT, 0)

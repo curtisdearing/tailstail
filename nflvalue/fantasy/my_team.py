@@ -621,7 +621,10 @@ def _draft(snapshot: Mapping[str, Any], *, team_id: int) -> dict:
     # The adapter states the draft's state outright; it is not re-derived from
     # two Booleans that can disagree with each other.
     status = str(draft.get("status") or "pre_draft")
-    state = {"post_draft": "complete", "in_progress": "in_progress"}.get(status, "pre_draft")
+    # The adapter (espn_league._normalize_draft) states "complete" for a drafted
+    # league; "post_draft" is kept for older payloads and fixtures.
+    state = {"complete": "complete", "post_draft": "complete",
+             "in_progress": "in_progress"}.get(status, "pre_draft")
 
     rationale = ("Draft state is read from ESPN's own drafted/inProgress flags; selections are "
                  "only those picks that carry a real player id.")
