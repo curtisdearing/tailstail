@@ -221,12 +221,27 @@ def pool_is_stale(pool: Sequence[PoolEntry], *, now: datetime) -> bool:
 
 def slot_legal_after(contract: LC.WaiverRules, roster: Sequence[RosterEntry],
                      add: PoolEntry, drop: RosterEntry | None) -> bool:
-    """Would the roster still satisfy its size limit after this move?"""
+    """Would the roster still be legal after this move — size *and* position?
+
+    Size was the only check here, which let the planner nominate a move ESPN
+    refuses: a roster already holding its maximum tight ends adds a fourth by
+    dropping a running back, the size stays inside the limit, and the claim is
+    rejected at processing time. ESPN publishes `positionLimits`; a
+    recommendation is checked against them before it is made.
+    """
     after = [e for e in active_roster(roster)
              if drop is None or e.espn_id != drop.espn_id]
     if contract.eligible_slots(add.position) == () and add.position not in ("BE",):
         return False
-    return len(after) + 1 <= contract.roster_limit
+    if len(after) + 1 > contract.roster_limit:
+        return False
+    limit = contract.position_limit(add.position)
+    if limit is not None:
+        held = sum(1 for e in after
+                   if str(e.position).upper() == str(add.position).upper())
+        if held + 1 > limit:
+            return False
+    return True
 
 
 # --------------------------------------------------------------------------- #
@@ -319,11 +334,18 @@ def _drop_choice(contract, roster, now, samples=None, add=None):
     if not legal:
         return None, NO_LEGAL_DROP
     if not roster_is_full(contract, roster):
-        return None, DROP_NOT_REQUIRED
+        if add is None or slot_legal_after(contract, roster, add, None):
+            return None, DROP_NOT_REQUIRED
+        # A free roster spot does not make a capped position addable; the
+        # claim still needs a same-position cut.
     if not samples or add is None:
         return None, NO_VALUED_DROP
     scored = []
     for candidate in legal:
+        # A cut that leaves the roster over a position cap is not a cheaper
+        # cut, it is an illegal one — it never competes on price.
+        if not slot_legal_after(contract, roster, add, candidate):
+            continue
         delta = _lineup_delta(contract, roster, add, candidate, samples)
         if delta is not None:
             scored.append((delta["own_optimal_lineup_delta"], int(candidate.espn_id), candidate))
