@@ -74,6 +74,11 @@ class WaiverRules:
     roster_limit: int
     ir_slots: int
     ir_eligible_statuses: frozenset[str]
+    #: ESPN's per-position roster cap (``{"TE": 3, ...}``). A position absent
+    #: from the mapping is uncapped. Empty means the snapshot stated none --
+    #: which is not the same as "no limits", so callers read it as unknown
+    #: only when the whole mapping is empty.
+    position_limits: Mapping[str, int]
     waiver_mode: str
     waiver_mode_assumed: bool
     uses_faab: bool
@@ -100,6 +105,19 @@ class WaiverRules:
             c.team_id for c in self.pending_claims
             if int(c.player_id) == int(player_id)))
 
+    def position_limit(self, position: str) -> int | None:
+        """The cap on how many of *position* a roster may hold, or None.
+
+        ESPN publishes `rosterSettings.positionLimits` and enforces it on every
+        add. The planner has to as well: a 3/3 tight-end roster that adds a
+        fourth TE by dropping a running back is a transaction ESPN rejects, and
+        a recommendation ESPN rejects is not a recommendation.
+        """
+        limit = self.position_limits.get(str(position).upper())
+        if limit is None or int(limit) < 0:
+            return None
+        return int(limit)
+
     def slot_for(self, label: str) -> RosterSlot | None:
         for slot in self.slots:
             if slot.label == label:
@@ -120,6 +138,7 @@ class WaiverRules:
             "league_id": self.league_id, "season": self.season,
             "scoring_period": self.scoring_period,
             "roster_limit": self.roster_limit, "ir_slots": self.ir_slots,
+            "position_limits": dict(self.position_limits),
             "waiver_mode": self.waiver_mode,
             "waiver_mode_assumed": self.waiver_mode_assumed,
             "uses_faab": self.uses_faab, "faab_budget": self.faab_budget,
@@ -161,6 +180,30 @@ def _slots_from_counts(counts: Mapping[str, Any]) -> tuple[tuple[RosterSlot, ...
     return tuple(slots), limit, ir
 
 
+def _position_limits(snapshot: Mapping[str, Any]) -> dict[str, int]:
+    """ESPN's per-position caps, as the adapter already named them.
+
+    The adapter writes them under ``rules.roster.roster.position_limits``
+    keyed by position label. Entries that are not a positive integer (ESPN
+    writes ``-1`` for "unlimited" and ``position_0`` for the unused slot) are
+    dropped rather than recorded as a cap of -1.
+    """
+    roster_rules = ((snapshot.get("rules") or {}).get("roster") or {})
+    raw = ((roster_rules.get("roster") or {}).get("position_limits")
+           or roster_rules.get("position_limits") or {})
+    out: dict[str, int] = {}
+    for label, value in raw.items():
+        try:
+            count = int(value)
+        except (TypeError, ValueError):
+            continue
+        key = str(label).upper()
+        if count <= 0 or key.startswith("POSITION_"):
+            continue
+        out[key] = count
+    return out
+
+
 def from_snapshot(snapshot: Mapping[str, Any], *,
                   as_of: datetime | None = None) -> WaiverRules:
     """Read waiver rules off a canonical `espn-league/1` snapshot.
@@ -184,6 +227,7 @@ def from_snapshot(snapshot: Mapping[str, Any], *,
     hashes = snapshot.get("hashes") or {}
 
     slots, limit, ir = _slots_from_counts(roster_settings.get("lineup_slot_counts") or {})
+    position_limits = _position_limits(snapshot)
 
     # ESPN's own rank: 1 is first claim. Sorting by it gives the order; it is
     # not re-derived and not inverted.
@@ -228,6 +272,7 @@ def from_snapshot(snapshot: Mapping[str, Any], *,
         roster_limit=limit,
         ir_slots=ir,
         ir_eligible_statuses=IR_ELIGIBLE_STATUSES,
+        position_limits=position_limits,
         waiver_mode=mode,
         waiver_mode_assumed=False,      # the snapshot states it; nothing is guessed
         uses_faab=bool(waivers.get("uses_acquisition_budget")),

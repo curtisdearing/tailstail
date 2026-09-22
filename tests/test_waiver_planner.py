@@ -492,3 +492,58 @@ def test_without_samples_no_drop_is_nominated_at_all():
 def test_the_gate_is_declared_ahead_of_any_run():
     for key in ("min_mean_lineup_delta", "min_prob_improves", "min_simulations"):
         assert key in WV.WAIVER_GATE
+
+
+# --------------------------------------------------------------------------- #
+# Position limits: ESPN enforces them, so a recommendation has to
+# --------------------------------------------------------------------------- #
+def _capped_contract(**limits):
+    """The same league, plus the per-position caps ESPN publishes."""
+    payload = snapshot()
+    payload["rules"] = {"roster": {"roster": {"position_limits": dict(limits)}}}
+    return LC.from_snapshot(payload, as_of=NOW)
+
+
+def test_position_limits_are_read_from_the_snapshot_not_assumed():
+    assert contract().position_limits == {}, "no caps stated means none claimed"
+    capped = _capped_contract(TE=3, RB=8, position_0=0, K=-1)
+    assert capped.position_limit("TE") == 3
+    assert capped.position_limit("RB") == 8
+    assert capped.position_limit("K") is None, "-1 is ESPN for unlimited"
+    assert capped.position_limit("WR") is None, "an uncapped position is not a cap of zero"
+
+
+def test_an_add_that_would_break_a_position_cap_is_not_legal():
+    """FULL_ROSTER holds two tight ends (6, 11). At a cap of two, a third is out."""
+    capped = _capped_contract(TE=2)
+    third_te = WV.PoolEntry(**_p(800, "TE"))
+    rb_drop = next(e for e in FULL_ROSTER if int(e.espn_id) == 9)
+    assert not WV.slot_legal_after(capped, FULL_ROSTER, third_te, rb_drop)
+    te_drop = next(e for e in FULL_ROSTER if int(e.espn_id) == 11)
+    assert WV.slot_legal_after(capped, FULL_ROSTER, third_te, te_drop)
+
+
+def test_a_capped_position_add_is_never_paired_with_an_off_position_drop():
+    """The cheapest cut is a running back; the legal cut is a tight end."""
+    capped = _capped_contract(TE=2)
+    means = {int(e.espn_id): 9.0 for e in FULL_ROSTER}
+    means[9] = 0.5          # the cheapest cut on the roster, and a running back
+    draws = _samples({**means, 800: 24.0})
+    recs = WV.plan(capped, roster=FULL_ROSTER, pool=pool(_p(800, "TE")), now=NOW,
+                   distributions=draws)
+    picked = [r for r in recs if r.status == "recommendation"]
+    assert picked, "a legal same-position cut exists, so the add is still available"
+    assert picked[0].drop_espn_id == 11, (
+        "dropping the cheap RB would leave three TEs on a two-TE cap")
+
+
+def test_a_free_roster_spot_does_not_defeat_a_position_cap():
+    capped = _capped_contract(TE=2)
+    thin = [e for e in FULL_ROSTER if int(e.espn_id) != 13]  # one spot open
+    draws = _samples({**{int(e.espn_id): 9.0 for e in thin}, 801: 24.0})
+    recs = WV.plan(capped, roster=thin, pool=pool(_p(801, "TE")), now=NOW,
+                   distributions=draws)
+    picked = [r for r in recs if r.status == "recommendation"]
+    assert picked, "the claim is still legal — with a tight end going the other way"
+    assert picked[0].drop_espn_id in (6, 11), (
+        "an open bench spot does not make a third tight end addable")
