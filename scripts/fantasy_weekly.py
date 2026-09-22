@@ -36,25 +36,61 @@ def current_nfl_season() -> int:
     return today.year if today.month >= 3 else today.year - 1
 
 
-def select_week(schedules: pd.DataFrame, season: int | None, week: int | None) -> tuple[int, int]:
+def select_week(
+    schedules: pd.DataFrame,
+    season: int | None,
+    week: int | None,
+    *,
+    now: datetime | None = None,
+) -> tuple[int, int]:
+    """The projection week: the first regular-season week with a game still to kick off.
+
+    A week is current until its LAST kickoff has passed, judged on the real
+    kickoff clock (ET gameday+gametime -> UTC, via `espn_compare.game_kickoffs_utc`),
+    not on the calendar date. The previous rule -- "first game whose gameday is
+    within two days of today" -- returned the FINISHED week whenever the
+    Wednesday cron (23:35 UTC) started before midnight UTC: on 2026-09-23 the
+    Monday-night game of Week 2 (gameday 2026-09-21) was still inside the
+    two-day grace, so the run would have projected Week 2 again and Week 3
+    would have had no Wednesday forecast. The two September 2026 Wednesday runs
+    only selected the right week because GitHub started them 1h47m and 2h49m
+    late, after the UTC date had rolled over.
+
+    Games without a kickoff time fall back to the gameday date: a week whose
+    dated games are all in the past is finished. Explicit season/week overrides
+    are validated against the schedule and returned unchanged.
+    """
     if (season is None) != (week is None):
         raise ValueError("season and week overrides must be provided together")
     games = schedules.copy()
     if "game_type" in games:
         games = games[games["game_type"].fillna("REG").eq("REG")]
-    games["gameday_value"] = pd.to_datetime(games["gameday"], errors="coerce").dt.date
+    games["season"] = pd.to_numeric(games["season"], errors="coerce")
+    games["week"] = pd.to_numeric(games["week"], errors="coerce")
+    games = games.dropna(subset=["season", "week"])
     if season is not None and week is not None:
-        if games[pd.to_numeric(games["season"], errors="coerce").eq(season)
-                 & pd.to_numeric(games["week"], errors="coerce").eq(week)].empty:
+        if games[games["season"].eq(season) & games["week"].eq(week)].empty:
             raise ValueError(f"schedule has no {season} week {week}")
         return int(season), int(week)
-    cutoff = date.today() - timedelta(days=2)
-    future = games[games["gameday_value"].ge(cutoff)].sort_values("gameday_value")
-    if future.empty:
-        latest = games.sort_values(["season", "week"]).iloc[-1]
-        return int(latest["season"]), int(latest["week"])
-    next_game = future.iloc[0]
-    return int(next_game["season"]), int(next_game["week"])
+    if games.empty:
+        raise ValueError("schedule has no regular-season games to select a week from")
+    now = now or datetime.now(timezone.utc)
+    if now.tzinfo is None:
+        raise ValueError("select_week needs an aware UTC clock")
+    games["gameday_value"] = pd.to_datetime(games["gameday"], errors="coerce").dt.date
+    for (season_value, week_value), group in games.groupby(["season", "week"], sort=True):
+        season_value, week_value = int(season_value), int(week_value)
+        kickoffs = espn_compare.game_kickoffs_utc(games, season_value, week_value)
+        if kickoffs:
+            if any(datetime.fromisoformat(value) > now for value in kickoffs.values()):
+                return season_value, week_value
+            continue
+        # No kickoff clock at all for this week: date-only fallback.
+        gamedays = group["gameday_value"].dropna()
+        if not gamedays.empty and gamedays.max() >= now.date():
+            return season_value, week_value
+    latest = games.sort_values(["season", "week"]).iloc[-1]
+    return int(latest["season"]), int(latest["week"])
 
 
 def _actual_ppr_points(stats: pd.DataFrame, season: int, week: int, rules: ScoringRules) -> dict:
