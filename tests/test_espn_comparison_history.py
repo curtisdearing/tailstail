@@ -339,3 +339,57 @@ def test_a_readable_history_loads_normally(tmp_path):
     history, available, reason = fantasy_weekly.load_history_or_degrade(path, SEASON)
     assert available is True and reason is None
     assert sorted(history["weeks"]) == ["1", "2"]
+
+
+# ---------------------------------------------------------------------------
+# Registered freeze lever 3 (ESPN shrinkage blend) — measurement arm
+# ---------------------------------------------------------------------------
+
+def _blend_rows():
+    """Two played rows and one DNP, with model and ESPN on opposite sides."""
+    return [
+        {"player_id": "00-1", "player_name": "A", "position": "RB", "espn_pts": 10.0,
+         "model_pts": 20.0, "actual_pts": 10.0, "played": True,
+         "abs_err_espn": 0.0, "abs_err_model": 10.0, "who_was_closer": "espn"},
+        {"player_id": "00-2", "player_name": "B", "position": "WR", "espn_pts": 4.0,
+         "model_pts": 8.0, "actual_pts": 8.0, "played": True,
+         "abs_err_espn": 4.0, "abs_err_model": 0.0, "who_was_closer": "model"},
+        {"player_id": "00-3", "player_name": "C", "position": "WR", "espn_pts": 6.0,
+         "model_pts": 10.0, "actual_pts": 0.0, "played": False,
+         "abs_err_espn": 6.0, "abs_err_model": 10.0, "who_was_closer": "espn"},
+    ]
+
+
+def test_blend_arms_endpoints_reproduce_the_two_incumbents():
+    """w=0 must equal the model alone and w=1 the ESPN column, or the arm is not measuring what it claims."""
+    arms = {arm["w_espn"]: arm for arm in espn_compare._blend_arms(_blend_rows())}
+    assert set(arms) == set(espn_compare.BLEND_WEIGHTS)
+    assert arms[0.0]["mae_played"] == 5.0      # (10 + 0) / 2
+    assert arms[1.0]["mae_played"] == 2.0      # (0 + 4) / 2
+    assert arms[0.5]["mae_played"] == 3.5      # (|15-10| + |6-8|) / 2 -- strictly between
+    assert arms[0.0]["mae_incl_dnp"] == pytest.approx(20.0 / 3)
+    assert arms[1.0]["mae_incl_dnp"] == pytest.approx(10.0 / 3)
+    assert arms[1.0]["by_position"] == {"RB": 0.0, "WR": 4.0}
+
+
+def test_blend_arms_never_reach_the_published_history():
+    """The arm is private research; the published allow-list must drop it."""
+    aggregate = espn_compare._aggregate(_blend_rows())
+    assert "blend_arms" in aggregate
+    assert "blend_arms" not in espn_compare.public_aggregate(aggregate)
+    history = espn_compare.new_history(2026)
+    espn_compare.record_graded_week(
+        history, week=3, aggregate=aggregate, graded_at="2026-09-28T12:00:00+00:00",
+        projections_sha256="f" * 64)
+    espn_compare.validate_history(history)
+    assert "blend_arms" not in history["weeks"]["3"]
+
+
+def test_blend_weight_grid_is_frozen_with_its_preregistration():
+    """Changing the grid after a week is graded is a protocol violation; pin it."""
+    assert espn_compare.BLEND_WEIGHTS == (0.0, 0.25, 0.5, 0.75, 1.0)
+    prereg = ROOT / "docs" / "prereg" / "LEVER3_ESPN_BLEND_2026-09-22.md"
+    assert prereg.is_file()
+    text = prereg.read_text()
+    assert "REGISTERED, NOT RUN" in text
+    assert "6 graded weeks" in text

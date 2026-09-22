@@ -292,6 +292,52 @@ def who_was_closer(espn_pts: float, model_pts: float, actual: float) -> str:
     return "model" if model_err < espn_err else "espn"
 
 
+#: Blend weights measured on every graded week for registered freeze lever 3
+#: (market-prop shrinkage). ``w`` is the weight on ESPN, so 0.0 is the model
+#: alone and 1.0 is ESPN alone -- both endpoints are measured so the arm can
+#: never be read without its own controls beside it. Preregistered
+#: 2026-09-22 in `docs/prereg/LEVER3_ESPN_BLEND_2026-09-22.md`; this grid is
+#: frozen with that document and changing it after a week is graded is a
+#: protocol violation by construction.
+BLEND_WEIGHTS: tuple[float, ...] = (0.0, 0.25, 0.5, 0.75, 1.0)
+
+
+def _blend_arms(graded_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Per-weight MAE of ``w * espn + (1 - w) * model``, measurement only.
+
+    This is an instrument, not a promotion: nothing here changes a published
+    projection, a lineup or the model, and the decision is taken from the
+    accumulated per-player rows at the preregistered checkpoint rather than
+    from any single week shown here. It lives in the private ledger's grading
+    block, never in the published history -- `public_aggregate`'s allow-list
+    drops it, which is exactly why the allow-list is a positive one.
+    """
+    played = [row for row in graded_rows if row["played"]]
+
+    def arm(weight: float) -> dict[str, Any]:
+        def mae(rows: list[dict[str, Any]]) -> float | None:
+            if not rows:
+                return None
+            total = sum(
+                abs(weight * row["espn_pts"] + (1.0 - weight) * row["model_pts"]
+                    - row["actual_pts"])
+                for row in rows
+            )
+            return round(total / len(rows), 3)
+
+        by_position = {}
+        for position in sorted({row["position"] for row in played}):
+            by_position[position] = mae([r for r in played if r["position"] == position])
+        return {
+            "w_espn": weight,
+            "mae_played": mae(played),
+            "mae_incl_dnp": mae(graded_rows),
+            "by_position": by_position,
+        }
+
+    return [arm(weight) for weight in BLEND_WEIGHTS]
+
+
 def _aggregate(graded_rows: list[dict[str, Any]]) -> dict[str, Any]:
     def mae(rows: list[dict[str, Any]], key: str) -> float | None:
         return round(sum(row[key] for row in rows) / len(rows), 3) if rows else None
@@ -318,6 +364,8 @@ def _aggregate(graded_rows: list[dict[str, Any]]) -> dict[str, Any]:
         "espn_closer": closer.count("espn"),
         "ties": closer.count("tie"),
         "by_position": by_position,
+        # Registered lever 3 measurement. Private-ledger only; see _blend_arms.
+        "blend_arms": _blend_arms(graded_rows),
     }
 
 
