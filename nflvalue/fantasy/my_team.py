@@ -969,7 +969,11 @@ def build(snapshot: Mapping[str, Any], *, now: str, contract: Any | None = None,
             "league_hash": (snapshot.get("hashes") or {}).get("league"),
             "roster_hash": (snapshot.get("hashes") or {}).get("roster"),
         }],
-        "roster": resolved,
+        # The paired simulation draws stay inside this module (they feed the
+        # start/sit deltas above); the contract carries facts, not 10,000-row
+        # arrays, and a raw ndarray does not serialize at all.
+        "roster": [{key: value for key, value in player.items() if key != "samples"}
+                   for player in resolved],
         "draft": draft,
         "optimal_lineup": lineup,
         "start_sit": start_sit,

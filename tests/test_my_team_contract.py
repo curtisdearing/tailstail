@@ -682,3 +682,23 @@ def test_weekly_passes_the_roster_crosswalk_to_the_private_card():
     call = source[source.index("my_team_payload = run_my_team("):]
     call = call[:call.index(")\n")]
     assert "espn_crosswalk=crosswalk" in call and "official_statuses=official" in call
+
+
+def test_contract_roster_carries_no_simulation_draws(tmp_path):
+    """The payload must be JSON: the paired draws feed start/sit and stay internal."""
+    import json
+    import shutil
+
+    import numpy as np
+
+    shutil.copy(FIXTURES / "post_draft.json", tmp_path / "snap.json")
+    weekly = _weekly()
+    side = model("post_draft")
+    samples = {row["player_id"]: np.full(50, float(row["mean"]))
+               for row in _summaries("post_draft").to_dict("records")}
+    result = weekly.run_my_team(
+        _summaries("post_draft"), generated_at=NOW, snapshot_dir=str(tmp_path),
+        espn_crosswalk={int(k): v for k, v in side["crosswalk"].items()}, samples=samples)
+    assert result["optimal_lineup"]["status"] == "ok"
+    assert all("samples" not in player for player in result["roster"])
+    json.dumps(result)
