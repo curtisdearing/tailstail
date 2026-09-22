@@ -239,6 +239,25 @@ def run_espn_comparison(
     )
 
 
+def espn_crosswalk_from_rosters(rosters: pd.DataFrame, season: int) -> dict[int, str] | None:
+    """``{espn_id: gsis_id}`` for the private card, from the nflverse weekly rosters.
+
+    The card resolves every rostered ESPN id through this map and refuses to
+    guess (`identity.resolve`). Until 2026-09-22 the production script never
+    passed one, so every private card said "no player could be tied to a
+    projection" and NO CURRENT PICK -- the model's own lineup never reached the
+    reader. A rosters frame without the vendor id columns yields None and a
+    printed reason; the card then degrades honestly instead of the run failing.
+    """
+    try:
+        identity = espn_compare.build_identity_map(rosters, season)
+    except ValueError as exc:
+        print(f"[my-team] no ESPN identity crosswalk this run: {exc}")
+        return None
+    return {int(espn_id): str(gsis_id)
+            for gsis_id, espn_id in zip(identity["gsis_id"], identity["espn_id"])}
+
+
 def run_my_team(
     summaries: pd.DataFrame,
     *,
@@ -455,6 +474,7 @@ def main(argv=None) -> int:
                       for column in result.points.columns}
     my_team_payload = run_my_team(
         result.summaries, generated_at=generated, snapshot_dir=args.league_snapshot_dir,
+        espn_crosswalk=espn_crosswalk_from_rosters(data.rosters, season),
         samples=player_samples,
     )
     payload = {
