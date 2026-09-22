@@ -67,6 +67,26 @@ def _count(line: Mapping[str, Any], key: str) -> float:
     return float(value)
 
 
+def _team_win_points(line: Mapping[str, Any], contract: LeagueContract,
+                     position_id: int | None = None) -> float:
+    """Points for ``team_win``, which this league pays to EVERY position.
+
+    This was the one category missing from the first version of this module,
+    and it is not a rounding error: statId 155 pays 2.0 to a kicker and to a
+    defense whose NFL team wins, so every winning K and D/ST was scored two
+    points light.  It was found by reproducing ESPN's own applied totals for
+    2026 weeks 1-2 -- all 20 winning rows were short by exactly 2.0 and all 20
+    losing rows were exact, which is as clean a signature as this kind of bug
+    gets.
+
+    ``team_win`` is optional and absent means "not stated", scoring nothing.
+    A caller that does not know the game result gets the same answer as
+    before rather than a silent guess about who won; callers that do know
+    pass ``team_win``.
+    """
+    return _count(line, "team_win") * contract.points("team_win", position_id)
+
+
 def score_kicker(line: Mapping[str, Any], contract: LeagueContract) -> float:
     """Score a kicker's stat line.
 
@@ -102,6 +122,7 @@ def score_kicker(line: Mapping[str, Any], contract: LeagueContract) -> float:
     total += _count(line, "field_goals_missed") * contract.points("fg_missed_total")
     total += _count(line, "pat_made") * contract.points("pat_made")
     total += _count(line, "pat_missed") * contract.points("pat_missed")
+    total += _team_win_points(line, contract)
     return total
 
 
@@ -150,4 +171,5 @@ def score_dst(line: Mapping[str, Any], contract: LeagueContract) -> float:
     ya_key = yards_allowed_key(float(line["yards_allowed"]))
     if ya_key is not None:
         total += contract.dst_points(ya_key)
+    total += _team_win_points(line, contract, DST_POSITION_ID)
     return total
