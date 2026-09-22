@@ -495,8 +495,13 @@ def main(argv=None) -> int:
     # read.  It gates who the card may recommend; it does not touch a number.
     official = availability_gate.official_statuses(
         data.injuries, data.rosters, season=season, week=week)
-    print(f"[availability-gate] {len(availability_gate.gated(official))} player(s) Out/Doubtful "
-          f"on the official {season} week {week} report or roster")
+    _gated = availability_gate.gated(official)
+    _stale = availability_gate.stale(official)
+    _report = availability_gate.injury_report_published(data.injuries, season, week)
+    print(f"[availability-gate] {len(_gated)} player(s) Out/Doubtful for {season} week {week}; "
+          f"{len(_stale)} of those rest on a carried-forward roster snapshot with no "
+          f"week-{week} roster published yet; "
+          f"week-{week} injury report published: {'yes' if _report else 'NO'}")
     try:
         crosswalk = identity.build_crosswalk(data.rosters, season)
     except Exception as exc:  # the card says why instead of fielding unknowns

@@ -831,6 +831,13 @@ def _alerts(my_team: Mapping[str, Any], *, refused_context: Sequence[Mapping[str
             seated_count += int(seated)
             names.append(f"{entry.get('name')} ({entry.get('position')}, {entry.get('reason')}"
                          + (f"; currently set at {slot}" if seated else "") + ")")
+        # A status read off a carried-forward roster snapshot is last week's
+        # fact, not this week's ruling. It still blocks -- an inactive player
+        # with no newer word is not someone to start -- but saying "ruled out"
+        # about a week nobody has reported on yet is the same conflation that
+        # produced the 2026 week 1-2 serving defect.
+        stale_entries = [entry for entry in unavailable
+                         if (entry.get("official_status") or {}).get("stale")]
         alerts.append({
             "kind": "availability",
             "severity": "warning",
@@ -838,7 +845,10 @@ def _alerts(my_team: Mapping[str, Any], *, refused_context: Sequence[Mapping[str
                      "on the latest official word"
                      + (f", {seated_count} of them in the lineup you have set" if seated_count
                         else "")
-                     + ". None is recommended anywhere on this page."),
+                     + ". None is recommended anywhere on this page."
+                     + (f" {len(stale_entries)} of them rest on the previous week's roster "
+                        "because no roster has been published for this week yet -- recheck "
+                        "once the club reports land." if stale_entries else "")),
             "players": names,
         })
     if lineup.get("status") != "ok" and lineup.get("violations"):
