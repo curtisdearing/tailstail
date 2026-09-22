@@ -20,6 +20,10 @@ from .scoring import add_fantasy_points
 
 POSITIONS = ("QB", "RB", "WR", "TE")
 KEYS = ["season", "week", "player_id"]
+#: Weekly-roster ``status`` codes that mean the player cannot play that week.
+#: Shared with ``availability_gate`` so the serving-time gate and the
+#: ``status_inactive`` feature read the same word the same way.
+INACTIVE_ROSTER_CODES = frozenset({"INA", "RES", "IR", "PUP", "DEV", "EXE", "SUS", "NFI", "RET"})
 
 STAT_DEFAULTS = (
     "completions", "attempts", "passing_yards", "passing_tds",
@@ -545,8 +549,7 @@ def build_feature_frame(
     frame = frame.sort_values(["player_id", "season", "week"]).reset_index(drop=True)
 
     status = frame["status"].fillna("unknown").astype(str).str.upper()
-    inactive_codes = {"INA", "RES", "IR", "PUP", "DEV", "EXE", "SUS", "NFI", "RET"}
-    frame["status_inactive"] = status.isin(inactive_codes).astype(float)
+    frame["status_inactive"] = status.isin(INACTIVE_ROSTER_CODES).astype(float)
     report = frame["report_status"].fillna("").astype(str).str.lower()
     practice = frame["practice_status"].fillna("").astype(str).str.lower()
     frame["injury_out"] = report.str.fullmatch("out").fillna(False).astype(float)

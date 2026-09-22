@@ -124,6 +124,46 @@ one an LLM has touched, and refuses rather than repairs.
   every run, so a run that can say nothing replaces the page instead of leaving
   last week's answer on disk looking current.
 
+### The pregame availability gate
+
+2026 Week 2: the Thursday card carried Zay Flowers at 14.4 projected points.
+The official report listed him Doubtful on Friday, he was inactive on Sunday,
+and the set lineup scored zero at that seat. Nothing re-read the report between
+the card and kickoff, and the lineup layer only knew the ESPN league's own
+`injury_status`, which did not block DOUBTFUL at all.
+
+`nflvalue/fantasy/availability_gate.py` is the serving-time answer. It reads the
+two official feeds the pipeline already caches — the nflverse injury report and
+the weekly roster — for the projection week and states per player whether the
+latest official word is Out (report "Out", or a roster status of IR/PUP/SUS/
+INA/RES/...) or Doubtful. The pipeline passes that beside each projection
+(`official_status`), and:
+
+* `my_team._availability` excludes an Out or Doubtful player from the legal
+  lineup with the reason printed verbatim (`code`: `official_out`,
+  `official_doubtful`; `espn_status` for the league's own OUT/IR/**DOUBTFUL**).
+  A player the model already dropped as Out shows as a stated zero, not as
+  "no projection available".
+* the seat he leaves is a *forced* change naming him ("— W. Gray cannot play"),
+  never a judgement measured against a week that will not happen;
+* the card carries an `availability` alert — **OUT / DOUBTFUL**, who, why, and
+  whether he is in the lineup already set — rendered loud on the page.
+
+It is a gate on who may be recommended, not a model input: no projection
+number is changed, and the vocabulary is the one the feature frame uses
+(`injury_out`, `injury_doubtful`, `status_inactive`), so the gate and the
+simulation's own availability draw never disagree about a player. Questionable
+is carried for display and left to the draw. It cannot catch a player the
+official feeds never list (Mike Gesicki, same week: no report row, roster
+active, no stat line) — that needs the T-90 inactives feed, which is not wired
+to this track.
+
+**Sunday-morning refresh.** `python scripts/fantasy_weekly.py --no-fit`
+re-reads the current season's official feeds, re-simulates from the saved
+`data/fantasy_model.joblib`, re-runs the gate and rewrites the private card —
+no refit. Capture a fresh league snapshot first
+(`scripts/espn_league_snapshot.py`) or the card blocks on freshness.
+
 ### Cited context
 
 Team and injury news is passed to `build(..., context=[...])` as items carrying

@@ -14,13 +14,21 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nflvalue.fantasy import decision_card, decision_page, espn_compare, private_boundary, prospective_archive
+from nflvalue.fantasy import (
+    availability_gate,
+    decision_card,
+    decision_page,
+    espn_compare,
+    identity,
+    private_boundary,
+    prospective_archive,
+)
 from nflvalue.fantasy import my_team as my_team_mod
 from nflvalue.fantasy.config import ModelConfig, ScoringRules, SimulationConfig
 from nflvalue.fantasy.dashboard import render_fantasy_dashboard
 from nflvalue.fantasy.data import HistoricalData, fetch_historical, materialize_projection_week
 from nflvalue.fantasy.features import build_feature_frame, frame_quality_report
-from nflvalue.fantasy.models import fit_ensemble
+from nflvalue.fantasy.models import FantasyEnsemble, fit_ensemble
 from nflvalue.fantasy.scoring import add_fantasy_points
 from nflvalue.fantasy.simulation import simulate_week
 from nflvalue.projection_snapshot import (
@@ -212,6 +220,7 @@ def run_my_team(
     waiver_plan=None,
     espn_crosswalk: dict | None = None,
     samples: dict | None = None,
+    official_statuses: dict | None = None,
 ) -> dict:
     """Build the Curtis-specific Monitor contract from the read-only snapshot.
 
@@ -219,6 +228,12 @@ def run_my_team(
     snapshot produces a contract whose sections all say NO CURRENT PICK with the
     reason, exactly as a stale one does.  ESPN is read-only here — this function
     performs no write of any kind.
+
+    *official_statuses* is ``availability_gate.official_statuses(...)`` for the
+    projection week.  It travels beside each projection so the lineup layer
+    can refuse to start a player the official report lists as Out or
+    Doubtful, and so a player the model dropped as Out still shows as a zero
+    with that reason rather than as "no projection available".
     """
     # Scoring/roster identity comes from espn_contract when a contract is
     # supplied; with none, my_team emits null hashes and says why rather than
@@ -237,11 +252,22 @@ def run_my_team(
     crosswalk: dict = dict(espn_crosswalk or {})
     if len(summaries):
         for row in summaries.to_dict("records"):
-            projections[str(row.get("player_id"))] = {
+            projection = {
                 "mean": float(row.get("mean", 0.0)),
                 "p10": float(row.get("p10", row.get("mean", 0.0))),
                 "p90": float(row.get("p90", row.get("mean", 0.0))),
             }
+            if row.get("availability_probability") is not None:
+                projection["availability_probability"] = float(row["availability_probability"])
+            projections[str(row.get("player_id"))] = projection
+    for player_id, status in (official_statuses or {}).items():
+        if status.get("gate") == availability_gate.GATE_OUT and player_id not in projections:
+            # The model already refuses to project an Out player
+            # (features.model_eligible); his row is a stated zero, not a gap.
+            projections[player_id] = {"mean": 0.0, "p10": 0.0, "p90": 0.0,
+                                      "availability_probability": 0.0}
+        if player_id in projections:
+            projections[player_id]["official_status"] = dict(status)
     # Projections stay beside the snapshot rather than being spliced into it:
     # the snapshot is a record of what ESPN said, and joining the model into it
     # is what let the reader and the adapter drift into two schemas.
@@ -297,6 +323,11 @@ def main(argv=None) -> int:
     parser.add_argument("--scoring", choices=["ppr", "half_ppr", "standard"], default="ppr")
     parser.add_argument("--fast", action="store_true")
     parser.add_argument("--no-fetch", action="store_true")
+    parser.add_argument("--no-fit", action="store_true",
+                        help="reuse the saved --model artifact instead of refitting: re-reads the "
+                             "current season's official feeds (injury report, rosters), "
+                             "re-simulates, re-runs the availability gate and rewrites the "
+                             "private card. The Sunday-morning refresh.")
     parser.add_argument("--output", default="data/fantasy_latest.json",
                         help="full weekly payload; private, gitignored, never published")
     parser.add_argument("--public-output", default="data/fantasy_public.json",
@@ -314,6 +345,9 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
 
     data_dir = Path(args.data_dir)
+    if args.no_fit and not Path(args.model).exists():
+        raise FileNotFoundError(
+            f"--no-fit needs a saved model at {args.model}; run once without --no-fit first")
     if not args.no_fetch:
         end = max(args.season or current_nfl_season(), current_nfl_season())
         fetch_historical(range(args.start_season, end + 1), data_dir)
@@ -325,11 +359,15 @@ def main(argv=None) -> int:
     before = (frame["season"].astype(int) < season) | (
         frame["season"].astype(int).eq(season) & frame["week"].astype(int).lt(week)
     )
-    artifact = fit_ensemble(
-        frame[before],
-        config=ModelConfig(fast=args.fast, stack_validation_seasons=2 if args.fast else 3),
-        scoring=rules,
-    )
+    if args.no_fit:
+        artifact = FantasyEnsemble.load(args.model)
+        print(f"[no-fit] reusing model artifact {args.model}; feeds re-read, no refit")
+    else:
+        artifact = fit_ensemble(
+            frame[before],
+            config=ModelConfig(fast=args.fast, stack_validation_seasons=2 if args.fast else 3),
+            scoring=rules,
+        )
     target = frame[
         frame["season"].astype(int).eq(season) & frame["week"].astype(int).eq(week)
     ].copy()
@@ -417,9 +455,20 @@ def main(argv=None) -> int:
     # and one it has to refuse.
     player_samples = {str(column): result.points[column].to_numpy()
                       for column in result.points.columns}
+    # The latest official word on every player, from the feeds this run just
+    # read.  It gates who the card may recommend; it does not touch a number.
+    official = availability_gate.official_statuses(
+        data.injuries, data.rosters, season=season, week=week)
+    print(f"[availability-gate] {len(availability_gate.gated(official))} player(s) Out/Doubtful "
+          f"on the official {season} week {week} report or roster")
+    try:
+        crosswalk = identity.build_crosswalk(data.rosters, season)
+    except Exception as exc:  # the card says why instead of fielding unknowns
+        print(f"[my-team] no ESPN crosswalk this run: {type(exc).__name__}: {exc}")
+        crosswalk = None
     my_team_payload = run_my_team(
         result.summaries, generated_at=generated, snapshot_dir=args.league_snapshot_dir,
-        samples=player_samples,
+        samples=player_samples, espn_crosswalk=crosswalk, official_statuses=official,
     )
     payload = {
         "espn_comparison": espn_comparison,

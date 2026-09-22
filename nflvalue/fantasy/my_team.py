@@ -65,9 +65,16 @@ SLOT_NAMES: Mapping[int, str] = {
 BENCH_SLOTS = frozenset({20, 21})
 FLEX_SLOT = 23
 FLEX_POSITIONS = frozenset({"RB", "WR", "TE"})
-#: Statuses that make a player ineligible to start.  DOUBTFUL is deliberately
-#: NOT here: it is a judgement call the reader makes, not one this file makes.
-INELIGIBLE_INJURY = frozenset({"OUT", "IR", "INJURY_RESERVE", "SUSPENSION", "NA"})
+#: ESPN league statuses that make a player ineligible to start.  DOUBTFUL was
+#: deliberately left out as "a judgement call the reader makes"; 2026 Week 2
+#: (Zay Flowers, Doubtful on Friday, inactive on Sunday, started for zero) is
+#: what that judgement costs when nothing on the page says the word.  A
+#: Doubtful player is now excluded with the reason stated; the reader can
+#: still overrule the page, but not without seeing it.
+INELIGIBLE_INJURY = frozenset({"OUT", "DOUBTFUL", "IR", "INJURY_RESERVE", "SUSPENSION", "NA"})
+#: ``official_status.gate`` values (nflvalue.fantasy.availability_gate) that
+#: exclude a player from the lineup, and the exclusion code each one carries.
+OFFICIAL_GATE_CODES: Mapping[str, str] = {"out": "official_out", "doubtful": "official_doubtful"}
 
 FRESH_HOURS = 6.0
 STALE_HOURS = 24.0
@@ -342,6 +349,10 @@ def _players_from_snapshot(snapshot: Mapping[str, Any], team_id: int, *,
             "bye_week": byes.get(model_id),
             "eligible_slots": list(entry.get("eligible_slots") or []),
             "projection": projection,
+            # The latest official report/roster word on this player, read
+            # beside the projection (availability_gate.official_statuses).
+            # None means the feeds list nothing, never that he is cleared.
+            "official_status": projection.pop("official_status", None),
             "samples": None if samples is None else samples.get(model_id),
         })
 
@@ -358,15 +369,26 @@ def _players_from_snapshot(snapshot: Mapping[str, Any], team_id: int, *,
     return resolved, unresolved
 
 
-def _availability(player: Mapping[str, Any], scoring_period: int) -> str | None:
+def _availability(player: Mapping[str, Any], scoring_period: int) -> tuple[str, str] | None:
+    """``(code, reason)`` when the player cannot be started, else None.
+
+    The official report/roster gate is read first: it is the feed the
+    simulation's own availability draw uses, and it is refreshed by a
+    ``--no-fit`` rerun on Sunday morning, which the ESPN league capture may
+    not be.
+    """
+    official = player.get("official_status") or {}
+    code = OFFICIAL_GATE_CODES.get(str(official.get("gate") or ""))
+    if code:
+        return code, str(official.get("reason") or f"official status {official.get('gate')}")
     status = str(player.get("injury_status") or "ACTIVE").upper()
     if status in INELIGIBLE_INJURY:
-        return f"injury status {status}"
+        return "espn_status", f"injury status {status}"
     bye = player.get("bye_week")
     if bye is not None and int(bye) == int(scoring_period):
-        return f"on bye in week {scoring_period}"
+        return "bye", f"on bye in week {scoring_period}"
     if _mean(player) == float("-inf"):
-        return "no projection available"
+        return "no_projection", "no projection available"
     return None
 
 
@@ -402,10 +424,15 @@ def _optimal_lineup(snapshot, resolved, unresolved, scoring_period) -> dict:
     for player in resolved:
         blocker = _availability(player, scoring_period)
         if blocker:
+            code, reason = blocker
             excluded.append({"player_id": player.get("player_id"),
                              "espn_player_id": player.get("espn_player_id"),
                              "name": player.get("name"), "position": player.get("position"),
-                             "reason": blocker})
+                             "code": code, "reason": reason,
+                             # the seat he occupies in the lineup already set,
+                             # so the card can say it out loud
+                             "lineup_slot": player.get("lineup_slot"),
+                             "official_status": player.get("official_status")})
         else:
             available.append(player)
     for entry in unresolved:
@@ -566,15 +593,33 @@ def _start_sit(lineup: Mapping[str, Any], resolved: Sequence[Mapping[str, Any]])
 
     started_now = {p.get("espn_player_id")
                    for players in current_by_slot.values() for p in players}
+    seated = {s["espn_player_id"] for s in lineup["starters"]}
+    # Starters the legal optimum no longer seats anywhere, and that it could
+    # have seated (a K or D/ST seat is a shadow lane, never displaced by an
+    # RB).  A seat is paired with its own displaced occupant first; when that
+    # occupant moved to another seat (Ives FLEX -> WR after Gray was excluded
+    # at WR), the seat that opened is paired with the player who actually left
+    # the lineup -- the excluded one first -- rather than reported as empty,
+    # which it was not.
+    shadow = set(lineup.get("shadow_slots") or [])
+    cannot_play = {e.get("espn_player_id") for e in (lineup.get("excluded") or [])}
+    displaced = sorted(
+        (p for slot, players in current_by_slot.items() if slot not in shadow
+         for p in players if p.get("espn_player_id") not in seated),
+        key=lambda p: (p.get("espn_player_id") not in cannot_play, -_mean(p)))
+    paired: set = set()
     decisions = []
     for entry in lineup["starters"]:
         if entry["espn_player_id"] in started_now:
             continue
         slot = entry["slot"]
         benched = [p for p in current_by_slot.get(slot, [])
-                   if p.get("espn_player_id") not in
-                   {s["espn_player_id"] for s in lineup["starters"]}]
-        out = min(benched, key=_mean) if benched else None
+                   if p.get("espn_player_id") not in seated
+                   and p.get("espn_player_id") not in paired]
+        out = min(benched, key=_mean) if benched else next(
+            (p for p in displaced if p.get("espn_player_id") not in paired), None)
+        if out is not None:
+            paired.add(out.get("espn_player_id"))
         out_mean = _mean(out) if out is not None else 0.0
         delta = entry["projected_mean"] - out_mean
         incoming = by_id.get(entry["espn_player_id"]) or {}
