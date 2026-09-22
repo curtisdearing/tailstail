@@ -666,18 +666,19 @@ def test_weekly_passes_the_roster_crosswalk_to_the_private_card():
     """Regression: production never passed a crosswalk, so every card was NO CURRENT PICK."""
     import pandas as pd
 
-    weekly = _weekly()
     rosters = pd.DataFrame({
         "season": [2026, 2026, 2026, 2025],
         "week": [1, 2, 2, 18],
         "gsis_id": ["00-0034844", "00-0034844", "00-0039064", "00-0011111"],
         "espn_id": [3929630, 3929630, 4429615, 999],
     })
-    crosswalk = weekly.espn_crosswalk_from_rosters(rosters, 2026)
-    assert crosswalk == {3929630: "00-0034844", 4429615: "00-0039064"}
-    assert weekly.espn_crosswalk_from_rosters(rosters.drop(columns=["espn_id"]), 2026) is None
+    from nflvalue.fantasy import identity
+
+    assert identity.build_crosswalk(rosters, 2026) == {3929630: "00-0034844", 4429615: "00-0039064"}
+    with pytest.raises(ValueError):
+        identity.build_crosswalk(rosters.drop(columns=["espn_id"]), 2026)
 
     source = (ROOT / "scripts" / "fantasy_weekly.py").read_text()
     call = source[source.index("my_team_payload = run_my_team("):]
-    call = call[:call.index("samples=player_samples")]
-    assert "espn_crosswalk=espn_crosswalk_from_rosters(data.rosters, season)" in call
+    call = call[:call.index(")\n")]
+    assert "espn_crosswalk=crosswalk" in call and "official_statuses=official" in call

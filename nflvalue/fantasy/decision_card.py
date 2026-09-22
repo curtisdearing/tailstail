@@ -83,6 +83,12 @@ ESPN_USE = ("Recommendation only. ESPN is read once, for display; this card neve
 
 MAX_DRIVERS = 2
 
+#: Exclusion codes from ``my_team._availability`` that mean "cannot play",
+#: as opposed to an identity gap or a missing projection.
+AVAILABILITY_CODES = frozenset({"official_out", "official_doubtful", "espn_status"})
+#: Roster slot names that are not a starting seat (``my_team.SLOT_NAMES``).
+BENCH_SLOT_NAMES = frozenset({"BE", "IR"})
+
 
 class CardRejected(ValueError):
     """The card violated its own contract and was not returned.
@@ -809,6 +815,32 @@ def _alerts(my_team: Mapping[str, Any], *, refused_context: Sequence[Mapping[str
             "players": names,
         })
     lineup = my_team.get("optimal_lineup") or {}
+    # OUT / DOUBTFUL.  Read from the lineup engine's own exclusions, which read
+    # the official report and roster gate (availability_gate) and the ESPN
+    # league status; nothing is re-derived here.  This alert exists because
+    # 2026 Week 2's card carried a player the official report had since
+    # listed Doubtful, and the page had no sentence in which to say so.
+    unavailable = [entry for entry in (lineup.get("excluded") or [])
+                   if str(entry.get("code") or "") in AVAILABILITY_CODES]
+    if unavailable:
+        names = []
+        seated_count = 0
+        for entry in unavailable:
+            slot = str(entry.get("lineup_slot") or "BE")
+            seated = slot not in BENCH_SLOT_NAMES
+            seated_count += int(seated)
+            names.append(f"{entry.get('name')} ({entry.get('position')}, {entry.get('reason')}"
+                         + (f"; currently set at {slot}" if seated else "") + ")")
+        alerts.append({
+            "kind": "availability",
+            "severity": "warning",
+            "text": (f"OUT / DOUBTFUL: {len(unavailable)} rostered player(s) cannot be started "
+                     "on the latest official word"
+                     + (f", {seated_count} of them in the lineup you have set" if seated_count
+                        else "")
+                     + ". None is recommended anywhere on this page."),
+            "players": names,
+        })
     if lineup.get("status") != "ok" and lineup.get("violations"):
         alerts.append({
             "kind": "legality",

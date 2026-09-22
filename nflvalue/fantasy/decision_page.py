@@ -88,6 +88,7 @@ small{display:block;color:var(--muted)}b{color:var(--accent)}
 code{color:#9fb4d6;font-size:12px}
 .f-stale,.f-missing{color:#ffb4c0}.f-fresh{color:var(--accent)}.f-aging{color:#e7c98b}
 .set{color:var(--muted)}.change{color:#e7c98b}
+li.avail{color:#ffb4c0;font-size:15px;font-weight:600;background:#2a1c22;border:1px solid #5a2b38;border-radius:8px;padding:8px 10px;margin:6px 0 6px -18px;list-style:none}
 details{margin-top:34px;border-top:1px solid var(--line);padding-top:14px}
 summary{cursor:pointer;color:var(--muted);font-size:13px}
 """
@@ -278,7 +279,8 @@ def _alerts_section(card: Mapping[str, Any]) -> str:
             extra = " (" + _esc(", ".join(str(p) for p in alert["players"])) + ")"
         elif alert.get("violations"):
             extra = " (" + _esc("; ".join(str(v) for v in alert["violations"])) + ")"
-        items.append(f"<li><b>{_esc(alert.get('kind'))}</b> · {_esc(alert.get('severity'))} — "
+        loud = " class=\"avail\"" if alert.get("kind") == "availability" else ""
+        items.append(f"<li{loud}><b>{_esc(alert.get('kind'))}</b> · {_esc(alert.get('severity'))} — "
                      f"{_esc(alert.get('text'))}{extra}</li>")
     return f"<ul class=\"why\">{''.join(items)}</ul>" + shadow
 
