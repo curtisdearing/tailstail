@@ -114,6 +114,9 @@ def test_out_matches_features_semantics_and_roster_placement_is_out():
         "season": 2026, "week": 2, "report_status": None, "practice_status": None,
         "injury": None, "roster_status": "RES", "gate": "out",
         "reason": "official roster status RES", "source": availability_gate.SOURCE,
+        # A genuine week-2 roster row: the status is true OF week 2, and the
+        # contract says so rather than leaving the reader to assume it.
+        "stale": False, "as_of_week": 2,
     }
 
 
@@ -264,3 +267,74 @@ def test_no_fit_refuses_without_a_saved_model(tmp_path):
     with pytest.raises(FileNotFoundError, match="--no-fit"):
         fantasy_weekly.main(["--no-fit", "--no-fetch", "--data-dir", str(tmp_path),
                              "--model", str(tmp_path / "absent.joblib")])
+
+
+# ---------------------------------------------------------------------------
+# Staleness: a carried-forward roster snapshot is last week's fact
+# ---------------------------------------------------------------------------
+
+def _carried_rosters():
+    """Week 2 genuine, week 3 copied forward exactly as materialize_projection_week does."""
+    week2 = pd.DataFrame({
+        "season": [2026, 2026, 2026],
+        "week": [2, 2, 2],
+        "gsis_id": ["00-0039064", "00-0040730", "00-0026498"],
+        "status": ["INA", "INA", "ACT"],
+        "snapshot_carried_forward": [False, False, False],
+    })
+    week3 = week2.copy()
+    week3["week"] = 3
+    week3["snapshot_carried_forward"] = True
+    return pd.concat([week2, week3], ignore_index=True)
+
+
+def test_carried_forward_roster_status_is_marked_stale_and_says_so():
+    """The gate must not report last week's inactive list as this week's ruling."""
+    statuses = availability_gate.official_statuses(
+        None, _carried_rosters(), season=2026, week=3)
+    flowers = statuses["00-0039064"]
+    assert flowers["gate"] == "out"          # still blocks: fail closed
+    assert flowers["stale"] is True
+    assert flowers["as_of_week"] == 2
+    assert "week 2" in flowers["reason"]
+    assert "no official week 3 roster has been published yet" in flowers["reason"]
+    assert set(availability_gate.stale(statuses)) == {"00-0039064", "00-0040730"}
+
+
+def test_a_genuine_week_roster_is_not_marked_stale():
+    rosters = _carried_rosters()
+    genuine = rosters[rosters["week"].eq(2)].copy()
+    statuses = availability_gate.official_statuses(None, genuine, season=2026, week=2)
+    flowers = statuses["00-0039064"]
+    assert flowers["gate"] == "out"
+    assert flowers["stale"] is False
+    assert flowers["as_of_week"] == 2
+    assert flowers["reason"] == "official roster status INA"
+    assert availability_gate.stale(statuses) == {}
+
+
+def test_injury_report_publication_is_reported_not_assumed():
+    """No rows for a week means nobody has filed yet, which is not 'everyone healthy'."""
+    injuries = pd.DataFrame({
+        "season": [2026, 2026], "week": [2, 2],
+        "gsis_id": ["00-0039064", "00-0026498"],
+        "report_status": ["Doubtful", ""],
+        "practice_status": ["Limited Participation", ""],
+        "report_primary_injury": ["Hamstring", ""],
+    })
+    assert availability_gate.injury_report_published(injuries, 2026, 2) is True
+    assert availability_gate.injury_report_published(injuries, 2026, 3) is False
+    assert availability_gate.injury_report_published(None, 2026, 2) is False
+
+
+def test_stale_gate_reproduces_the_real_week3_corpus_shape():
+    """Regression for the measured defect: 972 week-2 statuses were reported as week 3."""
+    rosters = _carried_rosters()
+    week3 = availability_gate.official_statuses(None, rosters, season=2026, week=3)
+    week2 = availability_gate.official_statuses(
+        None, rosters[rosters["week"].eq(2)], season=2026, week=2)
+    # identical membership -- that is the defect's signature and it is expected;
+    # what must differ is the CLAIM each one makes about its own provenance.
+    assert set(availability_gate.gated(week3)) == set(availability_gate.gated(week2))
+    assert all(s["stale"] for s in availability_gate.gated(week3).values())
+    assert not any(s["stale"] for s in availability_gate.gated(week2).values())
